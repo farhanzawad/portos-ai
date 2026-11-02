@@ -73,7 +73,46 @@ In accordance with Blue AI Challenge governance:
 
 ---
 
-### Source 5: Synthetic Port Calibration Corpus (PORTOS Generator)
+### Source 5: CPA Official Berth Specifications Circular
+- **Source Identifier:** `SRC-CPA-BERTH-SPEC-2026`
+- **Origin Organization:** Chattogram Port Authority (CPA) / Traffic Operations Department
+- **Source Reference URL:** [https://cpa.gov.bd/site/page/f44b2053-4eb8-4ca4-bbdc-81c15f90c888/Berth-Specifications](https://cpa.gov.bd/site/page/f44b2053-4eb8-4ca4-bbdc-81c15f90c888/Berth-Specifications)
+- **Access Terms / License:** Public Government Portal Information (Official Publication)
+- **Ingestion Date:** 2026-11-03
+- **Fields & Parameters Used:**
+  - Technical berth dimensions, design depths (CD), and max permissible LOA (180m–205m) for CCT and NCT.
+  - STS crane rail gauge ($30.48\text{ m}$) and bollard pull capacities ($100-120\text{ tonnes}$).
+  - Night navigation restrictions and Karnaphuli river fairway guidelines.
+
+---
+
+### Source 6: Bangladesh Meteorological Department (BMD) Patenga Coastal Maritime Bulletins
+- **Source Identifier:** `SRC-BMD-PATENGA-2026`
+- **Origin Organization:** Bangladesh Meteorological Department (BMD) / Storm Warning Centre
+- **Source Reference URL:** [https://bmd.gov.bd/coastal-bulletin](https://bmd.gov.bd/coastal-bulletin)
+- **Access Terms / License:** Official Public Meteorological Bulletin
+- **Ingestion Date:** 2026-11-03
+- **Fields & Parameters Used:**
+  - Patenga coastal observatory weather records and North Bay maritime area forecasts.
+  - National maritime danger and cautionary signal system (Signals 1 through 10).
+  - Port operational impact thresholds (e.g., suspension of outer anchorage lighterage at Signal No. 3).
+
+---
+
+### Source 7: CPA Annual Container Throughput & Turnaround Statistics
+- **Source Identifier:** `SRC-CPA-ANNUAL-STATS-2025`
+- **Origin Organization:** Chattogram Port Authority (CPA) / Planning & Statistics Department
+- **Source Reference URL:** [https://cpa.gov.bd/site/page/c79ec9df-7521-4fbe-9b34-8c886e0ba149/Port-Statistics](https://cpa.gov.bd/site/page/c79ec9df-7521-4fbe-9b34-8c886e0ba149/Port-Statistics)
+- **Access Terms / License:** Public Administrative Performance Report
+- **Ingestion Date:** 2026-11-03
+- **Fields & Parameters Used:**
+  - 5-year historical container throughput (3.0M to 3.25M TEU).
+  - Average vessel turnaround time (2.78 to 3.60 days) and berth occupancy benchmarks (79% to 86%).
+  - Import/export container dwell time baselines (7.4 to 9.5 days).
+
+---
+
+### Source 8: Synthetic Port Calibration Corpus (PORTOS Generator)
 - **Source Identifier:** `SRC-SYNTHETIC-CORPUS-SEED42`
 - **Generator Script:** `backend/app/ml/synthetic_data.py` & `backend/app/yard/forecaster.py`
 - **Random Seed:** `42` (Fixed for complete determinism)

@@ -11,6 +11,7 @@ from app.schemas.health import (
     SubsystemStatusRead,
     SystemAuditSummaryResponse,
 )
+from app.copilot.tools import copilot_tool_registry
 
 router = APIRouter(tags=["Health & System"])
 
@@ -85,7 +86,7 @@ def get_system_audit_summary(
             cpa_live_connection_active=False,
             synthetic_data_limitations_prominent=True,
             human_in_the_loop_required=True,
-            tool_allowlist_count=11,
+            tool_allowlist_count=len(copilot_tool_registry.ALLOWLIST),
             separation_of_analytical_roles_enforced=True,
             models_deployed={
                 "vessel_eta_regression": "GradientBoostingRegressor v1.0.0 (MAE: 0.85h)",

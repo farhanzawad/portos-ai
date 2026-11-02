@@ -25,8 +25,8 @@ def db_session():
 
 
 def test_copilot_tool_allowlist_coverage(db_session):
-    """Verify all 11 declared allowlist tools execute deterministically and return valid dictionaries."""
-    assert len(copilot_tool_registry.ALLOWLIST) == 11
+    """Verify all 12 declared allowlist tools execute deterministically and return valid dictionaries."""
+    assert len(copilot_tool_registry.ALLOWLIST) == 12
 
     # 1. get_terminal_status
     t_status = copilot_tool_registry.execute_tool("get_terminal_status", {}, db_session)
@@ -80,6 +80,16 @@ def test_copilot_tool_allowlist_coverage(db_session):
     assert "station_name" in w_data
     assert "temperature_celsius" in w_data
     assert "attribution" in w_data
+
+    # 12. get_govt_circulars
+    gov_tides = copilot_tool_registry.execute_tool("get_govt_circulars", {"circular_type": "tides"}, db_session)
+    assert "tide_records_count" in gov_tides
+    assert gov_tides["authority"] == "Chattogram Port Authority (Hydrography Dept)"
+    assert gov_tides["data_status"] == "OBSERVED"
+
+    gov_berths = copilot_tool_registry.execute_tool("get_govt_circulars", {"circular_type": "berths"}, db_session)
+    assert "berths" in gov_berths
+    assert len(gov_berths["berths"]) >= 5
 
 
 def test_copilot_rejects_unallowlisted_tools(db_session):
@@ -137,7 +147,7 @@ def test_copilot_endpoints(client):
     assert status_res.status_code == 200
     status_data = status_res.json()
     assert "model_name" in status_data
-    assert status_data["tools_count"] == 11
+    assert status_data["tools_count"] == 12
 
     # 2. Prompts endpoint
     prompts_res = client.get("/api/v1/copilot/prompts")

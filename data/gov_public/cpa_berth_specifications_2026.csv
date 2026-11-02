@@ -1,0 +1,14 @@
+berth_code,terminal_code,terminal_name,quay_length_m,designed_depth_cd_m,max_permissible_loa_m,max_permissible_draft_m,sts_crane_equipped,crane_rail_gauge_m,bollard_capacity_tonnes,apron_width_m,night_navigation_allowed,power_supply_voltage_kv,source_circular_no
+CCT-1,CCT,Chattogram Container Terminal,200.0,9.50,186.0,9.15,true,30.48,100,35.0,false,11.0,CPA/TM/OPS/BERTH/2026/08
+CCT-2,CCT,Chattogram Container Terminal,210.0,9.50,190.0,9.20,true,30.48,100,35.0,false,11.0,CPA/TM/OPS/BERTH/2026/08
+CCT-3,CCT,Chattogram Container Terminal,195.0,9.20,180.0,8.85,true,30.48,100,35.0,false,11.0,CPA/TM/OPS/BERTH/2026/08
+NCT-1,NCT,New Mooring Container Terminal,200.0,10.00,186.0,9.50,true,30.48,120,40.0,false,11.0,CPA/TM/OPS/BERTH/2026/08
+NCT-2,NCT,New Mooring Container Terminal,215.0,10.00,195.0,9.50,true,30.48,120,40.0,false,11.0,CPA/TM/OPS/BERTH/2026/08
+NCT-3,NCT,New Mooring Container Terminal,215.0,10.00,195.0,9.50,true,30.48,120,40.0,false,11.0,CPA/TM/OPS/BERTH/2026/08
+NCT-4,NCT,New Mooring Container Terminal,220.0,10.20,200.0,9.50,true,30.48,120,40.0,false,11.0,CPA/TM/OPS/BERTH/2026/08
+NCT-5,NCT,New Mooring Container Terminal,225.0,10.20,205.0,9.50,true,30.48,120,40.0,false,11.0,CPA/TM/OPS/BERTH/2026/08
+GCB-1,GCB,General Cargo Berth (Feeder Capable),185.0,8.50,175.0,8.20,false,0.00,75,25.0,true,0.4,CPA/TM/OPS/BERTH/2026/08
+GCB-2,GCB,General Cargo Berth (Feeder Capable),185.0,8.50,175.0,8.20,false,0.00,75,25.0,true,0.4,CPA/TM/OPS/BERTH/2026/08
+GCB-3,GCB,General Cargo Berth (Feeder Capable),185.0,8.50,175.0,8.20,false,0.00,75,25.0,true,0.4,CPA/TM/OPS/BERTH/2026/08
+GCB-4,GCB,General Cargo Berth (Feeder Capable),185.0,8.50,175.0,8.20,false,0.00,75,25.0,true,0.4,CPA/TM/OPS/BERTH/2026/08
+GCB-5,GCB,General Cargo Berth (Feeder Capable),185.0,8.50,175.0,8.20,false,0.00,75,25.0,true,0.4,CPA/TM/OPS/BERTH/2026/08

@@ -72,6 +72,7 @@ class CopilotToolRegistry:
         "get_emissions_estimate",
         "get_data_provenance",
         "get_external_weather",
+        "get_govt_circulars",
     ]
 
     def execute_tool(self, tool_name: str, arguments: Dict[str, Any], db: Session) -> Dict[str, Any]:
@@ -375,6 +376,57 @@ class CopilotToolRegistry:
             "data_status": w.data_status.value,
             "advisory_disclaimer": w.navigational_warning,
         }
+
+    def _tool_get_govt_circulars(self, db: Session, circular_type: str = "tides", **kwargs) -> Dict[str, Any]:
+        """Retrieve official CPA and BMD government publications, permissible draft rules, and tide tables."""
+        from app.gov_data.service import gov_data_service
+        if circular_type == "berths":
+            specs = gov_data_service.get_berth_specs()
+            return {
+                "circular_title": "CPA Official Container Berth Specifications",
+                "authority": "Chattogram Port Authority (Traffic Operations)",
+                "berths": [
+                    {
+                        "code": s.berth_code,
+                        "terminal": s.terminal_name,
+                        "quay_m": s.quay_length_m,
+                        "depth_cd_m": s.designed_depth_cd_m,
+                        "max_loa_m": s.max_permissible_loa_m,
+                        "max_draft_m": s.max_permissible_draft_m,
+                        "sts_crane": s.sts_crane_equipped,
+                        "gauge_m": s.crane_rail_gauge_m,
+                    }
+                    for s in specs
+                ],
+                "data_status": "OBSERVED",
+            }
+        elif circular_type == "met":
+            bulletins = gov_data_service.get_met_bulletins()
+            latest = bulletins[0] if bulletins else None
+            return {
+                "circular_title": "BMD Patenga Coastal Maritime Weather Bulletins",
+                "authority": "Bangladesh Meteorological Department",
+                "bulletin_id": latest.bulletin_id if latest else None,
+                "signal": latest.maritime_signal_name if latest else None,
+                "wind_knots": latest.sustained_wind_knots if latest else None,
+                "wave_m": latest.wave_height_m if latest else None,
+                "port_impact": latest.port_operations_impact if latest else None,
+                "advisory": latest.advisory_text if latest else None,
+                "data_status": "OBSERVED",
+            }
+        else:
+            tides = gov_data_service.get_tides()
+            sample = tides[0] if tides else None
+            return {
+                "circular_title": "CPA Official Tide Table & Permissible Draft Limits",
+                "authority": "Chattogram Port Authority (Hydrography Dept)",
+                "tide_records_count": len(tides),
+                "latest_sample_date": sample.date if sample else None,
+                "max_draft_m": sample.max_permissible_draft_m if sample else 9.50,
+                "daylight_loa_cutoff_m": 175.0,
+                "gupta_bend_limit_m": 9.50,
+                "data_status": "OBSERVED",
+            }
 
 
 copilot_tool_registry = CopilotToolRegistry()

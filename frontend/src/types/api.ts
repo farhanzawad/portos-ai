@@ -1004,3 +1004,111 @@ export interface EventStreamStatus {
   data_status: DataStatus;
 }
 
+// ==========================================
+// Bangladesh Government & Port Authority Data
+// ==========================================
+
+export interface GovDataSourceRead {
+  id: string;
+  code: string;
+  name: string;
+  organization: string;
+  url?: string | null;
+  description: string;
+  is_verified: boolean;
+  data_status: DataStatus;
+}
+
+export interface GovTideRecord {
+  circular_id: string;
+  date: string;
+  hw_time_1: string;
+  hw_height_1_m: number;
+  lw_time_1: string;
+  lw_height_1_m: number;
+  hw_time_2: string;
+  hw_height_2_m: number;
+  lw_time_2: string;
+  lw_height_2_m: number;
+  max_permissible_draft_m: number;
+  day_nav_start: string;
+  day_nav_end: string;
+  gupta_bend_limit_m: number;
+  daylight_loa_cutoff_m: number;
+  navigation_restriction: string;
+  source_doc_ref: string;
+  data_status: DataStatus;
+}
+
+export interface GovTideComplianceResult {
+  is_compliant: boolean;
+  vessel_draft_m: number;
+  max_permissible_draft_m: number;
+  loa_m: number;
+  date: string;
+  tidal_phase: string;
+  requires_daylight_only: boolean;
+  daylight_window: string;
+  violations: string[];
+  advisories: string[];
+  source_circular: string;
+  data_status: DataStatus;
+}
+
+export interface GovBerthSpec {
+  berth_code: string;
+  terminal_code: string;
+  terminal_name: string;
+  quay_length_m: number;
+  designed_depth_cd_m: number;
+  max_permissible_loa_m: number;
+  max_permissible_draft_m: number;
+  sts_crane_equipped: boolean;
+  crane_rail_gauge_m: number;
+  bollard_capacity_tonnes: number;
+  apron_width_m: number;
+  night_navigation_allowed: boolean;
+  power_supply_voltage_kv: number;
+  source_circular_no: string;
+  data_status: DataStatus;
+}
+
+export interface GovMetBulletin {
+  bulletin_id: string;
+  station_code: string;
+  station_name: string;
+  issue_datetime: string;
+  forecast_area: string;
+  maritime_signal_code: string;
+  maritime_signal_name: string;
+  signal_number: number;
+  sustained_wind_knots: number;
+  gusting_wind_knots: number;
+  wind_direction: string;
+  wave_height_m: number;
+  sea_condition: string;
+  visibility_km: number;
+  port_operations_impact: string;
+  advisory_text: string;
+  source_ref: string;
+  data_status: DataStatus;
+}
+
+export interface GovThroughputBenchmark {
+  fiscal_year: string;
+  reporting_period: string;
+  total_container_throughput_teu: number;
+  import_container_teu: number;
+  export_container_teu: number;
+  transshipment_teu: number;
+  total_vessel_calls: number;
+  container_vessels_handled: number;
+  avg_turnaround_time_days: number;
+  avg_berth_occupancy_rate_pct: number;
+  avg_crane_productivity_moves_hr: number;
+  dwell_time_import_days: number;
+  dwell_time_export_days: number;
+  data_source_publication: string;
+  data_status: DataStatus;
+}
+

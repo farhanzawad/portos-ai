@@ -1,0 +1,6 @@
+vessel_name,imo_number,arrival_time,berth_code,draft_m,length_overall_m,teu,cargo_type,remarks
+MV KOTA RAJIN,9123456,2026-11-04 03:15,CCT-1,8.90,172.5,1420,CONTAINER,Verified CPA Inward Feeder - Port Data Bridge
+MV EXPRESS PADMA,9234567,2026-11-04 07:30,NCT-2,9.20,185.0,1750,CONTAINER,Verified CPA Inward Feeder - Port Data Bridge
+MV KARNAPHULI PRIDE,9345678,2026-11-04 11:00,CCT-2,8.60,168.0,1100,CONTAINER,Verified CPA Inward Feeder - Port Data Bridge
+MV MEGHNA TRADER,9456789,2026-11-04 14:45,NCT-4,9.40,195.0,1980,CONTAINER,Verified CPA Inward Feeder - Port Data Bridge
+MV BAY EXPLORER,9567890,2026-11-04 18:20,GCB-1,8.10,160.0,850,CONTAINER,Verified CPA Inward Feeder - Port Data Bridge

@@ -40,6 +40,12 @@ import {
   EventStreamStatus,
   WeatherContextRead,
   WeatherForecastResponse,
+  GovDataSourceRead,
+  GovTideRecord,
+  GovTideComplianceResult,
+  GovBerthSpec,
+  GovMetBulletin,
+  GovThroughputBenchmark,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -397,6 +403,56 @@ export async function resetIncident(): Promise<IncidentResetResponse> {
     headers: { "Content-Type": "application/json" },
   });
 }
+
+// ==========================================
+// Bangladesh Government & Port Authority API
+// ==========================================
+
+export async function getGovDataSources(): Promise<GovDataSourceRead[]> {
+  return fetchFromApi<GovDataSourceRead[]>("/api/v1/gov/sources");
+}
+
+export async function getGovTides(date?: string): Promise<GovTideRecord[]> {
+  const query = date ? `?date=${encodeURIComponent(date)}` : "";
+  return fetchFromApi<GovTideRecord[]>(`/api/v1/gov/tides${query}`);
+}
+
+export async function checkGovTideCompliance(
+  draft_m: number,
+  loa_m: number,
+  date?: string
+): Promise<GovTideComplianceResult> {
+  const params = new URLSearchParams({
+    draft_m: String(draft_m),
+    loa_m: String(loa_m),
+  });
+  if (date) params.append("date", date);
+  return fetchFromApi<GovTideComplianceResult>(`/api/v1/gov/tides/check-compliance?${params.toString()}`);
+}
+
+export async function getGovBerthSpecs(terminal?: string): Promise<GovBerthSpec[]> {
+  const query = terminal ? `?terminal=${encodeURIComponent(terminal)}` : "";
+  return fetchFromApi<GovBerthSpec[]>(`/api/v1/gov/berth-specifications${query}`);
+}
+
+export async function getGovMetBulletins(minSignal?: number): Promise<GovMetBulletin[]> {
+  const query = minSignal !== undefined ? `?min_signal=${minSignal}` : "";
+  return fetchFromApi<GovMetBulletin[]>(`/api/v1/gov/met-bulletins${query}`);
+}
+
+export async function getGovThroughputBenchmarks(): Promise<GovThroughputBenchmark[]> {
+  return fetchFromApi<GovThroughputBenchmark[]>("/api/v1/gov/throughput-benchmarks");
+}
+
+export async function getGovSampleFile(file_type: string): Promise<string> {
+  const url = `${API_BASE_URL}/api/v1/gov/sample-file?file_type=${encodeURIComponent(file_type)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to download sample file: ${res.statusText}`);
+  }
+  return res.text();
+}
+
 
 
 

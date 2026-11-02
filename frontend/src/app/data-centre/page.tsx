@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import { ModelCentreView } from "@/components/models/ModelCentreView";
 import { PortDataBridgeView } from "@/components/ingestion/PortDataBridgeView";
+import { GovtDataCentreView } from "@/components/gov/GovtDataCentreView";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
-import { BrainCircuit, UploadCloud, Database } from "lucide-react";
+import { BrainCircuit, UploadCloud, ShieldCheck } from "lucide-react";
 
 export default function DataCentrePage() {
-  const [activeTab, setActiveTab] = useState<"models" | "ingestion">("models");
+  const [activeTab, setActiveTab] = useState<"models" | "ingestion" | "gov">("models");
 
   return (
     <div className="space-y-6">
@@ -18,10 +19,10 @@ export default function DataCentrePage() {
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-portos-navy">
               Model Centre & Data Management
             </h1>
-            <DataStatusBadge status="SIMULATED" />
+            <DataStatusBadge status={activeTab === "gov" ? "OBSERVED" : "SIMULATED"} />
           </div>
           <p className="text-xs text-portos-muted mt-0.5">
-            Predictive machine learning pipeline registry, evaluation metrics, and port data ingestion.
+            Predictive machine learning pipeline registry, official Bangladesh Government datasets, and port data ingestion.
           </p>
         </div>
 
@@ -50,6 +51,18 @@ export default function DataCentrePage() {
             <UploadCloud className="h-3.5 w-3.5 text-portos-navy-secondary" />
             <span>Data Ingestion (M13)</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab("gov")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors ${
+              activeTab === "gov"
+                ? "bg-white text-portos-navy font-bold shadow-xs"
+                : "text-portos-muted hover:text-portos-navy"
+            }`}
+          >
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+            <span>Official Govt Data (CPA/BMD)</span>
+          </button>
         </div>
       </div>
 
@@ -58,6 +71,9 @@ export default function DataCentrePage() {
 
       {/* Tab 2: Milestone 13 Document Ingestion & Port Data Bridge */}
       {activeTab === "ingestion" && <PortDataBridgeView />}
+
+      {/* Tab 3: Official Bangladesh Government & CPA Reference Data */}
+      {activeTab === "gov" && <GovtDataCentreView />}
     </div>
   );
 }

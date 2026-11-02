@@ -16,6 +16,7 @@ from app.api.v1.endpoints import (
     ingestion,
     copilot,
     weather,
+    gov_data,
 )
 
 api_v1_router = APIRouter(prefix="/api/v1")
@@ -37,3 +38,4 @@ api_v1_router.include_router(sustainability.router)
 api_v1_router.include_router(ingestion.router)
 api_v1_router.include_router(copilot.router)
 api_v1_router.include_router(weather.router)
+api_v1_router.include_router(gov_data.router)

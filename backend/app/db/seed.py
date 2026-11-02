@@ -513,6 +513,51 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
             "https://cpa.gov.bd/berthing-lineup",
             "Public operational berthing and anchorage daily schedule published for shipping agents.",
             True,
+            DataStatusEnum.SIMULATED,
+        ),
+        (
+            "ds_cpa_tides",
+            "SRC-CPA-TIDES-2026",
+            "Chattogram Port Authority Tide Tables & Permissible Drafts",
+            "Chattogram Port Authority (Hydrography Dept)",
+            SourceTypeEnum.PUBLIC_REPORT,
+            "https://cpa.gov.bd/site/page/87e07662-3c22-498c-8c0c-7b00bfd21ebc/Tide-Table",
+            "Official semi-diurnal tide tables and permissible draft limits for Karnaphuli river approach.",
+            True,
+            DataStatusEnum.OBSERVED,
+        ),
+        (
+            "ds_cpa_berths",
+            "SRC-CPA-BERTH-SPEC-2026",
+            "CPA Official Container Terminal & Berth Technical Specifications",
+            "Chattogram Port Authority (Traffic Operations)",
+            SourceTypeEnum.PUBLIC_REPORT,
+            "https://cpa.gov.bd/site/page/f44b2053-4eb8-4ca4-bbdc-81c15f90c888/Berth-Specifications",
+            "Official technical specifications, design depths, and crane rail gauges for CCT and NCT berths.",
+            True,
+            DataStatusEnum.OBSERVED,
+        ),
+        (
+            "ds_bmd_patenga",
+            "SRC-BMD-PATENGA-2026",
+            "BMD Patenga Coastal Maritime Weather Bulletin & Cyclone Signals",
+            "Bangladesh Meteorological Department",
+            SourceTypeEnum.PUBLIC_REPORT,
+            "https://bmd.gov.bd/coastal-bulletin",
+            "Official maritime weather bulletins, cyclone warning signals, and coastal sea conditions for Patenga and North Bay.",
+            True,
+            DataStatusEnum.OBSERVED,
+        ),
+        (
+            "ds_cpa_annual_stats",
+            "SRC-CPA-ANNUAL-STATS-2025",
+            "CPA Annual Container Throughput & Turnaround Statistics",
+            "Chattogram Port Authority (Planning & Statistics)",
+            SourceTypeEnum.PUBLIC_REPORT,
+            "https://cpa.gov.bd/site/page/c79ec9df-7521-4fbe-9b34-8c886e0ba149/Port-Statistics",
+            "Official annual container TEU throughput, vessel turnaround days, and berth occupancy rates.",
+            True,
+            DataStatusEnum.OBSERVED,
         ),
         (
             "ds_user_upload",
@@ -523,6 +568,7 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
             None,
             "Operator uploaded spreadsheet or document for human review and ingestion.",
             False,
+            DataStatusEnum.SIMULATED,
         ),
         (
             "ds_synthetic_stream",
@@ -533,10 +579,11 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
             None,
             "Calibrated synthetic operational feed for Blue AI Challenge research.",
             True,
+            DataStatusEnum.SIMULATED,
         ),
     ]
 
-    for s_id, s_code, s_name, s_org, s_type, s_url, s_desc, s_ver in default_sources:
+    for s_id, s_code, s_name, s_org, s_type, s_url, s_desc, s_ver, s_status in default_sources:
         existing_ds = db.query(DataSource).filter(DataSource.id == s_id).first()
         if not existing_ds:
             db.add(
@@ -549,8 +596,8 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
                     url=s_url,
                     description=s_desc,
                     is_verified=s_ver,
-                    data_status=DataStatusEnum.SIMULATED,
-                    source_name="PORTOS Seed Engine",
+                    data_status=s_status,
+                    source_name="Official Bangladesh Govt Portal / CPA",
                 )
             )
 
