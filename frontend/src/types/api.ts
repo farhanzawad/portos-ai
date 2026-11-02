@@ -281,3 +281,76 @@ export interface ProvenanceSummaryResponse {
   active_data_policy: string;
   disclaimer: string;
 }
+
+// Machine Learning & Model Centre
+export interface ModelMetadataResponse {
+  model_name: string;
+  model_version: string;
+  trained_at: string;
+  random_seed: number;
+  n_train_samples: number;
+  n_test_samples: number;
+  feature_columns: string[];
+  operational_notice: string;
+  data_status: DataStatus;
+}
+
+export interface ModelMetricsResponse {
+  regression_metrics: {
+    model_type: string;
+    mae_hours: number;
+    rmse_hours: number;
+    r2_score: number;
+    baseline_median_mae_hours: number;
+    mae_improvement_pct: number;
+    beats_baseline: boolean;
+  };
+  classification_metrics: {
+    model_type: string;
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1_score: number;
+    baseline_accuracy: number;
+    confusion_matrix: {
+      tn: number;
+      fp: number;
+      fn: number;
+      tp: number;
+    };
+    beats_baseline: boolean;
+  };
+  feature_importances: Record<string, number>;
+  target_definitions: {
+    regression_target: string;
+    classification_target: string;
+    high_risk_threshold_hours: number;
+  };
+}
+
+export interface VesselPredictionInput {
+  vessel_type: VesselType;
+  distance_to_pilot_nm: number;
+  speed_knots: number;
+  scheduled_hour_of_day: number;
+  anchorage_queue_count: number;
+  berth_occupancy_ratio: number;
+  wind_speed_knots: number;
+  visibility_nm: number;
+  is_monsoon_season: boolean;
+  tidal_window_favorable: boolean;
+  carrier_historical_delay_mean: number;
+}
+
+export interface VesselPredictionOutput {
+  predicted_delay_hours: number;
+  is_delayed_high_risk: boolean;
+  delay_risk_probability: number;
+  delay_risk_tier: DelayRiskStatus;
+  high_risk_threshold_hours: number;
+  model_name: string;
+  model_version: string;
+  created_at: string;
+  data_status: DataStatus;
+  operational_notice: string;
+}

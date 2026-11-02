@@ -1,0 +1,65 @@
+{
+  "model_name": "portos-vessel-delay-ensemble",
+  "model_version": "1.0.0",
+  "trained_at": "2026-11-02T18:49:01.403597+00:00",
+  "random_seed": 42,
+  "n_train_samples": 2400,
+  "n_test_samples": 600,
+  "target_definitions": {
+    "regression_target": "arrival_delay_hours",
+    "classification_target": "is_delayed_high_risk",
+    "high_risk_threshold_hours": 3.0
+  },
+  "feature_columns": [
+    "vessel_type_code",
+    "distance_to_pilot_nm",
+    "speed_knots",
+    "scheduled_hour_of_day",
+    "anchorage_queue_count",
+    "berth_occupancy_ratio",
+    "wind_speed_knots",
+    "visibility_nm",
+    "is_monsoon_season",
+    "tidal_window_favorable",
+    "carrier_historical_delay_mean"
+  ],
+  "regression_metrics": {
+    "model_type": "GradientBoostingRegressor",
+    "mae_hours": 0.846,
+    "rmse_hours": 1.09,
+    "r2_score": 0.887,
+    "baseline_median_mae_hours": 2.737,
+    "mae_improvement_pct": 69.08,
+    "beats_baseline": true
+  },
+  "classification_metrics": {
+    "model_type": "GradientBoostingClassifier",
+    "accuracy": 0.922,
+    "precision": 0.941,
+    "recall": 0.965,
+    "f1_score": 0.953,
+    "baseline_accuracy": 0.82,
+    "confusion_matrix": {
+      "tn": 78,
+      "fp": 30,
+      "fn": 17,
+      "tp": 475
+    },
+    "beats_baseline": true
+  },
+  "feature_importances": {
+    "tidal_window_favorable": 0.5497,
+    "vessel_type_code": 0.1457,
+    "anchorage_queue_count": 0.1005,
+    "carrier_historical_delay_mean": 0.0786,
+    "speed_knots": 0.0668,
+    "distance_to_pilot_nm": 0.0237,
+    "berth_occupancy_ratio": 0.0179,
+    "visibility_nm": 0.0098,
+    "wind_speed_knots": 0.0061,
+    "scheduled_hour_of_day": 0.0013,
+    "is_monsoon_season": 0.0
+  },
+  "operational_notice": "Synthetic-data demonstration. Not validated for real Chattogram Port operations.",
+  "data_status": "SIMULATED"
+}
