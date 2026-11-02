@@ -24,7 +24,7 @@
 | **11**| **11** | Yard Intelligence & Congestion Forecasting | Yard Heatmap, Capacity Watch | **COMPLETE** | 2026-11-03 |
 | **12**| **12** | Green Port Analytics & Auditable Estimates | Emission Factors, Scope | **COMPLETE** | 2026-11-03 |
 | **13**| **13** | Port Data Bridge & Document Ingestion | CSV, XLSX, Text PDF Upload | **COMPLETE** | 2026-11-03 |
-| **14**| **14** | Gemini Port Intelligence Copilot | Google GenAI SDK, Tool Allowlist | PENDING | — |
+| **14**| **14** | Gemini Port Intelligence Copilot | Google GenAI SDK, Tool Allowlist | **COMPLETE** | 2026-11-03 |
 | **15**| **15** | Unified Event Stream & Workflow Sync | WebSockets/SSE, Cross-module | PENDING | — |
 | **16**| **16** | Responsible AI, Security & Accessibility QA | Hardening, Audit, Disclosure | PENDING | — |
 | **17**| **17** | Competition Package, Runbook & Demo Script | 5-Minute Showcase, Local Setup | PENDING | — |

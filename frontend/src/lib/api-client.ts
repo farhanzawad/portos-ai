@@ -28,6 +28,10 @@ import {
   DataSourceRead,
   ImportSummaryReport,
   RecordCorrectionRequest,
+  CopilotChatRequest,
+  CopilotChatResponse,
+  CopilotStatusResponse,
+  CopilotSuggestedPrompt,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -309,5 +313,25 @@ export function getDownloadCsvTemplateUrl(): string {
 export function getDownloadXlsxTemplateUrl(): string {
   return `${API_BASE_URL}/api/v1/ingestion/templates/xlsx`;
 }
+
+// Milestone 14: Copilot API Functions
+export async function sendCopilotMessage(
+  request: CopilotChatRequest
+): Promise<CopilotChatResponse> {
+  return fetchFromApi<CopilotChatResponse>("/api/v1/copilot/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+}
+
+export async function getCopilotStatus(): Promise<CopilotStatusResponse> {
+  return fetchFromApi<CopilotStatusResponse>("/api/v1/copilot/status");
+}
+
+export async function getCopilotPrompts(): Promise<CopilotSuggestedPrompt[]> {
+  return fetchFromApi<CopilotSuggestedPrompt[]>("/api/v1/copilot/prompts");
+}
+
 
 

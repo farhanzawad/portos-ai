@@ -851,3 +851,54 @@ export interface ImportSummaryReport {
   audit_message: string;
 }
 
+// Milestone 14: Copilot Schemas
+export interface ToolCallRecord {
+  tool_name: string;
+  arguments: Record<string, any>;
+  status: string;
+  result_summary?: string | null;
+  timestamp: string;
+}
+
+export interface CopilotReference {
+  label: string;
+  url: string;
+  category: "vessel" | "berth" | "scenario" | "yard" | "sustainability" | "provenance" | string;
+}
+
+export interface CopilotChatRequest {
+  message: string;
+  conversation_id?: string | null;
+}
+
+export interface CopilotChatResponse {
+  conversation_id: string;
+  summary: string;
+  retrieved_facts: string[];
+  model_predictions: string[];
+  simulated_results: string[];
+  limitations: string[];
+  references: CopilotReference[];
+  tool_calls: ToolCallRecord[];
+  is_demo_mode: boolean;
+  model_name: string;
+  timestamp: string;
+}
+
+export interface CopilotStatusResponse {
+  is_configured: boolean;
+  model_name: string;
+  demo_mode: boolean;
+  tools_count: number;
+  allowlist: string[];
+}
+
+export interface CopilotSuggestedPrompt {
+  id?: string;
+  title?: string;
+  label?: string;
+  prompt?: string;
+  query?: string;
+  category: string;
+}
+
