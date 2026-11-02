@@ -17,7 +17,7 @@
 | **4** | **04** | FastAPI Service Layer & API Contracts | REST API, OpenAPI, Pydantic | **COMPLETE** | 2026-11-02 |
 | **5** | **05** | Overview Dashboard with Real Backend Data | TanStack Query, ECharts, KPIs | **COMPLETE** | 2026-11-03 |
 | **6** | **06** | Interactive 3D Terminal Digital Twin | Three.js / R3F, 2D Fallback | **COMPLETE** | 2026-11-03 |
-| **7** | **07** | Vessel Intelligence & Geographic Track View | MapLibre GL JS, Anchorage | PENDING | — |
+| **7** | **07** | Vessel Intelligence & Geographic Track View | MapLibre GL JS, Anchorage | **COMPLETE** | 2026-11-03 |
 | **8** | **08** | Vessel ETA & Delay-Risk ML Pipeline | scikit-learn, Model Cards | PENDING | — |
 | **9** | **09** | Constraint-Based Berth Planner | Google OR-Tools CP-SAT | PENDING | — |
 | **10**| **10** | SimPy Scenario Simulation & Decision Lab | Discrete-Event Engine | PENDING | — |

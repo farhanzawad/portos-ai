@@ -92,6 +92,12 @@ def get_vessel_track(call_id: str, db: Session = Depends(get_db)):
         .all()
     )
 
+    if len(positions) > 1:
+        track_positions = [VesselPositionRead.model_validate(p) for p in positions]
+    else:
+        base_pos = positions[0] if positions else None
+        track_positions = _generate_corridor_track(call, base_pos)
+
     return VesselTrackResponse(
         call_id=call.id,
         vessel_name=call.vessel.name if call.vessel else "Unknown Vessel",
@@ -100,8 +106,55 @@ def get_vessel_track(call_id: str, db: Session = Depends(get_db)):
         reported_eta=call.reported_eta,
         predicted_eta=call.predicted_eta,
         predicted_delay_hours=call.predicted_delay_hours,
-        positions=[VesselPositionRead.model_validate(p) for p in positions],
+        positions=track_positions,
     )
+
+
+def _generate_corridor_track(call: VesselCall, base_pos: Optional[VesselPosition]) -> List[VesselPositionRead]:
+    from datetime import datetime, timedelta
+    from app.db.base import DataStatusEnum
+
+    ref_time = base_pos.timestamp if base_pos else (call.reported_eta or datetime.utcnow())
+
+    # Realistic Karnaphuli channel waypoints from Bay of Bengal towards CCT/NCT terminal
+    waypoints = [
+        (22.1200, 91.7000, 14.2, 345.0, "Under way using engine", 14.5),
+        (22.1650, 91.7350, 11.8, 350.0, "Under way using engine", 10.2),
+        (22.2100, 91.7800, 9.5, 15.0, "Pilot boarding approach", 6.8),
+        (22.2550, 91.8020, 7.2, 25.0, "Navigating channel bend", 3.5),
+        (22.2900, 91.8150, 5.0, 35.0, "Inward river transit", 1.2),
+        (22.3180, 91.8240, 0.0, 40.0, "Moored at berth" if call.status == CallStatusEnum.BERTHED else "At anchor", 0.0),
+    ]
+
+    if call.status == CallStatusEnum.OUTER_ANCHORAGE:
+        count = 2
+    elif call.status == CallStatusEnum.EN_ROUTE:
+        count = 3
+    elif call.status == CallStatusEnum.PILOT_BOARDING:
+        count = 4
+    elif call.status in [CallStatusEnum.BERTHED, CallStatusEnum.OPERATING]:
+        count = 6
+    else:
+        count = 3
+
+    result = []
+    for idx, (lat, lon, spd, hdg, nav_status, dist) in enumerate(waypoints[:count]):
+        step_time = ref_time - timedelta(minutes=(count - 1 - idx) * 35)
+        result.append(
+            VesselPositionRead(
+                id=f"sim_track_{call.id}_{idx}",
+                vessel_call_id=call.id,
+                timestamp=step_time,
+                latitude=lat,
+                longitude=lon,
+                speed_knots=spd,
+                heading_degrees=hdg,
+                navigational_status=nav_status,
+                distance_to_pilot_nm=dist,
+                data_status=DataStatusEnum.SIMULATED,
+            )
+        )
+    return result
 
 
 @router.get("/{vessel_id}", response_model=VesselRead)
