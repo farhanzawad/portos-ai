@@ -110,3 +110,4 @@ class InMemoryEventBus:
 
 # Global Event Bus Singleton
 event_bus = InMemoryEventBus()
+

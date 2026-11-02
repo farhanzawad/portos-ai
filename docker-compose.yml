@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: portos-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-portos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-portos_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-portos}
+    ports:
+      - "5432:5432"
+    volumes:
+      - portos_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-portos} -d ${POSTGRES_DB:-portos}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - portos-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: portos-backend
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Asia/Dhaka}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-portos}:${POSTGRES_PASSWORD:-portos_dev_password}@db:5432/${POSTGRES_DB:-portos}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      SIMULATION_SEED: ${SIMULATION_SEED:-42}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - portos-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: portos-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) process.exit(1)})\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - portos-network
+
+networks:
+  portos-network:
+    driver: bridge
+
+volumes:
+  portos_pgdata:
+    name: portos_pgdata

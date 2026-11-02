@@ -134,3 +134,4 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/system/audit"
 1. **Hardware Gantry PLCs:** Physical crane controllers (Siemens/ABB PLCs) were not connected. This is an explicit architectural design decision and safety boundary; simulated crane telemetry is provided via SimPy.
 2. **Real CPA ASYCUDA Customs Database:** Customs integration was not run against live Bangladesh National Board of Revenue servers. Synthetic container manifest data was processed via the Port Data Bridge.
 3. **Live AIS Satellite Stream:** Live vessel satellite tracks from MarineTraffic/Spire were not ingested; synthetic geographic coordinates along the Karnaphuli river approach corridor were used.
+

@@ -91,3 +91,4 @@
 - **Synthetic Calibration:** Trained on synthetic parametric equations; real Chittagong tidal currents and monsoon cyclonic depressions exhibit higher non-linear variances.
 - **Fairway Draft Step Function:** Extreme low-water spring tides cause non-continuous wait times that linear tree splits approximate piecewise.
 - **Advisory Role:** Decisions based on these predictions must be confirmed by human berthing officers.
+

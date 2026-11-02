@@ -72,3 +72,4 @@ class EventStreamStatus(BaseModel):
     total_events_in_buffer: int
     last_event_id: Optional[str] = None
     data_status: DataStatusEnum = DataStatusEnum.SIMULATED
+

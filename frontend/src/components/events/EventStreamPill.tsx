@@ -58,3 +58,4 @@ export function EventStreamPill({ showDetails = false }: EventStreamPillProps) {
     </div>
   );
 }
+

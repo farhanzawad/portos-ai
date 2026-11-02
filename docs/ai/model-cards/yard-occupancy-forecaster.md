@@ -83,3 +83,4 @@
 - **Off-Dock Depot Dynamics:** In real Chattogram operations, empty containers and certain import boxes are transferred to 19+ Inland Container Depots (ICDs). The current prototype models only quayside and main terminal blocks.
 - **Customs Holds:** Unannounced regulatory customs freezes are treated as synthetic noise rather than explicit policy events.
 - **Advisory Decision Support:** Recommended block diversions require operator review.
+
