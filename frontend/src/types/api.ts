@@ -219,6 +219,32 @@ export interface EquipmentTelemetryRead {
 }
 
 // Yard
+export type MovementType =
+  | "DISCHARGE_TO_YARD"
+  | "YARD_TO_GATE"
+  | "GATE_TO_YARD"
+  | "YARD_TO_VESSEL"
+  | "HOUSEKEEPING_SHIFT";
+
+export interface ExplanatoryFactor {
+  factor: string;
+  impact_teu: number;
+  direction: string;
+  description: string;
+}
+
+export interface ForecastHorizonDetail {
+  horizon_hrs: number;
+  predicted_occupied_teu: number;
+  predicted_occupancy_pct: number;
+  risk_tier: YardRiskTier;
+  confidence_lower_pct: number;
+  confidence_upper_pct: number;
+  overflow_risk: boolean;
+  capped_at_capacity: boolean;
+  explanatory_factors: ExplanatoryFactor[];
+}
+
 export interface YardBlockRead {
   id: string;
   terminal_id: string;
@@ -232,6 +258,41 @@ export interface YardBlockRead {
   source_name: string;
 }
 
+export interface YardBlockStatusRead {
+  id: string;
+  terminal_id: string;
+  code: string;
+  name: string;
+  zone: YardZone;
+  teu_capacity: number;
+  warning_threshold_pct: number;
+  critical_threshold_pct: number;
+  current_occupied_teu: number;
+  current_occupancy_pct: number;
+  current_risk_tier: YardRiskTier;
+  reefer_occupied_count: number;
+  forecast_6h: ForecastHorizonDetail;
+  forecast_12h: ForecastHorizonDetail;
+  forecast_24h: ForecastHorizonDetail;
+  data_status: DataStatus;
+  source_name: string;
+  last_observation_time?: string | null;
+}
+
+export interface YardSummaryResponse {
+  terminal_id: string;
+  total_capacity_teu: number;
+  total_occupied_teu: number;
+  overall_occupancy_pct: number;
+  blocks_normal_count: number;
+  blocks_watch_count: number;
+  blocks_high_risk_count: number;
+  blocks: YardBlockStatusRead[];
+  model_metadata: Record<string, any>;
+  data_status: DataStatus;
+  timestamp: string;
+}
+
 export interface YardOccupancyRead {
   id: string;
   yard_block_id: string;
@@ -241,6 +302,41 @@ export interface YardOccupancyRead {
   reefer_occupied_count: number;
   risk_tier: YardRiskTier;
   forecast_horizon_hrs?: number;
+  data_status: DataStatus;
+}
+
+export interface ContainerMovementRead {
+  id: string;
+  yard_block_id: string;
+  timestamp: string;
+  movement_type: MovementType;
+  teu_count: number;
+  vessel_call_id?: string | null;
+  equipment_id?: string | null;
+  data_status: DataStatus;
+  source_name: string;
+}
+
+export interface YardBlockDetailResponse {
+  block: YardBlockRead;
+  current_status: YardBlockStatusRead;
+  history_observations: YardOccupancyRead[];
+  recent_movements: ContainerMovementRead[];
+  model_metadata: Record<string, any>;
+  data_status: DataStatus;
+}
+
+export interface YardCongestionAlert {
+  block_id: string;
+  block_code: string;
+  zone: YardZone;
+  current_pct: number;
+  peak_forecast_pct: number;
+  peak_horizon_hrs: number;
+  risk_tier: YardRiskTier;
+  title: string;
+  message: string;
+  recommended_action: string;
   data_status: DataStatus;
 }
 

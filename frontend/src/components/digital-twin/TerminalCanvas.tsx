@@ -27,6 +27,7 @@ interface TerminalCanvasProps {
   equipment: EquipmentRead[];
   yardBlocks: YardBlockRead[];
   isLoading?: boolean;
+  initialSelectedBlockCode?: string | null;
 }
 
 export function TerminalCanvas({
@@ -35,6 +36,7 @@ export function TerminalCanvas({
   equipment,
   yardBlocks,
   isLoading = false,
+  initialSelectedBlockCode,
 }: TerminalCanvasProps) {
   const [viewMode, setViewMode] = useState<"3d" | "2d">("3d");
   const [hasWebGL, setHasWebGL] = useState(true);
@@ -71,6 +73,24 @@ export function TerminalCanvas({
       setViewMode("2d");
     }
   }, []);
+
+  // Auto-select yard block from deep link query parameter
+  useEffect(() => {
+    if (initialSelectedBlockCode && yardBlocks.length > 0) {
+      const match = yardBlocks.find(
+        (b) =>
+          b.code.toUpperCase() === initialSelectedBlockCode.toUpperCase() ||
+          b.id.toLowerCase() === initialSelectedBlockCode.toLowerCase()
+      );
+      if (match) {
+        setSelectedEntity({
+          type: "yard",
+          id: match.id,
+          data: match,
+        });
+      }
+    }
+  }, [initialSelectedBlockCode, yardBlocks]);
 
   // Simulation timer tick
   useEffect(() => {

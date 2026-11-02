@@ -27,6 +27,8 @@ from app.models import (
     MaintenanceTypeEnum,
     YardBlock,
     YardOccupancyObservation,
+    ContainerMovementEvent,
+    MovementTypeEnum,
     YardZoneEnum,
     YardRiskTierEnum,
     OperationalEvent,
@@ -260,29 +262,70 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
                         )
                     )
 
-    # 6. Yard Occupancy Observations
+    # 6. Yard Occupancy Observations (Historical 24h Telemetry + Current)
+    obs_intervals = [24, 20, 16, 12, 8, 6, 4, 2, 0]
     for i in range(1, 13):
         yb_id = f"yb_{i:02d}"
-        obs_id = f"obs_{yb_id}"
-        if not db.query(YardOccupancyObservation).filter_by(id=obs_id).first():
-            cap = 600 if i not in [5, 6] else 250
-            occ = int(cap * (0.88 if i == 4 else (0.92 if i == 7 else 0.55 + (i * 0.02))))
-            pct = round((occ / cap) * 100, 1)
-            tier = YardRiskTierEnum.HIGH_RISK if pct >= 90.0 else (YardRiskTierEnum.WATCH if pct >= 80.0 else YardRiskTierEnum.NORMAL)
+        cap = 600 if i not in [5, 6] else 250
+        target_pct = 0.88 if i == 4 else (0.92 if i == 7 else 0.55 + (i * 0.02))
 
-            db.add(
-                YardOccupancyObservation(
-                    id=obs_id,
-                    yard_block_id=yb_id,
-                    timestamp=ref_time,
-                    occupied_teu=occ,
-                    occupancy_pct=pct,
-                    reefer_occupied_count=int(occ * 0.4) if i in [5, 6] else 0,
-                    risk_tier=tier,
-                    data_status=DataStatusEnum.SIMULATED,
-                    source_name="PORTOS Seed Engine",
+        for hours_ago in obs_intervals:
+            obs_id = f"obs_{yb_id}_t{hours_ago}h"
+            if not db.query(YardOccupancyObservation).filter_by(id=obs_id).first():
+                # Realistic historical trajectory leading up to current observation
+                time_delta = hours_ago / 24.0
+                fluctuation = (0.04 * (1.0 if (i + hours_ago) % 2 == 0 else -1.0)) * (1.0 - time_delta * 0.5)
+                hist_pct = max(0.15, min(0.98, target_pct - (0.06 * time_delta) + fluctuation))
+                occ = int(round(cap * hist_pct))
+                pct = round((occ / cap) * 100, 1)
+                tier = (
+                    YardRiskTierEnum.HIGH_RISK
+                    if pct >= 90.0
+                    else (YardRiskTierEnum.WATCH if pct >= 80.0 else YardRiskTierEnum.NORMAL)
                 )
-            )
+
+                db.add(
+                    YardOccupancyObservation(
+                        id=obs_id,
+                        yard_block_id=yb_id,
+                        timestamp=ref_time - timedelta(hours=hours_ago),
+                        occupied_teu=occ,
+                        occupancy_pct=pct,
+                        reefer_occupied_count=int(occ * 0.4) if i in [5, 6] else 0,
+                        risk_tier=tier,
+                        data_status=DataStatusEnum.SIMULATED,
+                        source_name="PORTOS Seed Engine",
+                    )
+                )
+
+    # 6b. Container Movement Events (Recent terminal transfers)
+    movement_configs = [
+        ("DISCHARGE_TO_YARD", MovementTypeEnum.DISCHARGE_TO_YARD, 25),
+        ("GATE_TO_YARD", MovementTypeEnum.GATE_TO_YARD, 18),
+        ("YARD_TO_GATE", MovementTypeEnum.YARD_TO_GATE, 22),
+        ("YARD_TO_VESSEL", MovementTypeEnum.YARD_TO_VESSEL, 30),
+        ("HOUSEKEEPING_SHIFT", MovementTypeEnum.HOUSEKEEPING_SHIFT, 12),
+    ]
+    for i in range(1, 13):
+        yb_id = f"yb_{i:02d}"
+        for idx, (m_tag, m_type, m_teu) in enumerate(movement_configs):
+            mov_id = f"mov_{yb_id}_{idx+1}"
+            if not db.query(ContainerMovementEvent).filter_by(id=mov_id).first():
+                event_time = ref_time - timedelta(hours=(idx * 3 + (i % 3) + 1))
+                v_call_id = f"call_{(i % 12) + 1:02d}" if m_type in (MovementTypeEnum.DISCHARGE_TO_YARD, MovementTypeEnum.YARD_TO_VESSEL) else None
+                db.add(
+                    ContainerMovementEvent(
+                        id=mov_id,
+                        yard_block_id=yb_id,
+                        vessel_call_id=v_call_id,
+                        equipment_id=f"eq_rtg_{(i % 4) + 1:02d}",
+                        timestamp=event_time,
+                        movement_type=m_type,
+                        teu_count=m_teu + ((i * 3) % 15),
+                        data_status=DataStatusEnum.SIMULATED,
+                        source_name="PORTOS TOS Emulator",
+                    )
+                )
 
     # 7. Operational Disruption Events
     alerts_data = [
@@ -352,6 +395,8 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
         "berths": db.query(Berth).count(),
         "equipment": db.query(Equipment).count(),
         "yard_blocks": db.query(YardBlock).count(),
+        "yard_observations": db.query(YardOccupancyObservation).count(),
+        "container_movements": db.query(ContainerMovementEvent).count(),
         "vessels": db.query(Vessel).count(),
         "vessel_calls": db.query(VesselCall).count(),
         "berth_assignments": db.query(BerthAssignment).count(),

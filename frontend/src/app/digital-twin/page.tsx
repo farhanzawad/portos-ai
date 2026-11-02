@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   getBerths,
@@ -40,7 +41,10 @@ const TerminalCanvas = dynamic(
   }
 );
 
-export default function DigitalTwinPage() {
+function DigitalTwinContent() {
+  const searchParams = useSearchParams();
+  const blockParam = searchParams.get("block");
+
   const { data: berths = [], isLoading: berthsLoading } = useQuery({
     queryKey: ["digital-twin-berths"],
     queryFn: () => getBerths(),
@@ -104,6 +108,7 @@ export default function DigitalTwinPage() {
         equipment={equipment}
         yardBlocks={yardBlocks}
         isLoading={isLoading}
+        initialSelectedBlockCode={blockParam}
       />
 
       {/* Bottom Spatial Telemetry Quick Summary Bar */}
@@ -179,5 +184,19 @@ export default function DigitalTwinPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DigitalTwinPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full h-[660px] bg-slate-950 rounded-lg flex items-center justify-center text-slate-400 text-xs">
+          Loading Digital Twin workspace...
+        </div>
+      }
+    >
+      <DigitalTwinContent />
+    </Suspense>
   );
 }

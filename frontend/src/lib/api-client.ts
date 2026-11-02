@@ -1,0 +1,171 @@
+import {
+  BaselineKPIsResponse,
+  TerminalLayoutRead,
+  TerminalRead,
+  BerthRead,
+  VesselCallRead,
+  VesselTrackResponse,
+  VesselRead,
+  PaginatedResponse,
+  OperationalEventRead,
+  YardBlockRead,
+  YardSummaryResponse,
+  YardBlockDetailResponse,
+  YardCongestionAlert,
+  EquipmentRead,
+  ProvenanceSummaryResponse,
+  ModelMetadataResponse,
+  ModelMetricsResponse,
+  VesselPredictionInput,
+  VesselPredictionOutput,
+} from "@/types/api";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+async function fetchFromApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        Accept: "application/json",
+        ...options?.headers,
+      },
+    });
+
+    if (!response.ok) {
+      let errorDetail = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorJson = await response.json();
+        if (errorJson.detail) errorDetail = errorJson.detail;
+      } catch {
+        // Fallback to HTTP text
+      }
+      throw new Error(errorDetail);
+    }
+
+    return await response.json();
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw new Error("Network request failed. Is the backend server running?");
+  }
+}
+
+export async function getOverviewKPIs(terminalId?: string): Promise<BaselineKPIsResponse> {
+  const query = terminalId ? `?terminal_id=${encodeURIComponent(terminalId)}` : "";
+  return fetchFromApi<BaselineKPIsResponse>(`/api/v1/kpis/overview${query}`);
+}
+
+export async function getTerminals(): Promise<TerminalRead[]> {
+  return fetchFromApi<TerminalRead[]>("/api/v1/terminals");
+}
+
+export async function getTerminalLayout(terminalId: string): Promise<TerminalLayoutRead> {
+  return fetchFromApi<TerminalLayoutRead>(`/api/v1/terminals/${encodeURIComponent(terminalId)}/layout`);
+}
+
+export async function getBerths(terminalId?: string): Promise<BerthRead[]> {
+  const query = terminalId ? `?terminal_id=${encodeURIComponent(terminalId)}` : "";
+  return fetchFromApi<BerthRead[]>(`/api/v1/berths${query}`);
+}
+
+export async function getVesselCalls(params?: {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  delayRiskStatus?: string;
+}): Promise<PaginatedResponse<VesselCallRead>> {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.pageSize) query.set("page_size", String(params.pageSize));
+  if (params?.status) query.set("status", params.status);
+  if (params?.delayRiskStatus) query.set("delay_risk_status", params.delayRiskStatus);
+
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  return fetchFromApi<PaginatedResponse<VesselCallRead>>(`/api/v1/vessels/calls${qs}`);
+}
+
+export async function getVesselTrack(callId: string): Promise<VesselTrackResponse> {
+  return fetchFromApi<VesselTrackResponse>(`/api/v1/vessels/calls/${encodeURIComponent(callId)}/track`);
+}
+
+export async function getVessels(params?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Promise<PaginatedResponse<VesselRead>> {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.pageSize) query.set("page_size", String(params.pageSize));
+  if (params?.search) query.set("search", params.search);
+
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  return fetchFromApi<PaginatedResponse<VesselRead>>(`/api/v1/vessels${qs}`);
+}
+
+export async function getOperationalEvents(params?: {
+  page?: number;
+  pageSize?: number;
+  severity?: string;
+}): Promise<PaginatedResponse<OperationalEventRead>> {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.pageSize) query.set("page_size", String(params.pageSize));
+  if (params?.severity) query.set("severity", params.severity);
+
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  return fetchFromApi<PaginatedResponse<OperationalEventRead>>(`/api/v1/events${qs}`);
+}
+
+export async function getYardBlocks(): Promise<YardBlockRead[]> {
+  return fetchFromApi<YardBlockRead[]>("/api/v1/yard/blocks");
+}
+
+export async function getYardStatus(terminalId?: string): Promise<YardSummaryResponse> {
+  const query = terminalId ? `?terminal_id=${encodeURIComponent(terminalId)}` : "";
+  return fetchFromApi<YardSummaryResponse>(`/api/v1/yard/status${query}`);
+}
+
+export async function getYardForecast(horizonHrs: number = 6, blockId?: string): Promise<any> {
+  let query = `?horizon_hrs=${horizonHrs}`;
+  if (blockId) query += `&block_id=${encodeURIComponent(blockId)}`;
+  return fetchFromApi<any>(`/api/v1/yard/forecast${query}`);
+}
+
+export async function getYardBlockDetail(blockId: string): Promise<YardBlockDetailResponse> {
+  return fetchFromApi<YardBlockDetailResponse>(`/api/v1/yard/blocks/${encodeURIComponent(blockId)}/detail`);
+}
+
+export async function getYardCongestionAlerts(): Promise<YardCongestionAlert[]> {
+  return fetchFromApi<YardCongestionAlert[]>("/api/v1/yard/congestion-alerts");
+}
+
+export async function getEquipment(equipmentType?: string): Promise<EquipmentRead[]> {
+  const query = equipmentType ? `?equipment_type=${encodeURIComponent(equipmentType)}` : "";
+  return fetchFromApi<EquipmentRead[]>(`/api/v1/equipment${query}`);
+}
+
+export async function getProvenanceSummary(): Promise<ProvenanceSummaryResponse> {
+  return fetchFromApi<ProvenanceSummaryResponse>("/api/v1/provenance/summary");
+}
+
+export async function getModelMetadata(): Promise<ModelMetadataResponse> {
+  return fetchFromApi<ModelMetadataResponse>("/api/v1/models/metadata");
+}
+
+export async function getModelEvaluation(): Promise<ModelMetricsResponse> {
+  return fetchFromApi<ModelMetricsResponse>("/api/v1/models/evaluation");
+}
+
+export async function predictVesselDelay(
+  input: VesselPredictionInput
+): Promise<VesselPredictionOutput> {
+  return fetchFromApi<VesselPredictionOutput>("/api/v1/models/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+}
+
