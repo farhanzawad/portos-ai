@@ -1,135 +1,216 @@
 import React from "react";
+import { KPICard } from "@/components/ui/KPICard";
+import { AlertRow } from "@/components/ui/AlertRow";
+import { PageSection } from "@/components/ui/PageSection";
+import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
 import { BackendConnectionCard } from "@/components/status/BackendConnectionCard";
-import { Anchor, Cpu, Database, GitBranch, Layers, ShieldCheck } from "lucide-react";
+import {
+  Ship,
+  Anchor,
+  Clock,
+  Layers,
+  ShieldCheck,
+  AlertTriangle,
+  ArrowRight,
+} from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
+export default function OverviewPage() {
   return (
-    <main className="min-h-screen flex flex-col bg-portos-bg">
-      {/* Persistent Demo Environment Banner */}
-      <header className="w-full bg-portos-navy px-4 py-2 border-b border-portos-navy-secondary text-white">
-        <div className="max-w-6xl mx-auto flex items-center justify-between text-xs">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-portos-border">
+        <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wider bg-portos-amber text-portos-navy">
-              DEMO ENVIRONMENT
-            </span>
-            <span className="text-white/80">
-              Illustrative Chattogram Container Terminal Prototype
-            </span>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-portos-navy">
+              Port Operations Overview
+            </h1>
+            <DataStatusBadge status="SIMULATED" size="sm" />
           </div>
-          <div className="hidden sm:flex items-center gap-4 text-white/70 text-[11px]">
-            <span>Timezone: <strong>Asia/Dhaka (UTC+6)</strong></span>
-            <span>Status: <strong className="text-portos-teal">SIMULATED</strong></span>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Workspace */}
-      <div className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 space-y-8">
-        {/* Brand & Introduction */}
-        <div className="space-y-2 pb-6 border-b border-portos-border">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-portos-navy rounded text-white">
-              <Anchor className="h-6 w-6 text-portos-teal" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-portos-navy tracking-tight">
-                PORTOS AI
-              </h1>
-              <p className="text-sm font-medium text-portos-muted">
-                Port Operations Intelligence System — Blue AI Challenge 2026–27
-              </p>
-            </div>
-          </div>
-          <p className="text-sm text-portos-navy/80 max-w-3xl pt-2 leading-relaxed">
-            A transparent decision-support platform combining an illustrative hybrid digital twin,
-            predictive vessel delay analytics, constrained berth optimization (Google OR-Tools),
-            discrete-event simulation (SimPy), and a grounded Gemini explanation copilot.
+          <p className="text-xs text-portos-muted mt-0.5">
+            Real-time status across outer anchorage queues, berth lanes, yard blocks, and simulated disruption events.
           </p>
         </div>
 
-        {/* Milestone 01 Status & Backend Connection Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-6">
-            <div className="rounded border border-portos-border bg-portos-surface p-6 shadow-sm space-y-4">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-portos-teal" />
-                <h2 className="text-base font-semibold text-portos-navy">
-                  Milestone 01: Monorepo & Runnable Foundation
-                </h2>
-              </div>
-              <p className="text-xs text-portos-muted leading-relaxed">
-                The core monorepo scaffold is operational with isolated frontend and backend services.
-                The frontend operates gracefully without a running backend, fulfilling the resilient
-                demonstration standard.
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div className="border border-portos-border rounded p-3 bg-portos-bg/50">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-portos-navy">
-                    <Layers className="h-4 w-4 text-portos-navy-secondary" />
-                    Frontend Stack
-                  </div>
-                  <ul className="mt-2 space-y-1 text-[11px] text-portos-muted">
-                    <li>• Next.js App Router (TypeScript)</li>
-                    <li>• Tailwind CSS (Minimal Industrial)</li>
-                    <li>• Resilient connection polling</li>
-                    <li>• 3D / R3F compatible foundation</li>
-                  </ul>
-                </div>
-
-                <div className="border border-portos-border rounded p-3 bg-portos-bg/50">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-portos-navy">
-                    <Cpu className="h-4 w-4 text-portos-navy-secondary" />
-                    Backend Stack
-                  </div>
-                  <ul className="mt-2 space-y-1 text-[11px] text-portos-muted">
-                    <li>• FastAPI & Pydantic v2 schemas</li>
-                    <li>• Strict CORS origin control</li>
-                    <li>• Health check (/health & /api/v1)</li>
-                    <li>• Offline Demo Mode enabled</li>
-                  </ul>
-                </div>
-
-                <div className="border border-portos-border rounded p-3 bg-portos-bg/50">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-portos-navy">
-                    <Database className="h-4 w-4 text-portos-navy-secondary" />
-                    Data Architecture
-                  </div>
-                  <ul className="mt-2 space-y-1 text-[11px] text-portos-muted">
-                    <li>• PostgreSQL 16 + PostGIS Docker</li>
-                    <li>• 5-Tier Data Status Tagging</li>
-                    <li>• UTC storage / Asia/Dhaka display</li>
-                    <li>• Idempotent seed architecture</li>
-                  </ul>
-                </div>
-
-                <div className="border border-portos-border rounded p-3 bg-portos-bg/50">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-portos-navy">
-                    <GitBranch className="h-4 w-4 text-portos-navy-secondary" />
-                    Operational Guardrails
-                  </div>
-                  <ul className="mt-2 space-y-1 text-[11px] text-portos-muted">
-                    <li>• No live CPA/AIS connection claims</li>
-                    <li>• Advisory-only decision support</li>
-                    <li>• Human-in-the-loop review</li>
-                    <li>• Zero secrets in client bundles</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <BackendConnectionCard />
-          </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/digital-twin"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-portos-navy text-white hover:bg-portos-navy-secondary transition-colors"
+          >
+            <span>Launch Digital Twin</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-portos-border bg-portos-surface py-4 px-4 text-center text-xs text-portos-muted">
-        PORTOS AI Prototype — Designed for Blue AI Challenge 2026–27. All demo operational data is strictly SIMULATED.
-      </footer>
-    </main>
+      {/* KPI Metric Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KPICard
+          label="Vessels in System"
+          value={12}
+          unit="vessels"
+          subtitle="4 at berth · 8 in approach queue"
+          dataStatus="SIMULATED"
+          icon={Ship}
+          trend={{ value: "2 arrivals today", positive: true }}
+        />
+        <KPICard
+          label="Berth Occupancy"
+          value="66.7"
+          unit="%"
+          subtitle="4 of 6 berths occupied"
+          dataStatus="SIMULATED"
+          icon={Anchor}
+          trend={{ value: "Optimal capacity", positive: true }}
+        />
+        <KPICard
+          label="Mean Anchorage Waiting"
+          value="14.2"
+          unit="hrs"
+          subtitle="Feeder queue average delay"
+          dataStatus="FORECAST"
+          icon={Clock}
+          trend={{ value: "+2.1 hrs vs baseline", positive: false }}
+        />
+        <KPICard
+          label="Active Disruption Alerts"
+          value={3}
+          unit="alerts"
+          subtitle="1 high risk · 2 watch"
+          dataStatus="SIMULATED"
+          icon={AlertTriangle}
+        />
+      </div>
+
+      {/* Main Two-Column Operations Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Recent Operations Alerts & Milestone Architecture */}
+        <div className="lg:col-span-7 space-y-6">
+          <PageSection
+            title="Operational Alerts & Disruption Timeline"
+            subtitle="Recent simulated alerts requiring operational planner attention"
+            badge={<DataStatusBadge status="SIMULATED" size="sm" />}
+            actions={
+              <Link
+                href="/scenario-lab"
+                className="text-xs font-medium text-portos-navy hover:text-portos-teal transition-colors"
+              >
+                Open Scenario Lab →
+              </Link>
+            }
+          >
+            <div className="space-y-2.5">
+              <AlertRow
+                severity="critical"
+                title="Delay Risk: MV Karnaphuli Feeder"
+                description="Simulated engine derating injected. Predicted outer anchorage arrival delayed by +4.2 hours; potential pilotage window miss."
+                timestamp="16:42 BST"
+                source="ML Delay Classifier"
+                dataStatus="FORECAST"
+                actionLabel="Inspect"
+              />
+              <AlertRow
+                severity="warning"
+                title="Crane Maintenance: STS-02 Gantry Offline"
+                description="STS Crane 02 trolley sensor warning. Service rate reduced by 35% on Berth B-02 until 21:00 BST."
+                timestamp="15:30 BST"
+                source="Equipment Telemetry"
+                dataStatus="SIMULATED"
+                actionLabel="View Berth"
+              />
+              <AlertRow
+                severity="normal"
+                title="Berth Plan Feasibility Verified"
+                description="OR-Tools CP-SAT generated conflict-free 48h schedule satisfying draft limits and vessel LOA boundaries."
+                timestamp="14:15 BST"
+                source="OR-Tools Optimizer"
+                dataStatus="DERIVED"
+                actionLabel="Review Plan"
+              />
+            </div>
+          </PageSection>
+
+          <PageSection
+            title="System Capabilities & Milestone Progression"
+            subtitle="Verified architectural foundations and upcoming analytical modules"
+          >
+            <div className="rounded border border-portos-border bg-portos-surface p-5 shadow-sm space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-portos-navy">
+                <ShieldCheck className="h-4 w-4 text-portos-teal" />
+                <span>Minimal Industrial Futurism Architecture</span>
+              </div>
+              <p className="text-xs text-portos-muted leading-relaxed">
+                PORTOS AI operates with complete data transparency and operational guardrails. All demo records carry standardized 5-tier status labels, while optimization and simulation are partitioned into deterministic solvers (OR-Tools & SimPy).
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-[11px] text-portos-navy font-mono">
+                <div className="p-2 rounded bg-portos-bg border border-portos-border text-center">
+                  <span className="text-[10px] text-portos-muted block">FRONTEND</span>
+                  Next.js 14 / TS
+                </div>
+                <div className="p-2 rounded bg-portos-bg border border-portos-border text-center">
+                  <span className="text-[10px] text-portos-muted block">BACKEND</span>
+                  FastAPI / Py3.12
+                </div>
+                <div className="p-2 rounded bg-portos-bg border border-portos-border text-center">
+                  <span className="text-[10px] text-portos-muted block">DATABASE</span>
+                  PostgreSQL / PostGIS
+                </div>
+                <div className="p-2 rounded bg-portos-bg border border-portos-border text-center">
+                  <span className="text-[10px] text-portos-muted block">APPLICATION AI</span>
+                  Google GenAI SDK
+                </div>
+              </div>
+            </div>
+          </PageSection>
+        </div>
+
+        {/* Right Column: Backend Service Connection & Quick Links */}
+        <div className="lg:col-span-5 space-y-6">
+          <PageSection
+            title="Service Layer Health"
+            subtitle="FastAPI backend connectivity and demo mode telemetry"
+          >
+            <BackendConnectionCard />
+          </PageSection>
+
+          <div className="rounded border border-portos-border bg-portos-surface p-4 shadow-sm space-y-3">
+            <h4 className="text-xs font-semibold text-portos-navy uppercase tracking-wide flex items-center gap-2">
+              <Layers className="h-4 w-4 text-portos-navy-secondary" />
+              Quick Module Navigation
+            </h4>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <Link
+                href="/digital-twin"
+                className="p-2.5 rounded border border-portos-border hover:border-portos-teal hover:bg-portos-teal-light/30 transition-all text-portos-navy font-medium"
+              >
+                Digital Twin
+                <span className="block text-[10px] text-portos-muted font-normal">3D/2D Spatial View</span>
+              </Link>
+              <Link
+                href="/vessels"
+                className="p-2.5 rounded border border-portos-border hover:border-portos-teal hover:bg-portos-teal-light/30 transition-all text-portos-navy font-medium"
+              >
+                Vessel Intelligence
+                <span className="block text-[10px] text-portos-muted font-normal">Track & ETA ML</span>
+              </Link>
+              <Link
+                href="/berth-planner"
+                className="p-2.5 rounded border border-portos-border hover:border-portos-teal hover:bg-portos-teal-light/30 transition-all text-portos-navy font-medium"
+              >
+                Berth Planner
+                <span className="block text-[10px] text-portos-muted font-normal">OR-Tools Optimizer</span>
+              </Link>
+              <Link
+                href="/scenario-lab"
+                className="p-2.5 rounded border border-portos-border hover:border-portos-teal hover:bg-portos-teal-light/30 transition-all text-portos-navy font-medium"
+              >
+                Scenario Lab
+                <span className="block text-[10px] text-portos-muted font-normal">SimPy Decision Lab</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-
