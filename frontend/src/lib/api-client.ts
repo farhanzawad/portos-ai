@@ -22,6 +22,12 @@ import {
   EmissionFactorRead,
   ScenarioEmissionsComparison,
   EnvironmentalContext,
+  ImportedDatasetRead,
+  ImportedRecordRead,
+  DocumentUploadResponse,
+  DataSourceRead,
+  ImportSummaryReport,
+  RecordCorrectionRequest,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -206,4 +212,102 @@ export async function getScenarioEmissionsComparison(
 export async function getEnvironmentalContext(): Promise<EnvironmentalContext> {
   return fetchFromApi<EnvironmentalContext>("/api/v1/sustainability/environmental-context");
 }
+
+// ==========================================
+// Milestone 13: Port Data Bridge Ingestion API
+// ==========================================
+
+export async function uploadDocument(
+  file: File,
+  dataSourceId?: string,
+  documentType: string = "VESSEL_BERTHING_LOG"
+): Promise<DocumentUploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (dataSourceId) formData.append("data_source_id", dataSourceId);
+  formData.append("document_type", documentType);
+
+  const url = `${API_BASE_URL}/api/v1/ingestion/upload`;
+  const response = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorDetail = `Upload failed (${response.status})`;
+    try {
+      const json = await response.json();
+      if (json.detail) errorDetail = json.detail;
+    } catch {
+      // Fallback
+    }
+    throw new Error(errorDetail);
+  }
+
+  return response.json();
+}
+
+export async function listDatasets(limit: number = 20): Promise<ImportedDatasetRead[]> {
+  return fetchFromApi<ImportedDatasetRead[]>(`/api/v1/ingestion/datasets?limit=${limit}`);
+}
+
+export async function getDataset(datasetId: string): Promise<ImportedDatasetRead> {
+  return fetchFromApi<ImportedDatasetRead>(`/api/v1/ingestion/datasets/${encodeURIComponent(datasetId)}`);
+}
+
+export async function correctRecord(
+  datasetId: string,
+  recordId: string,
+  updatedFields: Record<string, any>,
+  isAccepted?: boolean,
+  rejectionReason?: string
+): Promise<ImportedRecordRead> {
+  return fetchFromApi<ImportedRecordRead>(
+    `/api/v1/ingestion/datasets/${encodeURIComponent(datasetId)}/records/${encodeURIComponent(recordId)}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        row_id: recordId,
+        updated_fields: updatedFields,
+        is_accepted: isAccepted,
+        rejection_reason: rejectionReason,
+      }),
+    }
+  );
+}
+
+export async function commitDataset(
+  datasetId: string,
+  reviewerName: string,
+  operatorNotes?: string,
+  corrections?: RecordCorrectionRequest[]
+): Promise<ImportSummaryReport> {
+  return fetchFromApi<ImportSummaryReport>(
+    `/api/v1/ingestion/datasets/${encodeURIComponent(datasetId)}/commit`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dataset_id: datasetId,
+        reviewer_name: reviewerName,
+        operator_notes: operatorNotes,
+        corrections,
+      }),
+    }
+  );
+}
+
+export async function listDataSources(): Promise<DataSourceRead[]> {
+  return fetchFromApi<DataSourceRead[]>("/api/v1/ingestion/sources");
+}
+
+export function getDownloadCsvTemplateUrl(): string {
+  return `${API_BASE_URL}/api/v1/ingestion/templates/csv`;
+}
+
+export function getDownloadXlsxTemplateUrl(): string {
+  return `${API_BASE_URL}/api/v1/ingestion/templates/xlsx`;
+}
+
 

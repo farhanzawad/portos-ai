@@ -186,7 +186,7 @@ test.describe("Model Centre & Predictive Pipelines", () => {
     await ingestionTab.click();
 
     await expect(
-      page.getByText("Port Data Bridge & Document Ingestion Pipeline")
+      page.getByText(/Port Data Bridge/i).first()
     ).toBeVisible();
   });
 });

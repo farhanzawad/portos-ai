@@ -738,3 +738,116 @@ export interface GreenPortOverviewResponse {
   data_status: DataStatus;
   timestamp: string;
 }
+
+// ==========================================
+// Milestone 13: Port Data Bridge & Document Ingestion
+// ==========================================
+
+export type FileFormat = "CSV" | "XLSX" | "PDF" | "JSON";
+export type IngestionStatus = "PENDING_REVIEW" | "VERIFIED" | "REJECTED";
+export type ValidationStatus = "VALID" | "WARNING" | "INVALID" | "DUPLICATE";
+export type IssueType = "MISSING_FIELD" | "TYPE_MISMATCH" | "RANGE_VIOLATION" | "SUSPECT_UNIT" | "DUPLICATE";
+export type IssueSeverity = "WARNING" | "CRITICAL";
+
+export interface DataSourceRead {
+  id: string;
+  code: string;
+  name: string;
+  organization: string;
+  source_type: string;
+  url?: string | null;
+  description: string;
+  is_verified: boolean;
+  data_status: DataStatus;
+}
+
+export interface DataQualityIssueRead {
+  id: string;
+  field_name: string;
+  issue_type: IssueType;
+  description: string;
+  severity: IssueSeverity;
+}
+
+export interface ImportedRecordRead {
+  id: string;
+  row_index: number;
+  source_location?: string | null;
+  raw_payload_json: Record<string, any>;
+  normalized_payload_json: Record<string, any>;
+  validation_status: ValidationStatus;
+  is_accepted: boolean;
+  rejection_reason?: string | null;
+  issues: string[];
+}
+
+export interface ImportedDatasetRead {
+  id: string;
+  data_source_id: string;
+  file_name: string;
+  file_format: FileFormat;
+  file_sha256: string;
+  file_size_bytes: number;
+  document_type: string;
+  scanned_pdf_detected: boolean;
+  record_count: number;
+  ingestion_status: IngestionStatus;
+  rejection_reason?: string | null;
+  uploaded_at: string;
+  data_status: DataStatus;
+  records?: ImportedRecordRead[];
+  quality_issues?: DataQualityIssueRead[];
+}
+
+export interface DocumentUploadResponse {
+  dataset_id: string;
+  file_name: string;
+  file_format: FileFormat;
+  file_sha256: string;
+  file_size_bytes: number;
+  document_type: string;
+  scanned_pdf_detected: boolean;
+  scanned_message?: string | null;
+  total_rows_parsed: number;
+  valid_rows_count: number;
+  warning_rows_count: number;
+  invalid_rows_count: number;
+  duplicate_rows_count: number;
+  ingestion_status: IngestionStatus;
+  records: ImportedRecordRead[];
+  issues: DataQualityIssueRead[];
+  provenance_note: string;
+  data_status: DataStatus;
+}
+
+export interface RecordCorrectionRequest {
+  row_id: string;
+  updated_fields: Record<string, any>;
+  is_accepted?: boolean;
+  rejection_reason?: string;
+}
+
+export interface CommitDatasetRequest {
+  dataset_id: string;
+  reviewer_name: string;
+  operator_notes?: string;
+  corrections?: RecordCorrectionRequest[];
+}
+
+export interface ImportSummaryReport {
+  dataset_id: string;
+  file_name: string;
+  file_sha256: string;
+  total_records: number;
+  accepted_records: number;
+  rejected_records: number;
+  duplicate_records: number;
+  review_required_records: number;
+  ingestion_status: IngestionStatus;
+  reviewer_name: string;
+  committed_at: string;
+  provenance_hash: string;
+  data_status: DataStatus;
+  audit_message: string;
+}
+

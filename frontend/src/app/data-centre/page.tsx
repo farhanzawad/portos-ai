@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ModelCentreView } from "@/components/models/ModelCentreView";
-import { MilestonePlaceholder } from "@/components/ui/MilestonePlaceholder";
+import { PortDataBridgeView } from "@/components/ingestion/PortDataBridgeView";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
 import { BrainCircuit, UploadCloud, Database } from "lucide-react";
 
@@ -56,27 +56,8 @@ export default function DataCentrePage() {
       {/* Tab 1: Model Centre & Predictive Pipeline Evaluation */}
       {activeTab === "models" && <ModelCentreView />}
 
-      {/* Tab 2: Milestone 13 Document Ingestion Placeholder */}
-      {activeTab === "ingestion" && (
-        <MilestonePlaceholder
-          moduleName="Data Centre"
-          milestoneNumber="Milestone 13"
-          milestoneTitle="Port Data Bridge & Document Ingestion Pipeline"
-          description="A secure document ingestion pipeline enabling port planners to import spreadsheets and public reports. Features text-based PDF extraction via pypdf, candidate column mapping, human-in-the-loop preview, and automatic provenance stamping."
-          plannedFeatures={[
-            "Secure upload interface supporting CSV, XLSX, and text-based PDFs (via pypdf)",
-            "Human-in-the-loop candidate column mapping and unit normalization review",
-            "Hardened security: directory traversal mitigation, file size caps, formula injection defense",
-            "Full provenance recording: source checksum, reporting timeframe, and ingestion timestamp",
-            "Clear refusal handling for scanned image PDFs requiring future OCR",
-          ]}
-          prerequisites={[
-            "Milestone 03: DataSource, ImportedDataset, and ImportedRecord database schema",
-            "Milestone 04: Upload staging and data normalization backend services",
-            "Milestone 13: File parsing and column mapping review interfaces",
-          ]}
-        />
-      )}
+      {/* Tab 2: Milestone 13 Document Ingestion & Port Data Bridge */}
+      {activeTab === "ingestion" && <PortDataBridgeView />}
     </div>
   );
 }

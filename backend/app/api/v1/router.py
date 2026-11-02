@@ -13,6 +13,7 @@ from app.api.v1.endpoints import (
     berth_planner,
     scenarios,
     sustainability,
+    ingestion,
 )
 
 api_v1_router = APIRouter(prefix="/api/v1")
@@ -31,3 +32,4 @@ api_v1_router.include_router(models.router)
 api_v1_router.include_router(berth_planner.router)
 api_v1_router.include_router(scenarios.router)
 api_v1_router.include_router(sustainability.router)
+api_v1_router.include_router(ingestion.router)

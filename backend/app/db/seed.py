@@ -502,6 +502,58 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
             existing_ef.is_illustrative_assumption = is_demo
             existing_ef.factor_status = f_status
 
+    # 11. Seed Data Sources
+    default_sources = [
+        (
+            "ds_cpa_bulletin",
+            "CPA-PUB-DAILY",
+            "Chattogram Port Authority Daily Berthing Lineup (Simulated Public Report)",
+            "Chattogram Port Authority",
+            SourceTypeEnum.PUBLIC_REPORT,
+            "https://cpa.gov.bd/berthing-lineup",
+            "Public operational berthing and anchorage daily schedule published for shipping agents.",
+            True,
+        ),
+        (
+            "ds_user_upload",
+            "USER-UPLOAD-STAGING",
+            "Operator Staged Operational Dataset",
+            "PORTOS AI User Ingestion",
+            SourceTypeEnum.USER_UPLOAD,
+            None,
+            "Operator uploaded spreadsheet or document for human review and ingestion.",
+            False,
+        ),
+        (
+            "ds_synthetic_stream",
+            "PORTOS-SYNTH-01",
+            "PORTOS Synthetic Benchmark Stream",
+            "PORTOS AI Engineering",
+            SourceTypeEnum.SYNTHETIC_GENERATOR,
+            None,
+            "Calibrated synthetic operational feed for Blue AI Challenge research.",
+            True,
+        ),
+    ]
+
+    for s_id, s_code, s_name, s_org, s_type, s_url, s_desc, s_ver in default_sources:
+        existing_ds = db.query(DataSource).filter(DataSource.id == s_id).first()
+        if not existing_ds:
+            db.add(
+                DataSource(
+                    id=s_id,
+                    code=s_code,
+                    name=s_name,
+                    organization=s_org,
+                    source_type=s_type,
+                    url=s_url,
+                    description=s_desc,
+                    is_verified=s_ver,
+                    data_status=DataStatusEnum.SIMULATED,
+                    source_name="PORTOS Seed Engine",
+                )
+            )
+
     # Commit all seeded items
     db.commit()
 
@@ -516,6 +568,8 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
         "vessel_calls": db.query(VesselCall).count(),
         "berth_assignments": db.query(BerthAssignment).count(),
         "events": db.query(OperationalEvent).count(),
+        "emission_factors": db.query(EmissionFactor).count(),
+        "data_sources": db.query(DataSource).count(),
     }
     return counts
 
@@ -524,6 +578,9 @@ if __name__ == "__main__":
     with engine.connect() as conn:
         conn.execute(text("DROP TABLE IF EXISTS emissions_estimates"))
         conn.execute(text("DROP TABLE IF EXISTS emission_factors"))
+        conn.execute(text("DROP TABLE IF EXISTS data_quality_issues"))
+        conn.execute(text("DROP TABLE IF EXISTS imported_records"))
+        conn.execute(text("DROP TABLE IF EXISTS imported_datasets"))
         conn.commit()
     Base.metadata.create_all(bind=engine)
     with SessionLocal() as session:

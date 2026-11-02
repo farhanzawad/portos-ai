@@ -31,6 +31,7 @@ class ValidationStatusEnum(str, enum.Enum):
     VALID = "VALID"
     WARNING = "WARNING"
     INVALID = "INVALID"
+    DUPLICATE = "DUPLICATE"
 
 
 class IssueTypeEnum(str, enum.Enum):
@@ -80,12 +81,16 @@ class ImportedDataset(Base, ProvenanceMixin):
         nullable=False,
     )
     file_sha256: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    file_size_bytes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    document_type: Mapped[str] = mapped_column(String(64), default="VESSEL_BERTHING_LOG", nullable=False)
+    scanned_pdf_detected: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     record_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     ingestion_status: Mapped[IngestionStatusEnum] = mapped_column(
         SQLEnum(IngestionStatusEnum, name="ingestion_status_enum", native_enum=False),
         default=IngestionStatusEnum.PENDING_REVIEW,
         nullable=False,
     )
+    rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
@@ -102,6 +107,7 @@ class ImportedRecord(Base, ProvenanceMixin):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     imported_dataset_id: Mapped[str] = mapped_column(String(64), ForeignKey("imported_datasets.id", ondelete="CASCADE"), nullable=False, index=True)
     row_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     raw_payload_json: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False)
     normalized_payload_json: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     validation_status: Mapped[ValidationStatusEnum] = mapped_column(
@@ -109,6 +115,8 @@ class ImportedRecord(Base, ProvenanceMixin):
         default=ValidationStatusEnum.VALID,
         nullable=False,
     )
+    is_accepted: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Relationships
     imported_dataset: Mapped["ImportedDataset"] = relationship("ImportedDataset", back_populates="records")
@@ -135,4 +143,3 @@ class DataQualityIssue(Base, ProvenanceMixin):
 
     # Relationships
     imported_dataset: Mapped["ImportedDataset"] = relationship("ImportedDataset", back_populates="quality_issues")
-
