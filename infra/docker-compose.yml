@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: portos-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-portos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-portos_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-portos}
+    ports:
+      - "5432:5432"
+    volumes:
+      - portos_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-portos} -d ${POSTGRES_DB:-portos}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  portos_pgdata:
+    name: portos_pgdata
+
