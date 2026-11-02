@@ -13,6 +13,7 @@ from app.schemas.copilot import (
 from app.copilot.tools import (
     copilot_tool_registry,
     check_safety_critical_refusal,
+    check_prompt_injection,
 )
 
 SYSTEM_INSTRUCTION = """You are the PORTOS AI Port Intelligence Copilot, an operational decision-support assistant for a Chattogram-inspired container terminal environment.
@@ -66,6 +67,23 @@ class PortCopilotAgent:
                 model_predictions=[],
                 simulated_results=[],
                 limitations=["Automated navigational clearances and machinery operations are strictly prohibited."],
+                references=[],
+                tool_calls=[],
+                is_demo_mode=not self.is_configured,
+                model_name=self.model_name,
+                timestamp=datetime.now(timezone.utc),
+            )
+
+        # 2. Check Adversarial Prompt Injection Guard
+        injection_warning = check_prompt_injection(user_message)
+        if injection_warning:
+            return CopilotChatResponse(
+                conversation_id=conversation_id,
+                summary=injection_warning,
+                retrieved_facts=[],
+                model_predictions=[],
+                simulated_results=[],
+                limitations=["Adversarial prompt injection attempt detected and neutralized. Tool execution suspended."],
                 references=[],
                 tool_calls=[],
                 is_demo_mode=not self.is_configured,

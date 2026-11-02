@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-portos-bg text-portos-navy antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-portos-bg text-portos-navy antialiased" suppressHydrationWarning>
         <QueryProvider>
           <EventStreamProvider>
             <AppShell>{children}</AppShell>

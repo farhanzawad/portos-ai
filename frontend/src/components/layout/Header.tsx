@@ -25,12 +25,14 @@ export function Header({
   reducedMotion,
   onToggleReducedMotion,
 }: HeaderProps) {
-  const [timeString, setTimeString] = useState<string>("");
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [timeString, setTimeString] = useState<string>("00:00:00 BST");
   const [activeProfile, setActiveProfile] = useState<string>("Berth Planner (Demo)");
   const [showProfileMenu, setShowProfileMenu] = useState<boolean>(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState<boolean>(false);
 
   useEffect(() => {
+    setMounted(true);
     // Update local clock formatted to Asia/Dhaka (UTC+6)
     const updateTime = () => {
       const now = new Date();
@@ -85,7 +87,7 @@ export function Header({
         <div className="flex items-center gap-3 text-[11px]">
           <div className="hidden sm:flex items-center gap-1.5 text-white/70">
             <Clock className="h-3 w-3 text-portos-teal" />
-            <span className="tabular-nums font-mono text-white/90">{timeString || "00:00:00 BST"}</span>
+            <span className="tabular-nums font-mono text-white/90" suppressHydrationWarning>{mounted ? timeString : "00:00:00 BST"}</span>
           </div>
 
           <div className="flex items-center gap-1 text-[11px]">

@@ -15,11 +15,18 @@ from app.sustainability.calculator import green_port_calculator
 
 
 SAFETY_CRITICAL_PATTERNS = [
-    r"\b(clear|clearance)\b.*\b(vessel|ship|entry|berth|fairway)\b",
-    r"\b(maneuver|steer|navigate|pilot)\b.*\b(vessel|ship|channel)\b",
+    r"\b(clear|clearance)\b.*\b(vessel|ship|feeder|entry|berth|fairway)\b",
+    r"\b(maneuver|steer|navigate|pilot)\b.*\b(vessel|ship|feeder|channel|berth)\b",
     r"\b(operate|move|start|stop|hoist|lower)\b.*\b(crane|rtg|spreader|equipment)\b",
     r"\b(override|disable)\b.*\b(safety|emergency|interlock|limit)\b",
     r"\b(issue|grant)\b.*\b(clearance|permission|permit)\b",
+]
+
+PROMPT_INJECTION_PATTERNS = [
+    r"\b(ignore|disregard|forget)\b.*\b(previous|prior|above|system)\b.*\b(instructions?|rules?|prompts?|constraints?)\b",
+    r"\b(system\s+override|developer\s+mode|dan\s+mode|jailbreak)\b",
+    r"\byou\s+are\s+now\s+(unconstrained|an\s+unrestricted|root|admin)\b",
+    r"\bexecute\s+(system|bash|cmd|powershell|sql|rm\s+-rf|drop\s+table)\b",
 ]
 
 
@@ -33,6 +40,19 @@ def check_safety_critical_refusal(message: str) -> Optional[str]:
                 "The software does NOT possess authority or integration to execute navigational clearances, "
                 "issue vessel maneuvering orders, or control physical container handling equipment. "
                 "All vessel navigation, pilotage, and crane operations require qualified human port authority review."
+            )
+    return None
+
+
+def check_prompt_injection(message: str) -> Optional[str]:
+    """Inspects query for adversarial prompt injection or instructions override attempts."""
+    lower_msg = message.lower()
+    for pattern in PROMPT_INJECTION_PATTERNS:
+        if re.search(pattern, lower_msg):
+            return (
+                "SECURITY ADVISORY: Adversarial prompt injection or system override pattern detected. "
+                "PORTOS AI decision-support boundaries remain strictly enforced. "
+                "External instructions cannot override advisory role constraints or execute unapproved actions."
             )
     return None
 
