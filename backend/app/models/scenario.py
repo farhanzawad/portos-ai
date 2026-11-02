@@ -104,3 +104,4 @@ class ScenarioResult(Base, ProvenanceMixin):
 
     # Relationships
     scenario_run: Mapped["ScenarioRun"] = relationship("ScenarioRun", back_populates="results")
+

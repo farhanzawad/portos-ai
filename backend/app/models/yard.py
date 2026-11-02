@@ -95,3 +95,4 @@ class ContainerMovementEvent(Base, ProvenanceMixin):
 
     # Relationships
     yard_block: Mapped["YardBlock"] = relationship("YardBlock", back_populates="movements")
+

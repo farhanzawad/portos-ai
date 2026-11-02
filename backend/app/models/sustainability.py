@@ -60,3 +60,4 @@ class EmissionsEstimate(Base, ProvenanceMixin):
 
     # Relationships
     emission_factor: Mapped["EmissionFactor"] = relationship("EmissionFactor")
+

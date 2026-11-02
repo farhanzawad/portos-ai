@@ -132,3 +132,4 @@ def test_capacity_and_numeric_constraints(test_db):
     for ef in factors:
         assert ef.factor_value > 0
         assert ef.is_illustrative_assumption is True
+

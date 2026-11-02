@@ -72,3 +72,4 @@ class PredictionRecord(Base, ProvenanceMixin):
     predicted_label_str: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     confidence_lower_bound: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     confidence_upper_bound: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+

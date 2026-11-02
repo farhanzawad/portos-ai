@@ -98,3 +98,4 @@ class EquipmentMaintenanceEvent(Base, ProvenanceMixin):
 
     # Relationships
     equipment: Mapped["Equipment"] = relationship("Equipment", back_populates="maintenance_events")
+

@@ -116,3 +116,4 @@ class VesselPosition(Base, ProvenanceMixin):
     __table_args__ = (
         Index("idx_vessel_pos_call_time", "vessel_call_id", "timestamp"),
     )
+

@@ -66,3 +66,4 @@ class RecommendationReview(Base, ProvenanceMixin):
 
     # Relationships
     recommendation: Mapped["Recommendation"] = relationship("Recommendation", back_populates="reviews")
+

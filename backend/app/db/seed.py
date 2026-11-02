@@ -365,3 +365,4 @@ if __name__ == "__main__":
     with SessionLocal() as session:
         result = seed_database(session)
         print("Database seeded successfully:", result)
+

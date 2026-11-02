@@ -169,3 +169,4 @@ Every operational entity inherits the standard audit fields:
 - `ingested_at`: UTC timestamp of database ingestion
 - `methodology_note`: Description of calculation or simulation derivation
 - `created_at` / `updated_at`: UTC audit timestamps
+

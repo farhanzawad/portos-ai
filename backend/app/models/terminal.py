@@ -93,3 +93,4 @@ class BerthAssignment(Base, ProvenanceMixin):
     __table_args__ = (
         Index("idx_berth_assignment_time", "berth_id", "scheduled_start", "scheduled_end"),
     )
+
