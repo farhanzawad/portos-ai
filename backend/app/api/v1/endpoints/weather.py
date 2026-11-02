@@ -24,3 +24,4 @@ def get_weather_forecast(
 ) -> WeatherForecastResponse:
     """Retrieve multi-hour contextual marine weather and sea condition forecast."""
     return weather_adapter.get_forecast(hours=hours, force_refresh=refresh)
+

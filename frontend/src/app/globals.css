@@ -13,11 +13,45 @@ body {
   background: var(--background);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Tabular figures for operational KPIs and metrics */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Sleek Minimalist Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Micro-interaction polish classes */
+.smooth-transition {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(16, 42, 67, 0.08), 0 2px 6px -2px rgba(16, 42, 67, 0.04);
 }
 
 /* Accessibility: Comprehensive Reduced Motion Enforcement */
@@ -39,4 +73,3 @@ body {
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
-

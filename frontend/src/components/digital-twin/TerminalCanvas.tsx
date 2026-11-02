@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import {
   SelectedEntity,
@@ -161,9 +162,17 @@ export function TerminalCanvas({
         {viewMode === "3d" && hasWebGL ? (
           <Canvas
             shadows
-            camera={{ position: [40, 42, 46], fov: 38 }}
+            camera={{ position: [38, 40, 44], fov: 38 }}
             className="w-full h-full cursor-grab active:cursor-grabbing"
-            gl={{ antialias: true, alpha: false }}
+            gl={{
+              antialias: true,
+              alpha: false,
+              powerPreference: "high-performance",
+            }}
+            onCreated={({ gl }) => {
+              gl.toneMapping = THREE.ACESFilmicToneMapping;
+              gl.toneMappingExposure = 1.14;
+            }}
           >
             <color attach="background" args={["#0c1926"]} />
             <TerminalScene3D

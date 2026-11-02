@@ -106,16 +106,19 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={clsx(
-                  "flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors group",
+                  "relative flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-all duration-150 group",
                   isActive
-                    ? "bg-portos-navy-secondary text-white font-semibold shadow-inner"
-                    : "text-white/80 hover:bg-portos-navy-secondary/50 hover:text-white"
+                    ? "bg-portos-navy-secondary text-white font-semibold shadow-xs"
+                    : "text-white/80 hover:bg-portos-navy-secondary/60 hover:text-white"
                 )}
               >
-                <div className="flex items-center gap-2.5">
+                {isActive && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r bg-portos-teal" />
+                )}
+                <div className="flex items-center gap-2.5 pl-1">
                   <Icon
                     className={clsx(
-                      "h-4 w-4 shrink-0 transition-colors",
+                      "h-4 w-4 shrink-0 transition-transform group-hover:scale-105",
                       isActive ? "text-portos-teal" : "text-white/60 group-hover:text-white"
                     )}
                   />
@@ -124,10 +127,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 {item.milestone && (
                   <span
                     className={clsx(
-                      "text-[9px] font-mono px-1 py-0.2 rounded border",
+                      "text-[9px] font-mono px-1.5 py-0.5 rounded border transition-colors",
                       isActive
-                        ? "border-portos-teal/40 bg-portos-teal/20 text-portos-teal"
-                        : "border-white/10 text-white/40 group-hover:border-white/20 group-hover:text-white/60"
+                        ? "border-portos-teal/50 bg-portos-teal/20 text-portos-teal font-semibold"
+                        : "border-white/10 text-white/40 group-hover:border-white/20 group-hover:text-white/70"
                     )}
                   >
                     {item.milestone}

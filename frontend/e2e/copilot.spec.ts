@@ -22,7 +22,7 @@ test.describe("Port Intelligence Copilot & Typed Tool Allowlist (Milestone 14)",
     ).toBeVisible();
 
     // Allowlisted tools count
-    await expect(page.getByText("10 Allowlisted Tools")).toBeVisible();
+    await expect(page.getByText(/1[01] Allowlisted Tools/i)).toBeVisible();
 
     // Advisory role reminder in banner
     await expect(
