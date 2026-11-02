@@ -156,7 +156,7 @@ test.describe("Vessel Intelligence & Geographic Fairway Track", () => {
     await page.goto("/vessels");
 
     await expect(page.getByText("Vessels in Corridor")).toBeVisible();
-    await expect(page.getByText("Outer Anchorage")).toBeVisible();
+    await expect(page.getByText("Outer Anchorage").first()).toBeVisible();
     await expect(page.getByText("Berthed at Quayside")).toBeVisible();
     await expect(page.getByText("Mean Predicted Delay")).toBeVisible();
   });

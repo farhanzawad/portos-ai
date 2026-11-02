@@ -138,7 +138,7 @@ test.describe("Port Operations Overview Dashboard", () => {
     ).toBeVisible();
 
     // Check vessel row rendered from mock
-    await expect(page.getByText("MV Karnaphuli Express")).toBeVisible();
+    await expect(page.getByText("MV Karnaphuli Express").first()).toBeVisible();
     await expect(page.getByText("IMO: IMO-9123456")).toBeVisible();
 
     // Check filter buttons

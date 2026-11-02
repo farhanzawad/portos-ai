@@ -354,3 +354,76 @@ export interface VesselPredictionOutput {
   data_status: DataStatus;
   operational_notice: string;
 }
+
+// Berth Planner & Optimizer
+export type SolverStatus = "OPTIMAL" | "FEASIBLE" | "INFEASIBLE" | "MODEL_INVALID" | "UNKNOWN";
+
+export interface ScheduledAssignment {
+  vessel_call_id: string;
+  vessel_name: string;
+  call_number: string;
+  berth_id: string;
+  berth_code: string;
+  berth_name: string;
+  scheduled_start: string;
+  scheduled_end: string;
+  service_duration_hours: number;
+  waiting_time_hours: number;
+  assigned_quay_start_m: number;
+  assigned_quay_end_m: number;
+  is_feasible: boolean;
+  assignment_explanation: string;
+  data_status: DataStatus;
+}
+
+export interface ConstraintViolation {
+  violation_type: string;
+  vessel_call_id: string;
+  berth_id: string;
+  description: string;
+  severity: string;
+}
+
+export interface FeasibilityValidationResult {
+  is_feasible: boolean;
+  total_assignments_checked: number;
+  violations_count: number;
+  violations: ConstraintViolation[];
+  summary: string;
+  validator_name: string;
+}
+
+export interface ScheduleComparisonMetrics {
+  baseline_total_waiting_hours: number;
+  optimized_total_waiting_hours: number;
+  waiting_hours_saved: number;
+  waiting_time_reduction_pct: number;
+  berth_utilization_pct: number;
+  vessels_scheduled_count: number;
+  vessels_unassigned_count: number;
+}
+
+export interface OptimizerResponse {
+  solver_status: SolverStatus;
+  solve_time_ms: number;
+  objective_value?: number;
+  planning_start: string;
+  planning_end: string;
+  baseline_schedule: ScheduledAssignment[];
+  optimized_schedule: ScheduledAssignment[];
+  unassigned_vessels: string[];
+  feasibility_validation: FeasibilityValidationResult;
+  comparison_metrics: ScheduleComparisonMetrics;
+  infeasibility_diagnostics: string[];
+  operational_notice: string;
+  data_status: DataStatus;
+}
+
+export interface ProposeScheduleResponse {
+  proposal_id: string;
+  status: string;
+  created_at: string;
+  records_created: number;
+  message: string;
+  data_status: DataStatus;
+}
