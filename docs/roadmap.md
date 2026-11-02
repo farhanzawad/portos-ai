@@ -22,7 +22,7 @@
 | **9** | **09** | Constraint-Based Berth Planner | Google OR-Tools CP-SAT | **COMPLETE** | 2026-11-03 |
 | **10**| **10** | SimPy Scenario Simulation & Decision Lab | Discrete-Event Engine | **COMPLETE** | 2026-11-03 |
 | **11**| **11** | Yard Intelligence & Congestion Forecasting | Yard Heatmap, Capacity Watch | **COMPLETE** | 2026-11-03 |
-| **12**| **12** | Green Port Analytics & Auditable Estimates | Emission Factors, Scope | PENDING | — |
+| **12**| **12** | Green Port Analytics & Auditable Estimates | Emission Factors, Scope | **COMPLETE** | 2026-11-03 |
 | **13**| **13** | Port Data Bridge & Document Ingestion | CSV, XLSX, Text PDF Upload | PENDING | — |
 | **14**| **14** | Gemini Port Intelligence Copilot | Google GenAI SDK, Tool Allowlist | PENDING | — |
 | **15**| **15** | Unified Event Stream & Workflow Sync | WebSockets/SSE, Cross-module | PENDING | — |

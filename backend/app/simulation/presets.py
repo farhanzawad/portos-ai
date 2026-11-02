@@ -137,3 +137,4 @@ def build_scenario_comparison(
         comparisons=comparisons,
         trade_off_summary=trade_off_summary,
     )
+

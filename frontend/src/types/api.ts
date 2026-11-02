@@ -610,3 +610,131 @@ export interface ProposeScenarioResponse {
   message: string;
   data_status: DataStatus;
 }
+
+// Green Port & Sustainability
+export type PollutantType = "CO2E" | "SOX" | "NOX" | "PM25";
+export type ActivityType =
+  | "VESSEL_HOTELING_AUX_ENGINE"
+  | "VESSEL_MANEUVERING"
+  | "STS_CRANE_ELECTRIC"
+  | "YARD_EQUIPMENT_DIESEL";
+export type FactorStatus = "VERIFIED_SOURCE" | "ILLUSTRATIVE_ASSUMPTION" | "UNCONFIGURED";
+
+export interface EmissionFactorRead {
+  id: string;
+  pollutant: PollutantType;
+  activity_type: ActivityType;
+  factor_value: number;
+  factor_unit: string;
+  source_reference: string;
+  source_url?: string | null;
+  publication_date?: string | null;
+  scope_category?: string | null;
+  applicability_notes?: string | null;
+  is_illustrative_assumption: boolean;
+  factor_status: FactorStatus;
+  data_status: DataStatus;
+}
+
+export interface ActivityEmissionsEstimate {
+  activity_type: ActivityType;
+  activity_name: string;
+  scope_category: string;
+  activity_quantity: number;
+  activity_unit: string;
+  pollutant: PollutantType;
+  factor_id?: string | null;
+  factor_value?: number | null;
+  factor_unit?: string | null;
+  factor_status?: string | null;
+  source_reference?: string | null;
+  source_url?: string | null;
+  estimated_kg?: number | null;
+  estimated_mt?: number | null;
+  formula_expression: string;
+  is_configured: boolean;
+  applicability_note?: string | null;
+}
+
+export interface PollutantBreakdown {
+  pollutant: PollutantType;
+  pollutant_name: string;
+  unit: string;
+  total_kg: number;
+  total_mt: number;
+  activities: ActivityEmissionsEstimate[];
+}
+
+export interface ActivityDelta {
+  activity_type: ActivityType;
+  activity_name: string;
+  scope_category: string;
+  baseline_quantity: number;
+  comparison_quantity: number;
+  quantity_unit: string;
+  baseline_kg: number;
+  comparison_kg: number;
+  delta_kg: number;
+  delta_pct: number;
+  formula_expression: string;
+}
+
+export interface ScenarioEmissionsComparison {
+  baseline_scenario_code: string;
+  baseline_scenario_name: string;
+  comparison_scenario_code: string;
+  comparison_scenario_name: string;
+  duration_hours: number;
+  factor_set_id: string;
+  factor_count: number;
+  comparison_integrity_verified: boolean;
+  scope_boundary_note: string;
+  baseline_total_co2e_kg: number;
+  comparison_total_co2e_kg: number;
+  delta_co2e_kg: number;
+  delta_co2e_pct: number;
+  baseline_total_co2e_mt: number;
+  comparison_total_co2e_mt: number;
+  delta_co2e_mt: number;
+  activity_deltas: ActivityDelta[];
+  calculation_method: string;
+  disclaimer: string;
+}
+
+export interface EnvironmentalContext {
+  station_name: string;
+  observation_time: string;
+  temperature_celsius: number;
+  wind_speed_knots: number;
+  wind_direction: string;
+  tidal_height_m: number;
+  tide_phase: string;
+  air_quality_index: number;
+  air_quality_tier: string;
+  pm25_ug_m3: number;
+  navigational_use_prohibited_notice: string;
+  data_status: DataStatus;
+}
+
+export interface ScopeBoundaryDefinition {
+  terminal_complex: string;
+  scope_1_included: string[];
+  scope_2_included: string[];
+  scope_3_included: string[];
+  explicitly_excluded: string[];
+  methodology_framework: string;
+}
+
+export interface GreenPortOverviewResponse {
+  terminal_id: string;
+  reporting_period_hours: number;
+  scope_definition: ScopeBoundaryDefinition;
+  total_co2e_mt: number;
+  total_co2e_kg: number;
+  pollutant_summaries: PollutantBreakdown[];
+  factors: EmissionFactorRead[];
+  baseline_comparison: ScenarioEmissionsComparison;
+  environmental_context: EnvironmentalContext;
+  data_status: DataStatus;
+  timestamp: string;
+}

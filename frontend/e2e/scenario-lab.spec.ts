@@ -381,3 +381,4 @@ test.describe("Decision Lab & SimPy Scenario Simulation", () => {
     await expect(page.getByText(/proposal_scen_987654321/i)).toBeVisible();
   });
 });
+

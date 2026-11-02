@@ -329,3 +329,4 @@ async def test_api_yard_block_detail_and_404(client: AsyncClient):
     # 404 test
     res_404 = await client.get("/api/v1/yard/blocks/yb_non_existent/detail")
     assert res_404.status_code == 404
+

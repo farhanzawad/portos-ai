@@ -298,3 +298,4 @@ export function YardHeatmapGrid({
     </div>
   );
 }
+

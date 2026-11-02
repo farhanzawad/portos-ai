@@ -18,6 +18,10 @@ import {
   ModelMetricsResponse,
   VesselPredictionInput,
   VesselPredictionOutput,
+  GreenPortOverviewResponse,
+  EmissionFactorRead,
+  ScenarioEmissionsComparison,
+  EnvironmentalContext,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -167,5 +171,39 @@ export async function predictVesselDelay(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
+}
+
+// Sustainability & Green Port Analytics
+export async function getGreenPortOverview(
+  terminalId?: string,
+  periodHours?: number
+): Promise<GreenPortOverviewResponse> {
+  const params = new URLSearchParams();
+  if (terminalId) params.append("terminal_id", terminalId);
+  if (periodHours) params.append("period_hours", periodHours.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  return fetchFromApi<GreenPortOverviewResponse>(`/api/v1/sustainability/overview${qs}`);
+}
+
+export async function getEmissionFactors(
+  pollutant?: string,
+  activityType?: string
+): Promise<EmissionFactorRead[]> {
+  const params = new URLSearchParams();
+  if (pollutant) params.append("pollutant", pollutant);
+  if (activityType) params.append("activity_type", activityType);
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  return fetchFromApi<EmissionFactorRead[]>(`/api/v1/sustainability/factors${qs}`);
+}
+
+export async function getScenarioEmissionsComparison(
+  scenarioCode: string = "monsoon_weather_squall"
+): Promise<ScenarioEmissionsComparison> {
+  const query = `?scenario_code=${encodeURIComponent(scenarioCode)}`;
+  return fetchFromApi<ScenarioEmissionsComparison>(`/api/v1/sustainability/compare${query}`);
+}
+
+export async function getEnvironmentalContext(): Promise<EnvironmentalContext> {
+  return fetchFromApi<EnvironmentalContext>("/api/v1/sustainability/environmental-context");
 }
 

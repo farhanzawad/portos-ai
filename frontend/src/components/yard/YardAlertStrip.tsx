@@ -93,3 +93,4 @@ export function YardAlertStrip({ alerts, onSelectBlock }: YardAlertStripProps) {
     </div>
   );
 }
+

@@ -106,3 +106,4 @@ class ProposeScenarioResponse(BaseModel):
     created_at: datetime
     message: str
     data_status: DataStatusEnum = DataStatusEnum.SIMULATED
+

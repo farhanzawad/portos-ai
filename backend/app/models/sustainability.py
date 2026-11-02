@@ -20,6 +20,11 @@ class ActivityTypeEnum(str, enum.Enum):
     YARD_EQUIPMENT_DIESEL = "YARD_EQUIPMENT_DIESEL"
 
 
+class FactorStatusEnum(str, enum.Enum):
+    VERIFIED_SOURCE = "VERIFIED_SOURCE"
+    ILLUSTRATIVE_ASSUMPTION = "ILLUSTRATIVE_ASSUMPTION"
+
+
 class EmissionFactor(Base, ProvenanceMixin):
     """Configured emission factor linking activity quantity to emissions."""
 
@@ -37,7 +42,15 @@ class EmissionFactor(Base, ProvenanceMixin):
     factor_value: Mapped[float] = mapped_column(Float, nullable=False)
     factor_unit: Mapped[str] = mapped_column(String(64), nullable=False)
     source_reference: Mapped[str] = mapped_column(String(255), nullable=False)
+    publication_date: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    scope_category: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    applicability_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_illustrative_assumption: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    factor_status: Mapped[FactorStatusEnum] = mapped_column(
+        SQLEnum(FactorStatusEnum, name="factor_status_enum", native_enum=False),
+        default=FactorStatusEnum.ILLUSTRATIVE_ASSUMPTION,
+        nullable=False,
+    )
 
 
 class EmissionsEstimate(Base, ProvenanceMixin):
@@ -60,4 +73,3 @@ class EmissionsEstimate(Base, ProvenanceMixin):
 
     # Relationships
     emission_factor: Mapped["EmissionFactor"] = relationship("EmissionFactor")
-

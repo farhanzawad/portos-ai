@@ -254,3 +254,4 @@ async def test_api_propose_scenario(async_client):
     data = res.json()
     assert data["status"] == "PROPOSED"
     assert "proposal_scen_" in data["proposal_id"]
+

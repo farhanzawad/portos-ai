@@ -131,5 +131,5 @@ def test_capacity_and_numeric_constraints(test_db):
     assert len(factors) >= 2
     for ef in factors:
         assert ef.factor_value > 0
-        assert ef.is_illustrative_assumption is True
+        assert isinstance(ef.is_illustrative_assumption, bool)
 

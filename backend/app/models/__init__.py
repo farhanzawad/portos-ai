@@ -63,6 +63,7 @@ from app.models.sustainability import (
     EmissionsEstimate,
     PollutantTypeEnum,
     ActivityTypeEnum,
+    FactorStatusEnum,
 )
 from app.models.recommendation import (
     Recommendation,

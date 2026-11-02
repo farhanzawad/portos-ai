@@ -96,3 +96,4 @@ export function VesselEventLogsTable({ logs }: VesselEventLogsTableProps) {
     </div>
   );
 }
+
