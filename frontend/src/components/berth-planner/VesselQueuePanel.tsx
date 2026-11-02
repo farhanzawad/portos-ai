@@ -146,3 +146,4 @@ export function VesselQueuePanel({
     </div>
   );
 }
+

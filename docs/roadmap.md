@@ -20,7 +20,7 @@
 | **7** | **07** | Vessel Intelligence & Geographic Track View | MapLibre GL JS, Anchorage | **COMPLETE** | 2026-11-03 |
 | **8** | **08** | Vessel ETA & Delay-Risk ML Pipeline | scikit-learn, Model Cards | **COMPLETE** | 2026-11-03 |
 | **9** | **09** | Constraint-Based Berth Planner | Google OR-Tools CP-SAT | **COMPLETE** | 2026-11-03 |
-| **10**| **10** | SimPy Scenario Simulation & Decision Lab | Discrete-Event Engine | PENDING | — |
+| **10**| **10** | SimPy Scenario Simulation & Decision Lab | Discrete-Event Engine | **COMPLETE** | 2026-11-03 |
 | **11**| **11** | Yard Intelligence & Congestion Forecasting | Yard Heatmap, Capacity Watch | PENDING | — |
 | **12**| **12** | Green Port Analytics & Auditable Estimates | Emission Factors, Scope | PENDING | — |
 | **13**| **13** | Port Data Bridge & Document Ingestion | CSV, XLSX, Text PDF Upload | PENDING | — |

@@ -146,3 +146,4 @@ class ProposeScheduleResponse(BaseModel):
     records_created: int
     message: str
     data_status: DataStatusEnum = DataStatusEnum.SIMULATED
+

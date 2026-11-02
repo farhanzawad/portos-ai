@@ -427,3 +427,90 @@ export interface ProposeScheduleResponse {
   message: string;
   data_status: DataStatus;
 }
+
+// SimPy Scenario Simulation & Decision Lab
+export interface TimeSeriesSample {
+  hour: number;
+  timestamp_iso: string;
+  value: number;
+}
+
+export interface VesselSimulationLog {
+  vessel_id: string;
+  vessel_name: string;
+  call_number: string;
+  arrival_hour: number;
+  berth_hour?: number;
+  departure_hour?: number;
+  waiting_time_hours: number;
+  service_duration_hours: number;
+  status: string;
+}
+
+export interface SimulationMetrics {
+  mean_waiting_time_hours: number;
+  median_waiting_time_hours: number;
+  p90_waiting_time_hours: number;
+  total_waiting_hours: number;
+  berth_utilization_pct: number;
+  crane_utilization_pct: number;
+  vessels_served_count: number;
+  vessels_remaining_queue: number;
+  estimated_secondary_co2_tonnes: number;
+}
+
+export interface ScenarioParameters {
+  scenario_code: string;
+  scenario_name: string;
+  description?: string;
+  is_baseline: boolean;
+  random_seed: number;
+  duration_hours: number;
+  vessel_arrival_multiplier: number;
+  berth_outage_count: number;
+  crane_outage_count: number;
+  crane_service_rate_multiplier: number;
+  weather_disruption_factor: number;
+  yard_congestion_threshold_pct: number;
+}
+
+export interface SimulationRunResponse {
+  run_id: string;
+  scenario_code: string;
+  scenario_name: string;
+  is_baseline: boolean;
+  random_seed: number;
+  duration_hours: number;
+  parameters: ScenarioParameters;
+  metrics: SimulationMetrics;
+  queue_length_series: TimeSeriesSample[];
+  berth_occupancy_series: TimeSeriesSample[];
+  vessel_logs: VesselSimulationLog[];
+  methodology_notes: string[];
+  data_status: DataStatus;
+  operational_notice: string;
+}
+
+export interface MetricDelta {
+  baseline_value: number;
+  alternative_value: number;
+  absolute_delta: number;
+  percentage_delta: number;
+}
+
+export interface ScenarioComparisonResponse {
+  baseline_run: SimulationRunResponse;
+  alternative_runs: SimulationRunResponse[];
+  comparisons: Record<string, Record<string, MetricDelta>>;
+  trade_off_summary: string[];
+  operational_notice: string;
+  data_status: DataStatus;
+}
+
+export interface ProposeScenarioResponse {
+  proposal_id: string;
+  status: string;
+  created_at: string;
+  message: string;
+  data_status: DataStatus;
+}
