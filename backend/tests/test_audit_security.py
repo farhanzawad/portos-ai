@@ -56,7 +56,7 @@ def test_system_audit_endpoint(client):
     assert ai["cpa_live_connection_active"] is False
     assert ai["synthetic_data_limitations_prominent"] is True
     assert ai["human_in_the_loop_required"] is True
-    assert ai["tool_allowlist_count"] == 10
+    assert ai["tool_allowlist_count"] == 11
     assert ai["separation_of_analytical_roles_enforced"] is True
     assert "vessel_eta_regression" in ai["models_deployed"]
     assert "berth_allocation_optimizer" in ai["models_deployed"]
@@ -129,7 +129,7 @@ def test_tool_allowlist_enforcement(db_session):
     assert "error" in result
     assert "not in the strict allowlist" in result["error"]
     assert "allowed_tools" in result
-    assert len(result["allowed_tools"]) == 10
+    assert len(result["allowed_tools"]) == 11
 
 
 def test_secrets_isolation_no_key_leakage(client):

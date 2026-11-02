@@ -81,3 +81,4 @@ networks:
 volumes:
   portos_pgdata:
     name: portos_pgdata
+

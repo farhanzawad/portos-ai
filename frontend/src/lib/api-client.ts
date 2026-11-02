@@ -38,6 +38,8 @@ import {
   IncidentInjectionResponse,
   IncidentResetResponse,
   EventStreamStatus,
+  WeatherContextRead,
+  WeatherForecastResponse,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -221,6 +223,23 @@ export async function getScenarioEmissionsComparison(
 
 export async function getEnvironmentalContext(): Promise<EnvironmentalContext> {
   return fetchFromApi<EnvironmentalContext>("/api/v1/sustainability/environmental-context");
+}
+
+// ==========================================
+// Optional A: External Weather & Maritime Environment API
+// ==========================================
+
+export async function getCurrentWeather(refresh: boolean = false): Promise<WeatherContextRead> {
+  const query = refresh ? "?refresh=true" : "";
+  return fetchFromApi<WeatherContextRead>(`/api/v1/weather/current${query}`);
+}
+
+export async function getWeatherForecast(
+  hours: number = 24,
+  refresh: boolean = false
+): Promise<WeatherForecastResponse> {
+  const query = `?hours=${hours}${refresh ? "&refresh=true" : ""}`;
+  return fetchFromApi<WeatherForecastResponse>(`/api/v1/weather/forecast${query}`);
 }
 
 // ==========================================

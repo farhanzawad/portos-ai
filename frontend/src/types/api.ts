@@ -714,6 +714,55 @@ export interface EnvironmentalContext {
   pm25_ug_m3: number;
   navigational_use_prohibited_notice: string;
   data_status: DataStatus;
+  wave_height_m?: number | null;
+  sea_condition?: string | null;
+  attribution?: string | null;
+  source?: string | null;
+  is_live?: boolean;
+}
+
+export interface WeatherContextRead {
+  station_name: string;
+  latitude: number;
+  longitude: number;
+  retrieval_timestamp: string;
+  forecast_timestamp: string;
+  source: string;
+  attribution: string;
+  units: Record<string, string>;
+  temperature_celsius: number;
+  wind_speed_knots: number;
+  wind_direction_deg: number;
+  wind_direction_compass: string;
+  visibility_km: number;
+  wave_height_m?: number | null;
+  sea_condition: string;
+  tidal_height_m: number;
+  tide_phase: string;
+  is_cached: boolean;
+  is_live: boolean;
+  data_status: DataStatus;
+  navigational_warning: string;
+}
+
+export interface WeatherForecastHourlyItem {
+  time: string;
+  temperature_celsius: number;
+  wind_speed_knots: number;
+  wind_direction_compass: string;
+  visibility_km: number;
+  wave_height_m?: number | null;
+}
+
+export interface WeatherForecastResponse {
+  location: string;
+  latitude: number;
+  longitude: number;
+  source: string;
+  attribution: string;
+  forecast_items: WeatherForecastHourlyItem[];
+  data_status: DataStatus;
+  navigational_warning: string;
 }
 
 export interface ScopeBoundaryDefinition {

@@ -202,7 +202,7 @@ def test_scope_boundaries_documented(calculator: GreenPortCalculator):
 def test_environmental_context_navigation_notice(calculator: GreenPortCalculator):
     """Verify environmental context contains mandatory safety disclaimer against navigation use."""
     env = calculator.get_environmental_context()
-    assert env.data_status == DataStatusEnum.SIMULATED
+    assert env.data_status in (DataStatusEnum.SIMULATED, DataStatusEnum.OBSERVED)
     assert "NEVER be used for navigational" in env.navigational_use_prohibited_notice
 
 

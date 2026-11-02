@@ -28,6 +28,7 @@
 | **15**| **15** | Unified Event Stream & Workflow Sync | WebSockets/SSE, Cross-module | **COMPLETE** | 2026-11-03 |
 | **16**| **16** | Responsible AI, Security & Accessibility QA | Hardening, Audit, Disclosure | **COMPLETE** | 2026-11-03 |
 | **17**| **17** | Competition Package, Runbook & Demo Script | 5-Minute Showcase, Local Setup | **COMPLETE** | 2026-11-03 |
+| **Opt**| **A**  | External Weather Integration | Open-Meteo Adapter, Fairway Sea State | **COMPLETE** | 2026-11-03 |
 
 ---
 
@@ -109,7 +110,10 @@
 
 ## Optional Extension Milestones (Post-Prompt 17)
 
-- **Optional A:** External Weather Integration (Open-Meteo or low-cost maritime API adapter).
+### Optional A — External Weather Integration (COMPLETE — 2026-11-03)
+- **Deliverables:** Open-Meteo API maritime integration (`22.23°N, 91.81°E` Karnaphuli approach), 15-minute in-memory caching, graceful timeout recovery, deterministic fallback (`PORTOS Synthetic Marine Generator`), REST endpoints (`/api/v1/weather/current`, `/api/v1/weather/forecast`), typed Copilot tool allowlist integration (`get_external_weather`), mandatory CC BY 4.0 license attribution, and prominent safety disclaimer: *"Contextual marine weather product only. Not certified for navigational clearance, vessel pilotage, or berth maneuvering safety decisions."*
+- **Target Outcome:** Auditable, low-cost external weather contextualization adhering to all maritime safety boundaries.
+
 - **Optional B:** Live AIS Provider Adapter (behind licensed provider key flag).
 - **Optional C:** Advanced Equipment Maintenance Anomaly Demo (synthetic telemetry & Isolation Forest).
 - **Optional D:** Research-Grade Model Evaluation (temporal cross-validation and calibration analysis).

@@ -75,3 +75,4 @@ Complete this checklist 15 minutes before the competition presentation or record
 - **3:40–4:20:** Twin & Yard Heatmap (`/digital-twin`, `/yard`)
 - **4:20–4:50:** Grounded Copilot & Safety Refusals (`/copilot`)
 - **4:50–5:00:** Test Verification & Wrap-Up (Footer)
+

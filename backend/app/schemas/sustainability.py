@@ -105,6 +105,11 @@ class EnvironmentalContext(BaseModel):
     pm25_ug_m3: float
     navigational_use_prohibited_notice: str
     data_status: DataStatusEnum
+    wave_height_m: Optional[float] = None
+    sea_condition: Optional[str] = None
+    attribution: Optional[str] = None
+    source: Optional[str] = None
+    is_live: bool = False
 
 
 class ScopeBoundaryDefinition(BaseModel):

@@ -64,7 +64,7 @@ class ResponsibleAIAuditRead(BaseModel):
     cpa_live_connection_active: bool = Field(default=False, description="Explicit: no live CPA TOS integration")
     synthetic_data_limitations_prominent: bool = Field(default=True, description="Disclaimers surfaced across UI and API")
     human_in_the_loop_required: bool = Field(default=True, description="Human review mandatory for berth schedule approval")
-    tool_allowlist_count: int = Field(default=10, description="Count of allowlisted copilot analytical tools")
+    tool_allowlist_count: int = Field(default=11, description="Count of allowlisted copilot analytical tools")
     separation_of_analytical_roles_enforced: bool = Field(default=True, description="Deterministic solvers separate from LLM")
     models_deployed: dict[str, str] = Field(default_factory=dict, description="Deployed ML and optimization models")
 

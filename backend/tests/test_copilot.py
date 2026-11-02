@@ -25,8 +25,8 @@ def db_session():
 
 
 def test_copilot_tool_allowlist_coverage(db_session):
-    """Verify all 10 declared allowlist tools execute deterministically and return valid dictionaries."""
-    assert len(copilot_tool_registry.ALLOWLIST) == 10
+    """Verify all 11 declared allowlist tools execute deterministically and return valid dictionaries."""
+    assert len(copilot_tool_registry.ALLOWLIST) == 11
 
     # 1. get_terminal_status
     t_status = copilot_tool_registry.execute_tool("get_terminal_status", {}, db_session)
@@ -74,6 +74,12 @@ def test_copilot_tool_allowlist_coverage(db_session):
     # 10. get_data_provenance
     prov = copilot_tool_registry.execute_tool("get_data_provenance", {}, db_session)
     assert "registered_sources_count" in prov
+
+    # 11. get_external_weather
+    w_data = copilot_tool_registry.execute_tool("get_external_weather", {"force_refresh": False}, db_session)
+    assert "station_name" in w_data
+    assert "temperature_celsius" in w_data
+    assert "attribution" in w_data
 
 
 def test_copilot_rejects_unallowlisted_tools(db_session):
@@ -131,7 +137,7 @@ def test_copilot_endpoints(client):
     assert status_res.status_code == 200
     status_data = status_res.json()
     assert "model_name" in status_data
-    assert status_data["tools_count"] == 10
+    assert status_data["tools_count"] == 11
 
     # 2. Prompts endpoint
     prompts_res = client.get("/api/v1/copilot/prompts")

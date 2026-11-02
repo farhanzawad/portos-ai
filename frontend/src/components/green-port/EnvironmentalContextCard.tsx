@@ -51,7 +51,7 @@ export function EnvironmentalContextCard({ context }: EnvironmentalContextCardPr
       </div>
 
       {/* Telemetry Grid */}
-      <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3 bg-white">
+      <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 bg-white">
         {/* 1. Ambient Temperature */}
         <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
           <div className="flex items-center justify-between text-portos-muted mb-1">
@@ -79,7 +79,7 @@ export function EnvironmentalContextCard({ context }: EnvironmentalContextCardPr
             </span>
             <span className="text-xs text-slate-600 font-semibold">knots</span>
           </div>
-          <span className="text-[10px] text-portos-muted mt-0.5 block font-mono">
+          <span className="text-[10px] text-portos-muted mt-0.5 block font-mono truncate" title={context.wind_direction}>
             {context.wind_direction}
           </span>
         </div>
@@ -96,13 +96,32 @@ export function EnvironmentalContextCard({ context }: EnvironmentalContextCardPr
             </span>
             <span className="text-xs text-slate-600 font-semibold">meters</span>
           </div>
-          <span className="text-[10px] text-portos-muted mt-0.5 block">
+          <span className="text-[10px] text-portos-muted mt-0.5 block truncate" title={context.tide_phase}>
             {context.tide_phase}
           </span>
         </div>
 
-        {/* 4. Air Quality & PM2.5 */}
+        {/* 4. Sea Condition & Wave Height */}
         <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="flex items-center justify-between text-portos-muted mb-1">
+            <span className="text-[10px] uppercase font-semibold">Sea State</span>
+            <Waves className="h-3.5 w-3.5 text-teal-600" />
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-xl font-bold font-mono text-portos-navy">
+              {context.wave_height_m !== undefined && context.wave_height_m !== null
+                ? context.wave_height_m.toFixed(1)
+                : "1.1"}
+            </span>
+            <span className="text-xs text-slate-600 font-semibold">m sig. wave</span>
+          </div>
+          <span className="text-[10px] text-portos-muted mt-0.5 block truncate" title={context.sea_condition || "Slight"}>
+            {context.sea_condition || "Slight to Moderate"}
+          </span>
+        </div>
+
+        {/* 5. Air Quality & PM2.5 */}
+        <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 col-span-2 sm:col-span-1">
           <div className="flex items-center justify-between text-portos-muted mb-1">
             <span className="text-[10px] uppercase font-semibold">Air Quality</span>
             <Activity className="h-3.5 w-3.5 text-portos-teal" />
@@ -119,6 +138,16 @@ export function EnvironmentalContextCard({ context }: EnvironmentalContextCardPr
             PM2.5: {context.pm25_ug_m3.toFixed(1)} µg/m³
           </span>
         </div>
+      </div>
+
+      {/* Mandatory Attribution & License Footer */}
+      <div className="px-4 py-2 bg-slate-50 border-t border-portos-border flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-portos-muted">
+        <span>
+          Source: {context.source || "Open-Meteo Marine & Weather API"} | {context.attribution || "Weather data by Open-Meteo.com under CC BY 4.0"}
+        </span>
+        <span className="font-mono text-slate-500">
+          Coordinates: 22.23°N, 91.81°E (Patenga)
+        </span>
       </div>
     </div>
   );

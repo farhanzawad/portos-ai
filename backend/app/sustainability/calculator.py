@@ -382,20 +382,27 @@ class GreenPortCalculator:
         )
 
     def get_environmental_context(self) -> EnvironmentalContext:
-        """Provide simulated ambient environmental context with mandatory safety disclaimer."""
+        """Provide ambient environmental context with mandatory safety disclaimer."""
+        from app.weather.adapter import weather_adapter
+        w = weather_adapter.get_current_weather()
         return EnvironmentalContext(
-            station_name="Karnaphuli River Estuary Station (Simulated Sensor Feed)",
-            observation_time=datetime.now(timezone.utc),
-            temperature_celsius=29.2,
-            wind_speed_knots=14.5,
-            wind_direction="SSW (205°)",
-            tidal_height_m=3.42,
-            tide_phase="Ebb Tide (High Slack)",
+            station_name=w.station_name,
+            observation_time=w.retrieval_timestamp,
+            temperature_celsius=w.temperature_celsius,
+            wind_speed_knots=w.wind_speed_knots,
+            wind_direction=w.wind_direction_compass,
+            tidal_height_m=w.tidal_height_m,
+            tide_phase=w.tide_phase,
             air_quality_index=78,
             air_quality_tier="Moderate",
             pm25_ug_m3=24.8,
             navigational_use_prohibited_notice=self.environmental_disclaimer,
-            data_status=DataStatusEnum.SIMULATED,
+            data_status=w.data_status,
+            wave_height_m=w.wave_height_m,
+            sea_condition=w.sea_condition,
+            attribution=w.attribution,
+            source=w.source,
+            is_live=w.is_live,
         )
 
     def generate_overview(

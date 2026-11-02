@@ -71,6 +71,7 @@ class CopilotToolRegistry:
         "get_yard_risk_summary",
         "get_emissions_estimate",
         "get_data_provenance",
+        "get_external_weather",
     ]
 
     def execute_tool(self, tool_name: str, arguments: Dict[str, Any], db: Session) -> Dict[str, Any]:
@@ -351,6 +352,28 @@ class CopilotToolRegistry:
                 for d in datasets
             ],
             "data_status": "SIMULATED",
+        }
+
+    def _tool_get_external_weather(self, db: Session, **kwargs) -> Dict[str, Any]:
+        """Get live contextual maritime weather telemetry via Open-Meteo or synthetic fallback."""
+        from app.weather.adapter import weather_adapter
+        w = weather_adapter.get_current_weather()
+        return {
+            "station": w.station_name,
+            "station_name": w.station_name,
+            "source": w.source,
+            "attribution": w.attribution,
+            "temperature_c": w.temperature_celsius,
+            "temperature_celsius": w.temperature_celsius,
+            "wind_speed_knots": w.wind_speed_knots,
+            "wind_direction": w.wind_direction_compass,
+            "visibility_km": w.visibility_km,
+            "sea_condition": w.sea_condition,
+            "tidal_height_m": w.tidal_height_m,
+            "tide_phase": w.tide_phase,
+            "is_live": w.is_live,
+            "data_status": w.data_status.value,
+            "advisory_disclaimer": w.navigational_warning,
         }
 
 

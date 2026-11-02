@@ -185,3 +185,4 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/system/audit" | ConvertTo-J
 | **Copilot reports "Offline Demo Mode"** | `GEMINI_API_KEY` is empty or unset in `.env`. | Expected behavior: system uses the built-in deterministic offline briefing engine with full tool execution. Add valid key to `.env` to enable live Gemini. |
 | **SSE Stream Pill shows "Connecting..."** | Backend server is not running on port 8000 or CORS is blocked. | Verify backend is active on `http://127.0.0.1:8000/health` and `FRONTEND_ORIGIN` matches frontend URL. |
 | **E2E Playwright test timeouts** | Headless browser execution takes longer on low-spec hardware. | Run with increased timeout: `npx playwright test --timeout=60000`. |
+

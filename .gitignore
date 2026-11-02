@@ -43,6 +43,7 @@ wheels/
 *.egg
 
 # Testing & Type Checking
+*.tsbuildinfo
 .pytest_cache/
 .coverage
 htmlcov/
