@@ -125,3 +125,4 @@ export function CopilotStatusBanner({ status, isLoading }: CopilotStatusBannerPr
     </div>
   );
 }
+

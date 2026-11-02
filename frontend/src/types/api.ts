@@ -902,3 +902,56 @@ export interface CopilotSuggestedPrompt {
   category: string;
 }
 
+// Milestone 15: Unified Event Stream & Workflow Sync
+export interface EventMessage {
+  id: string;
+  event_type: string;
+  emitted_at: string;
+  entity_id: string;
+  payload_schema_version: string;
+  data_status: DataStatus;
+  origin: string;
+  payload: Record<string, any>;
+}
+
+export interface IncidentPreset {
+  id: string;
+  title: string;
+  description: string;
+  target_entity: string;
+  severity: string;
+  expected_impact: string;
+}
+
+export interface IncidentInjectionRequest {
+  incident_type: string;
+  target_vessel_id?: string;
+  delay_hours?: number;
+  description?: string;
+}
+
+export interface IncidentInjectionResponse {
+  incident_id: string;
+  incident_type: string;
+  status: string;
+  summary: string;
+  events_emitted_count: number;
+  events: EventMessage[];
+  data_status: DataStatus;
+}
+
+export interface IncidentResetResponse {
+  status: string;
+  restored_baseline: boolean;
+  message: string;
+  events_emitted_count: number;
+  data_status: DataStatus;
+}
+
+export interface EventStreamStatus {
+  active_subscribers: number;
+  total_events_in_buffer: number;
+  last_event_id?: string | null;
+  data_status: DataStatus;
+}
+

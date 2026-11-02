@@ -83,3 +83,4 @@ def get_suggested_prompts():
             "prompt": "Explain the Scope 1, 2, and 3 emissions breakdown and the applied factor sources.",
         },
     ]
+

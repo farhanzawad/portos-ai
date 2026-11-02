@@ -14,6 +14,7 @@ import {
   Leaf,
   Bot,
   Database,
+  Activity,
   Palette,
   Anchor,
   X,
@@ -36,6 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Green Port", href: "/green-port", icon: Leaf, milestone: "M12" },
   { label: "AI Copilot", href: "/copilot", icon: Bot, milestone: "M14" },
   { label: "Data Centre", href: "/data-centre", icon: Database, milestone: "M13" },
+  { label: "Event Stream", href: "/events", icon: Activity, milestone: "M15" },
 ];
 
 interface SidebarProps {

@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
+import { EventStreamPill } from "@/components/events/EventStreamPill";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -109,6 +110,9 @@ export function Header({
 
         {/* Controls & User Profile */}
         <div className="flex items-center gap-2.5 shrink-0">
+          {/* Live SSE Stream Indicator */}
+          <EventStreamPill />
+
           {/* Reduced Motion Toggle */}
           <button
             onClick={onToggleReducedMotion}

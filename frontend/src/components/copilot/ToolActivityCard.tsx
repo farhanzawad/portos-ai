@@ -79,3 +79,4 @@ export function ToolActivityCard({ toolCalls }: ToolActivityCardProps) {
     </div>
   );
 }
+

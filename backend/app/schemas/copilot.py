@@ -42,3 +42,4 @@ class CopilotStatusResponse(BaseModel):
     demo_mode: bool
     tools_count: int
     allowlist: List[str]
+

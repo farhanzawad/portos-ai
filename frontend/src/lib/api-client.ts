@@ -32,6 +32,12 @@ import {
   CopilotChatResponse,
   CopilotStatusResponse,
   CopilotSuggestedPrompt,
+  EventMessage,
+  IncidentPreset,
+  IncidentInjectionRequest,
+  IncidentInjectionResponse,
+  IncidentResetResponse,
+  EventStreamStatus,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -332,6 +338,47 @@ export async function getCopilotStatus(): Promise<CopilotStatusResponse> {
 export async function getCopilotPrompts(): Promise<CopilotSuggestedPrompt[]> {
   return fetchFromApi<CopilotSuggestedPrompt[]>("/api/v1/copilot/prompts");
 }
+
+// Milestone 15: Event Stream & Workflow Sync
+export function getEventStreamUrl(lastEventId?: string): string {
+  const url = `${API_BASE_URL}/api/v1/events/stream`;
+  return lastEventId ? `${url}?last_event_id=${encodeURIComponent(lastEventId)}` : url;
+}
+
+export async function getEventHistory(
+  limit: number = 50,
+  sinceId?: string
+): Promise<EventMessage[]> {
+  const query = new URLSearchParams({ limit: String(limit) });
+  if (sinceId) query.append("since_id", sinceId);
+  return fetchFromApi<EventMessage[]>(`/api/v1/events/history?${query.toString()}`);
+}
+
+export async function getEventStreamStatus(): Promise<EventStreamStatus> {
+  return fetchFromApi<EventStreamStatus>("/api/v1/events/status");
+}
+
+export async function getIncidentPresets(): Promise<IncidentPreset[]> {
+  return fetchFromApi<IncidentPreset[]>("/api/v1/events/presets");
+}
+
+export async function injectIncident(
+  request: IncidentInjectionRequest
+): Promise<IncidentInjectionResponse> {
+  return fetchFromApi<IncidentInjectionResponse>("/api/v1/events/inject-incident", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+}
+
+export async function resetIncident(): Promise<IncidentResetResponse> {
+  return fetchFromApi<IncidentResetResponse>("/api/v1/events/reset-incident", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 
 
 

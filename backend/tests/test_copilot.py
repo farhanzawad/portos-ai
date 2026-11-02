@@ -151,3 +151,4 @@ def test_copilot_endpoints(client):
     assert "retrieved_facts" in chat_data
     assert "tool_calls" in chat_data
     assert any(t["tool_name"] == "list_vessels_at_risk" for t in chat_data["tool_calls"])
+
