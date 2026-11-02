@@ -16,7 +16,7 @@
 | **3** | **03** | Domain Model, Database & Seed Data | PostgreSQL/PostGIS, Alembic | **COMPLETE** | 2026-11-02 |
 | **4** | **04** | FastAPI Service Layer & API Contracts | REST API, OpenAPI, Pydantic | **COMPLETE** | 2026-11-02 |
 | **5** | **05** | Overview Dashboard with Real Backend Data | TanStack Query, ECharts, KPIs | **COMPLETE** | 2026-11-03 |
-| **6** | **06** | Interactive 3D Terminal Digital Twin | Three.js / R3F, 2D Fallback | PENDING | — |
+| **6** | **06** | Interactive 3D Terminal Digital Twin | Three.js / R3F, 2D Fallback | **COMPLETE** | 2026-11-03 |
 | **7** | **07** | Vessel Intelligence & Geographic Track View | MapLibre GL JS, Anchorage | PENDING | — |
 | **8** | **08** | Vessel ETA & Delay-Risk ML Pipeline | scikit-learn, Model Cards | PENDING | — |
 | **9** | **09** | Constraint-Based Berth Planner | Google OR-Tools CP-SAT | PENDING | — |
