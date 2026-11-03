@@ -41,6 +41,7 @@ import {
   getLiveVesselFairwayCoord,
   getAnchorageTidalDrift,
   getBerthedSway,
+  getTrailingWakeCoordinates,
 } from "@/lib/geospatial/fairway";
 import { SelectedEntity } from "../digital-twin/types";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
@@ -218,14 +219,17 @@ export function GeospatialPortMap({
               const st = (f.properties.status || "EN_ROUTE").toUpperCase();
               const spd = Number(f.properties.speed_knots) || (st === "BERTHED" ? 0 : 8.5);
               const progress = ((vIndex * 0.16) + 0.08) % 0.82;
-              vMap.set(String(f.id), {
+              const stateObj = {
                 baseLon: coords[0],
                 baseLat: coords[1],
                 baseProgress: progress,
                 speedKnots: spd > 0 ? spd : 8.0,
                 status: st,
                 isOutbound: vIndex % 3 === 0,
-              });
+              };
+              if (f.id) vMap.set(String(f.id), stateObj);
+              if (f.properties?.id) vMap.set(String(f.properties.id), stateObj);
+              if (f.properties?.vessel_call_id) vMap.set(String(f.properties.vessel_call_id), stateObj);
               vIndex++;
             }
           });
@@ -702,9 +706,12 @@ export function GeospatialPortMap({
         if (source && geojsonData.features) {
           let updatedAny = false;
           let idx = 0;
+          const vesselWakeMap = new Map<string, [number, number][]>();
+
           const updatedFeatures = geojsonData.features.map((feat) => {
             if (feat.properties?.entity_type === "Vessel" && feat.geometry.type === "Point") {
-              const state = initialVesselStatesRef.current.get(String(feat.id));
+              const key = String(feat.id || feat.properties?.id || feat.properties?.vessel_call_id);
+              const state = initialVesselStatesRef.current.get(key);
               if (!state) return feat;
 
               updatedAny = true;
@@ -733,6 +740,11 @@ export function GeospatialPortMap({
                 nextLon = motion.lon;
                 nextLat = motion.lat;
                 nextHeading = motion.heading;
+
+                // Dynamic trailing wake line
+                const wake = getTrailingWakeCoordinates(motion.currentProgress, state.isOutbound, 4);
+                if (feat.properties?.id) vesselWakeMap.set(String(feat.properties.id), wake);
+                if (feat.id) vesselWakeMap.set(String(feat.id), wake);
               }
               idx++;
 
@@ -749,6 +761,19 @@ export function GeospatialPortMap({
                   longitude: nextLon,
                 },
               };
+            } else if (feat.properties?.entity_type === "VesselTrack" && feat.geometry.type === "LineString") {
+              // Update trailing track for moving vessels
+              const callId = feat.properties?.vessel_call_id || feat.id?.toString().replace("feat_track_", "");
+              const wake = vesselWakeMap.get(String(callId)) || vesselWakeMap.get(`feat_vessel_${callId}`);
+              if (wake && wake.length > 1) {
+                return {
+                  ...feat,
+                  geometry: {
+                    ...feat.geometry,
+                    coordinates: wake,
+                  },
+                };
+              }
             }
             return feat;
           });

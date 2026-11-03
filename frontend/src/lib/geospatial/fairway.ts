@@ -86,33 +86,63 @@ export function interpolateFairwayPosition(progress: number): {
 /**
  * Simulate live vessel motion along the Karnaphuli fairway corridor
  * based on elapsed time, vessel velocity, and transit route.
+ * Uses an optimized visualization speed multiplier so vessel movement
+ * is clearly, smoothly observable in real-time operations dashboards.
  */
 export function getLiveVesselFairwayCoord(
   baseProgress: number,
   speedKnots: number,
   elapsedSeconds: number,
   isOutbound: boolean = false
-): { lon: number; lat: number; heading: number } {
+): { lon: number; lat: number; heading: number; currentProgress: number } {
   // Speed in meters per second (1 knot ~ 0.5144 m/s)
-  // Scale speed slightly for vivid real-time visualization
-  const speedMps = speedKnots * 0.5144 * 2.8;
+  // Visualization multiplier (24x) for smooth, distinctly visible real-time motion
+  const speedMps = Math.max(7.0, speedKnots) * 0.5144 * 24.0;
   const distTraveledM = speedMps * elapsedSeconds;
   const progressDelta = distTraveledM / TOTAL_FAIRWAY_DISTANCE_M;
 
   let currentProgress: number;
   if (!isOutbound) {
-    // Inbound: moving from sea (0) to berths (around 0.4 - 0.75)
-    currentProgress = (baseProgress + progressDelta) % 0.85;
+    // Inbound: moving from sea (0.02) to terminals (around 0.4 - 0.75)
+    currentProgress = (baseProgress + progressDelta) % 0.82;
   } else {
-    // Outbound: moving from terminal (0.8) out to sea (0)
-    currentProgress = (baseProgress - progressDelta + 1.0) % 0.85;
+    // Outbound: moving from terminal (0.80) out to sea (0.02)
+    currentProgress = (baseProgress - progressDelta + 1.0) % 0.82;
   }
 
   const result = interpolateFairwayPosition(currentProgress);
+  let heading = result.heading;
   if (isOutbound) {
-    result.heading = (result.heading + 180) % 360;
+    heading = (result.heading + 180) % 360;
   }
-  return result;
+  return {
+    lon: result.lon,
+    lat: result.lat,
+    heading,
+    currentProgress,
+  };
+}
+
+/**
+ * Generates dynamic trailing wake coordinates (polyline) behind a moving vessel
+ * along the hydrographic fairway so users can clearly see the movement trajectory.
+ */
+export function getTrailingWakeCoordinates(
+  currentProgress: number,
+  isOutbound: boolean = false,
+  wakePointsCount: number = 3
+): [number, number][] {
+  const coords: [number, number][] = [];
+  const wakeSpan = 0.025; // ~600m trailing wake
+  for (let i = wakePointsCount; i >= 0; i--) {
+    const fraction = i / wakePointsCount;
+    const p = isOutbound
+      ? (currentProgress + fraction * wakeSpan) % 0.82
+      : (currentProgress - fraction * wakeSpan + 1.0) % 0.82;
+    const pt = interpolateFairwayPosition(p);
+    coords.push([pt.lon, pt.lat]);
+  }
+  return coords;
 }
 
 /**

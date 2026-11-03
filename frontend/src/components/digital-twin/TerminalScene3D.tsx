@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
@@ -18,6 +18,13 @@ import { STSCrane3D } from "./STSCrane3D";
 import { YardBlock3D } from "./YardBlock3D";
 import { RealisticContainer3D } from "./RealisticContainer3D";
 import { localEnuToWgs84, PCT_TERMINAL_ORIGIN } from "@/lib/geospatial/coordinates";
+import {
+  getTerminalApronTexture,
+  getQuayCopingTexture,
+  getWaterNormalTexture,
+  getWaterColorTexture,
+  getCorrugatedMetalTexture,
+} from "@/lib/digital-twin/textures";
 
 export interface HoverEntityInfo {
   type: string;
@@ -86,6 +93,13 @@ export function TerminalScene3D({
   const buoyRedRef = useRef<THREE.Mesh>(null);
   const waterRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
+
+  // Procedural PBR Textures for High-Fidelity Industrial Visualization
+  const terminalApronTexture = useMemo(() => getTerminalApronTexture(), []);
+  const quayCopingTexture = useMemo(() => getQuayCopingTexture(), []);
+  const waterNormalTexture = useMemo(() => getWaterNormalTexture(), []);
+  const waterColorTexture = useMemo(() => getWaterColorTexture(), []);
+  const corrugatedRoofTexture = useMemo(() => getCorrugatedMetalTexture("#475569"), []);
 
   // Smooth Camera Lerping Targets
   const targetCamPos = useRef(new THREE.Vector3(42, 45, 48));
@@ -192,11 +206,15 @@ export function TerminalScene3D({
       }
     }
 
-    // 1. Water subtle wave shimmer
+    // 1. Water waves: continuous procedural ripple flow and specular shimmer
+    if (waterNormalTexture) {
+      waterNormalTexture.offset.x = (t * 0.025 * simulationSpeed) % 1;
+      waterNormalTexture.offset.y = (t * 0.015 * simulationSpeed) % 1;
+    }
     if (waterRef.current) {
       const mat = waterRef.current.material as THREE.MeshStandardMaterial;
       if (mat) {
-        mat.roughness = 0.22 + Math.sin(t * 0.8) * 0.04;
+        mat.roughness = 0.18 + Math.sin(t * 0.8) * 0.03;
       }
     }
 
@@ -279,10 +297,17 @@ export function TerminalScene3D({
       {/* ============================================================ */}
       {/* 2. KARNAPHULI RIVER FAIRWAY, BASIN & BREAKWATERS             */}
       {/* ============================================================ */}
-      {/* River Water Surface */}
+      {/* River Water Surface with High-Resolution Wave Normal Map & Bathymetry */}
       <mesh ref={waterRef} position={[0, -0.06, -34]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[165, 60, 32, 32]} />
-        <meshStandardMaterial color="#0a2239" roughness={0.22} metalness={0.45} />
+        <planeGeometry args={[165, 60, 64, 64]} />
+        <meshStandardMaterial
+          map={waterColorTexture || undefined}
+          normalMap={waterNormalTexture || undefined}
+          normalScale={new THREE.Vector2(0.4, 0.4)}
+          roughness={0.16}
+          metalness={0.65}
+          color="#0c2e48"
+        />
       </mesh>
 
       {/* 600m Turning Basin Boundary Ring (Depth -11m) */}
@@ -315,10 +340,15 @@ export function TerminalScene3D({
         </mesh>
       </group>
 
-      {/* Terminal Land Surface (Reinforced Yard Concrete) */}
+      {/* Terminal Land Surface (Reinforced Concrete Apron & Roadway Pavement Grid) */}
       <mesh position={[0, -0.05, 20]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[145, 48]} />
-        <meshStandardMaterial color="#0b1322" roughness={0.85} metalness={0.1} />
+        <meshStandardMaterial
+          map={terminalApronTexture || undefined}
+          roughness={0.75}
+          metalness={0.12}
+          color="#f8fafc"
+        />
       </mesh>
 
       {/* Fairway Channel Lateral Marker Buoys */}
@@ -347,9 +377,15 @@ export function TerminalScene3D({
       {/* ============================================================ */}
       {/* 3. CONTINUOUS QUAY WALL (580m Berths 1-3 + Berth 4 Tanker)    */}
       {/* ============================================================ */}
+      {/* Quay Frontage with 45° Yellow/Black Safety Chevrons & Rails */}
       <mesh position={[0, 0.08, -1.8]}>
         <boxGeometry args={[116, 0.28, 4.2]} />
-        <meshStandardMaterial color="#1e293b" roughness={0.7} metalness={0.2} />
+        <meshStandardMaterial
+          map={quayCopingTexture || undefined}
+          roughness={0.62}
+          metalness={0.28}
+          color="#f8fafc"
+        />
       </mesh>
 
       {/* Quay Crane Rail Tracks */}
@@ -920,11 +956,21 @@ export function TerminalScene3D({
       >
         <mesh position={[0, 2.8, 0]}>
           <boxGeometry args={[7.5, 5.6, 8.5]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.6} />
+          <meshStandardMaterial
+            map={corrugatedRoofTexture || undefined}
+            color="#475569"
+            roughness={0.6}
+            metalness={0.25}
+          />
         </mesh>
         <mesh position={[0, 5.8, 0]} rotation={[0, 0, 0]}>
           <boxGeometry args={[7.8, 0.4, 8.8]} />
-          <meshStandardMaterial color="#0f172a" />
+          <meshStandardMaterial
+            map={corrugatedRoofTexture || undefined}
+            color="#334155"
+            roughness={0.5}
+            metalness={0.3}
+          />
         </mesh>
       </group>
 
@@ -1057,7 +1103,12 @@ export function TerminalScene3D({
       >
         <mesh position={[0, 3.2, 0]}>
           <boxGeometry args={[12.0, 0.35, 4.0]} />
-          <meshStandardMaterial color="#16a394" />
+          <meshStandardMaterial
+            map={corrugatedRoofTexture || undefined}
+            color="#16a394"
+            roughness={0.4}
+            metalness={0.3}
+          />
         </mesh>
         <mesh position={[0, 1.6, 0]}>
           <boxGeometry args={[3.2, 3.0, 2.8]} />

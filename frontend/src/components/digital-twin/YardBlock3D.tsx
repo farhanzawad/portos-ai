@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import * as THREE from "three";
 import { YardBlockRead } from "@/types/api";
 import { RealisticContainer3D, ContainerCarrier } from "./RealisticContainer3D";
+import { getYardBlockGroundTexture } from "@/lib/digital-twin/textures";
 
 interface YardBlock3DProps {
   position: [number, number, number];
@@ -44,6 +45,12 @@ export function YardBlock3D({
     ? ["HAZARDOUS"]
     : ["MAERSK", "EVERGREEN", "HAPAG", "MSC", "CMACGM", "ONE", "COSCO"];
 
+  const blockCategory = String((block as any).category || block.zone || "IMPORT");
+  const blockCode = block.code;
+  const padTexture = useMemo(() => {
+    return getYardBlockGroundTexture(blockCode, blockCategory);
+  }, [blockCode, blockCategory]);
+
   return (
     <group
       position={position}
@@ -65,13 +72,14 @@ export function YardBlock3D({
       {/* ============================================================ */}
       {/* 1. PAVEMENT FOUNDATION & HAZARD HATCHING                     */}
       {/* ============================================================ */}
-      {/* Concrete Heavy Pavement Pad */}
+      {/* Concrete Heavy Pavement Pad with Twistlock Brackets & Stenciled Labels */}
       <mesh position={[0, 0.05, 0]}>
         <boxGeometry args={[6.8, 0.1, 4.6]} />
         <meshStandardMaterial
-          color={isSelected ? "#0e7490" : hovered ? "#334155" : "#1e293b"}
-          roughness={0.7}
-          metalness={0.1}
+          map={padTexture || undefined}
+          color={isSelected ? "#bae6fd" : hovered ? "#e2e8f0" : "#ffffff"}
+          roughness={0.65}
+          metalness={0.15}
         />
       </mesh>
 
