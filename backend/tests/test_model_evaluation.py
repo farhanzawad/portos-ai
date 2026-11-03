@@ -27,3 +27,4 @@ def test_research_evaluation_endpoint():
         for b in data["calibration_bins"]:
             assert 0.0 <= b["mean_predicted_probability"] <= 1.0
             assert 0.0 <= b["fraction_of_positives"] <= 1.0
+

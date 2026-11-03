@@ -57,3 +57,4 @@ def test_maintenance_inject_and_reset_anomaly():
         reset_resp = client.post("/api/v1/maintenance/reset-anomalies")
         assert reset_resp.status_code == 200
         assert reset_resp.json()["status"] == "anomalies_reset"
+

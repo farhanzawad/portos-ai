@@ -13,6 +13,7 @@ interface STSCrane3DProps {
   crane: EquipmentRead;
   isSelected?: boolean;
   onSelect?: () => void;
+  onHover?: (isHovered: boolean) => void;
   isSimulating?: boolean;
 }
 
@@ -23,6 +24,7 @@ export function STSCrane3D({
   crane,
   isSelected = false,
   onSelect,
+  onHover,
   isSimulating = false,
 }: STSCrane3DProps) {
   const trolleyRef = useRef<THREE.Group>(null);
@@ -63,8 +65,12 @@ export function STSCrane3D({
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
+        onHover?.(true);
       }}
-      onPointerOut={() => setHovered(false)}
+      onPointerOut={() => {
+        setHovered(false);
+        onHover?.(false);
+      }}
     >
       {/* ============================================================ */}
       {/* 1. SELECTION RING & BASE ANCHOR                             */}

@@ -69,11 +69,7 @@ test.describe("Geospatial Port Mapping & Synchronized 3D Digital Twin", () => {
 
   test("runs synchronized terminal simulation with speed controls", async ({ page }) => {
     test.setTimeout(45000);
-    const simButton = page.getByRole("button", { name: /Simulate/i });
-    await expect(simButton).toBeVisible();
-
-    // Start simulation
-    await simButton.click();
+    // Port runs live simulation by default
     const pauseBtn = page.getByRole("button", { name: /Pause/i });
     await expect(pauseBtn).toBeVisible();
 
@@ -88,7 +84,31 @@ test.describe("Geospatial Port Mapping & Synchronized 3D Digital Twin", () => {
 
     // Pause simulation
     await pauseBtn.click();
-    await expect(page.getByRole("button", { name: /Simulate/i })).toBeVisible();
+    const simButton = page.getByRole("button", { name: /Simulate/i });
+    await expect(simButton).toBeVisible();
+
+    // Resume simulation
+    await simButton.click();
+    await expect(page.getByRole("button", { name: /Pause/i })).toBeVisible();
+  });
+
+  test("renders live fairway traffic indicator and allows toggling vessel motion", async ({ page }) => {
+    await page.getByRole("button", { name: /2D GIS Map/i }).click();
+
+    // Verify Live Fairway Traffic telemetry indicator pill
+    await expect(page.getByText(/LIVE FAIRWAY TRAFFIC/i)).toBeVisible();
+
+    // Verify Motion toggle button
+    const motionToggle = page.getByRole("button", { name: /Motion: Live/i });
+    await expect(motionToggle).toBeVisible();
+
+    // Click to pause live vessel motion
+    await motionToggle.click();
+    await expect(page.getByRole("button", { name: /Motion: Paused/i })).toBeVisible();
+
+    // Click to resume
+    await page.getByRole("button", { name: /Motion: Paused/i }).click();
+    await expect(page.getByRole("button", { name: /Motion: Live/i })).toBeVisible();
   });
 
   test("interacts with 2D maritime GIS layers and measurement tool", async ({ page }) => {

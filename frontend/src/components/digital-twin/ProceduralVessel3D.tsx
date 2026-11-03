@@ -13,6 +13,7 @@ interface ProceduralVessel3DProps {
   call: VesselCallRead;
   isSelected?: boolean;
   onSelect?: () => void;
+  onHover?: (isHovered: boolean) => void;
   isSimulating?: boolean;
   isBerthed?: boolean;
 }
@@ -24,6 +25,7 @@ export function ProceduralVessel3D({
   call,
   isSelected = false,
   onSelect,
+  onHover,
   isSimulating = false,
   isBerthed = true,
 }: ProceduralVessel3DProps) {
@@ -83,8 +85,12 @@ export function ProceduralVessel3D({
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
+        onHover?.(true);
       }}
-      onPointerOut={() => setHovered(false)}
+      onPointerOut={() => {
+        setHovered(false);
+        onHover?.(false);
+      }}
     >
       {/* ============================================================ */}
       {/* 1. SELECTION & TELEMETRY BEACON                              */}

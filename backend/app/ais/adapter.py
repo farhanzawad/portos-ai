@@ -120,3 +120,4 @@ class AISProviderAdapter:
 
 
 ais_adapter = AISProviderAdapter()
+

@@ -10,6 +10,7 @@ interface BerthZone3DProps {
   berth: BerthRead;
   isSelected?: boolean;
   onSelect?: () => void;
+  onHover?: (isHovered: boolean) => void;
 }
 
 export function BerthZone3D({
@@ -18,6 +19,7 @@ export function BerthZone3D({
   berth,
   isSelected = false,
   onSelect,
+  onHover,
 }: BerthZone3DProps) {
   const [hovered, setHovered] = useState(false);
 
@@ -44,8 +46,12 @@ export function BerthZone3D({
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
+        onHover?.(true);
       }}
-      onPointerOut={() => setHovered(false)}
+      onPointerOut={() => {
+        setHovered(false);
+        onHover?.(false);
+      }}
     >
       {/* ============================================================ */}
       {/* 1. QUAYSIDE APRON HEAVY REINFORCED CONCRETE DECK             */}

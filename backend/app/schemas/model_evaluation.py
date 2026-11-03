@@ -43,3 +43,4 @@ class ResearchEvaluationReport(BaseModel):
         "Temporal expanding-window splits respect the forward arrow of time. No future voyage observations are leaked into earlier training windows.",
         description="Methodological guarantee"
     )
+

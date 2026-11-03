@@ -20,7 +20,7 @@ import { TwinHeaderControls } from "./TwinHeaderControls";
 import { EntityInspectorDrawer } from "./EntityInspectorDrawer";
 import { TwinLegend } from "./TwinLegend";
 import { TerminalSchematic2D } from "./TerminalSchematic2D";
-import { TerminalScene3D } from "./TerminalScene3D";
+import { TerminalScene3D, HoverEntityInfo } from "./TerminalScene3D";
 import { GeospatialPortMap } from "@/components/geospatial/GeospatialPortMap";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
 
@@ -47,6 +47,7 @@ export function TerminalCanvas({
   const [selectedEntity, setSelectedEntity] = useState<SelectedEntity | null>(
     null
   );
+  const [hoveredInfo, setHoveredInfo] = useState<HoverEntityInfo | null>(null);
   const [resetCameraSignal, setResetCameraSignal] = useState(0);
 
   const [layers, setLayers] = useState<LayerVisibility>({
@@ -57,7 +58,7 @@ export function TerminalCanvas({
   });
 
   const [simulation, setSimulation] = useState<SimulationState>({
-    isPlaying: false,
+    isPlaying: true, // Live port movement active by default
     speed: 1,
     elapsedSeconds: 0,
   });
@@ -198,6 +199,7 @@ export function TerminalCanvas({
                   layers={layers}
                   selectedEntity={selectedEntity}
                   onSelectEntity={(entity) => setSelectedEntity(entity)}
+                  onHoverEntity={(info) => setHoveredInfo(info)}
                   isSimulating={simulation.isPlaying}
                   simulationSpeed={simulation.speed}
                   resetCameraSignal={resetCameraSignal}
@@ -216,6 +218,37 @@ export function TerminalCanvas({
               />
             )}
             <TwinLegend />
+
+            {/* Floating Live 3D Asset Telemetry HUD */}
+            {hoveredInfo && (
+              <div className="absolute top-3 left-3 z-20 pointer-events-none bg-portos-navy/95 backdrop-blur-md border border-portos-teal/60 rounded-lg px-3.5 py-2.5 text-white shadow-2xl animate-in fade-in duration-150 max-w-sm">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-portos-teal animate-ping" />
+                  <span className="text-[10px] font-mono text-portos-teal uppercase font-bold tracking-wider">
+                    {hoveredInfo.type}
+                  </span>
+                  {hoveredInfo.status && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                      {hoveredInfo.status}
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs font-bold text-white mt-1">
+                  {hoveredInfo.title}
+                </div>
+                <div className="text-[11px] text-slate-300">
+                  {hoveredInfo.subtitle}
+                </div>
+                {hoveredInfo.metric && (
+                  <div className="text-[10px] font-mono text-emerald-400 mt-1">
+                    {hoveredInfo.metric}
+                  </div>
+                )}
+                <div className="text-[9px] text-slate-400 mt-1 italic">
+                  Click asset to frame 3D camera & link 2D GIS chart
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -291,6 +324,7 @@ export function TerminalCanvas({
                     layers={layers}
                     selectedEntity={selectedEntity}
                     onSelectEntity={(entity) => setSelectedEntity(entity)}
+                    onHoverEntity={(info) => setHoveredInfo(info)}
                     isSimulating={simulation.isPlaying}
                     simulationSpeed={simulation.speed}
                     resetCameraSignal={resetCameraSignal}
@@ -309,6 +343,24 @@ export function TerminalCanvas({
                 />
               )}
               <TwinLegend />
+
+              {/* Floating Live 3D Asset Telemetry HUD in Split View */}
+              {hoveredInfo && (
+                <div className="absolute top-3 left-3 z-20 pointer-events-none bg-portos-navy/95 backdrop-blur-md border border-portos-teal/60 rounded-lg px-3 py-2 text-white shadow-2xl animate-in fade-in duration-150 max-w-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-portos-teal animate-ping" />
+                    <span className="text-[9px] font-mono text-portos-teal uppercase font-bold tracking-wider">
+                      {hoveredInfo.type}
+                    </span>
+                  </div>
+                  <div className="text-xs font-bold text-white mt-0.5 truncate">
+                    {hoveredInfo.title}
+                  </div>
+                  <div className="text-[10px] text-slate-300 truncate">
+                    {hoveredInfo.subtitle}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

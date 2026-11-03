@@ -11,6 +11,7 @@ interface YardBlock3DProps {
   block: YardBlockRead;
   isSelected?: boolean;
   onSelect?: () => void;
+  onHover?: (isHovered: boolean) => void;
 }
 
 export function YardBlock3D({
@@ -19,6 +20,7 @@ export function YardBlock3D({
   block,
   isSelected = false,
   onSelect,
+  onHover,
 }: YardBlock3DProps) {
   const [hovered, setHovered] = useState(false);
 
@@ -53,8 +55,12 @@ export function YardBlock3D({
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
+        onHover?.(true);
       }}
-      onPointerOut={() => setHovered(false)}
+      onPointerOut={() => {
+        setHovered(false);
+        onHover?.(false);
+      }}
     >
       {/* ============================================================ */}
       {/* 1. PAVEMENT FOUNDATION & HAZARD HATCHING                     */}

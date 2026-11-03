@@ -56,3 +56,4 @@ class AISFeedResponse(BaseModel):
     targets: List[AISVesselMessage]
     total_targets: int
     generated_at: datetime
+

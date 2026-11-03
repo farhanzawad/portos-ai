@@ -43,3 +43,4 @@ class MaintenanceOverviewResponse(BaseModel):
         "Predictive maintenance advisory intelligence only. Human physical inspection required before taking equipment offline.",
         description="Advisory notice"
     )
+

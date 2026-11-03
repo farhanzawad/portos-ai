@@ -9,3 +9,4 @@ router = APIRouter(prefix="/ml", tags=["Model Evaluation & Research Metrics"])
 def get_research_evaluation():
     """Retrieve 5-fold temporal cross-validation metrics, Brier scores, and calibration curve."""
     return compute_research_evaluation(n_samples=2500, n_splits=5)
+

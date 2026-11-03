@@ -178,3 +178,4 @@ export function AISDiagnosticsModal({ isOpen, onClose }: AISDiagnosticsModalProp
     </div>
   );
 }
+

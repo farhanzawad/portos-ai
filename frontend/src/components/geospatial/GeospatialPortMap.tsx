@@ -37,6 +37,11 @@ import {
   DEFAULT_PORT_ORIGIN,
   PCT_TERMINAL_ORIGIN,
 } from "@/lib/geospatial/coordinates";
+import {
+  getLiveVesselFairwayCoord,
+  getAnchorageTidalDrift,
+  getBerthedSway,
+} from "@/lib/geospatial/fairway";
 import { SelectedEntity } from "../digital-twin/types";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
 import { MaritimeMapLegend } from "./MaritimeMapLegend";
@@ -163,6 +168,24 @@ export function GeospatialPortMap({
 
   const [geojsonData, setGeojsonData] = useState<GeoJSONFeatureCollection | null>(null);
 
+  // Live continuous fairway vessel motion animation state
+  const [isLiveActive, setIsLiveActive] = useState(true);
+  const animFrameIdRef = useRef<number | null>(null);
+  const animStartTimeRef = useRef<number>(Date.now());
+  const initialVesselStatesRef = useRef<
+    Map<
+      string,
+      {
+        baseLon: number;
+        baseLat: number;
+        baseProgress: number;
+        speedKnots: number;
+        status: string;
+        isOutbound: boolean;
+      }
+    >
+  >(new Map());
+
   // Fetch Spatial Layers & GeoJSON
   useEffect(() => {
     async function loadData() {
@@ -173,6 +196,41 @@ export function GeospatialPortMap({
         ]);
         setSpatialLayers(layersData);
         setGeojsonData(geoData);
+
+        // Precompute initial vessel states for natural, smooth live movement
+        if (geoData?.features) {
+          const vMap = new Map<
+            string,
+            {
+              baseLon: number;
+              baseLat: number;
+              baseProgress: number;
+              speedKnots: number;
+              status: string;
+              isOutbound: boolean;
+            }
+          >();
+
+          let vIndex = 0;
+          geoData.features.forEach((f) => {
+            if (f.properties?.entity_type === "Vessel" && f.geometry?.type === "Point") {
+              const coords = f.geometry.coordinates as [number, number];
+              const st = (f.properties.status || "EN_ROUTE").toUpperCase();
+              const spd = Number(f.properties.speed_knots) || (st === "BERTHED" ? 0 : 8.5);
+              const progress = ((vIndex * 0.16) + 0.08) % 0.82;
+              vMap.set(String(f.id), {
+                baseLon: coords[0],
+                baseLat: coords[1],
+                baseProgress: progress,
+                speedKnots: spd > 0 ? spd : 8.0,
+                status: st,
+                isOutbound: vIndex % 3 === 0,
+              });
+              vIndex++;
+            }
+          });
+          initialVesselStatesRef.current = vMap;
+        }
       } catch (err) {
         console.error("Failed to load geospatial datasets from backend:", err);
       }
@@ -494,7 +552,27 @@ export function GeospatialPortMap({
       },
     });
 
-    // 11b. Selected Entity Highlight Target Ring
+    // 11b. Vessel Name Labels
+    map.addLayer({
+      id: "layer-vessels-label",
+      type: "symbol",
+      source: "portos-features",
+      filter: ["==", ["get", "entity_type"], "Vessel"],
+      layout: {
+        "text-field": ["get", "name"],
+        "text-size": 10,
+        "text-offset": [0, 1.2],
+        "text-anchor": "top",
+        "text-allow-overlap": false,
+      },
+      paint: {
+        "text-color": "#ffffff",
+        "text-halo-color": "#0d1b2a",
+        "text-halo-width": 1.5,
+      },
+    });
+
+    // 11c. Selected Entity Highlight Target Ring
     map.addLayer({
       id: "layer-selected-entity-ring",
       type: "circle",
@@ -607,6 +685,95 @@ export function GeospatialPortMap({
     renderGeoJSONLayers();
   }, [renderGeoJSONLayers]);
 
+  // Live Continuous Fairway Vessel Animation Loop (30-60 FPS smooth motion, zero lag)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded || !geojsonData || !isLiveActive) return;
+
+    let lastTick = performance.now();
+
+    const animateFairway = (now: number) => {
+      // Throttle updates to ~30 fps for smooth continuous motion
+      if (now - lastTick >= 33) {
+        lastTick = now;
+        const elapsedSec = ((Date.now() - animStartTimeRef.current) / 1000) * simulationSpeed;
+
+        const source = map.getSource("portos-features") as GeoJSONSource;
+        if (source && geojsonData.features) {
+          let updatedAny = false;
+          let idx = 0;
+          const updatedFeatures = geojsonData.features.map((feat) => {
+            if (feat.properties?.entity_type === "Vessel" && feat.geometry.type === "Point") {
+              const state = initialVesselStatesRef.current.get(String(feat.id));
+              if (!state) return feat;
+
+              updatedAny = true;
+              let nextLon = state.baseLon;
+              let nextLat = state.baseLat;
+              let nextHeading = feat.properties.heading_degrees || 0;
+
+              if (state.status === "BERTHED") {
+                const sway = getBerthedSway(state.baseLon, state.baseLat, elapsedSec, idx);
+                nextLon = sway.lon;
+                nextLat = sway.lat;
+                nextHeading = sway.heading;
+              } else if (state.status === "OUTER_ANCHORAGE" || state.status.includes("ANCHOR")) {
+                const drift = getAnchorageTidalDrift(state.baseLon, state.baseLat, elapsedSec, idx);
+                nextLon = drift.lon;
+                nextLat = drift.lat;
+                nextHeading = drift.heading;
+              } else {
+                // Moving vessel underway along Karnaphuli fairway
+                const motion = getLiveVesselFairwayCoord(
+                  state.baseProgress,
+                  state.speedKnots,
+                  elapsedSec,
+                  state.isOutbound
+                );
+                nextLon = motion.lon;
+                nextLat = motion.lat;
+                nextHeading = motion.heading;
+              }
+              idx++;
+
+              return {
+                ...feat,
+                geometry: {
+                  ...feat.geometry,
+                  coordinates: [nextLon, nextLat],
+                },
+                properties: {
+                  ...feat.properties,
+                  heading_degrees: nextHeading,
+                  latitude: nextLat,
+                  longitude: nextLon,
+                },
+              };
+            }
+            return feat;
+          });
+
+          if (updatedAny) {
+            source.setData({
+              ...geojsonData,
+              features: updatedFeatures,
+            } as any);
+          }
+        }
+      }
+
+      animFrameIdRef.current = requestAnimationFrame(animateFairway);
+    };
+
+    animFrameIdRef.current = requestAnimationFrame(animateFairway);
+
+    return () => {
+      if (animFrameIdRef.current !== null) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+    };
+  }, [mapLoaded, geojsonData, isLiveActive, simulationSpeed]);
+
   // Synchronize Layer Visibility Checkboxes
   useEffect(() => {
     const map = mapRef.current;
@@ -626,7 +793,7 @@ export function GeospatialPortMap({
       container_yards: ["layer-container-yards-fill", "layer-container-yards-line"],
       port_facilities: ["layer-facilities-fill", "layer-facilities-line"],
       road_rail_network: ["layer-road-rail-line"],
-      vessels: ["layer-vessels-circle"],
+      vessels: ["layer-vessels-circle", "layer-vessels-label"],
       vessel_tracks: ["layer-vessel-tracks-line"],
       incidents: ["layer-incidents-circle"],
     };
@@ -662,8 +829,12 @@ export function GeospatialPortMap({
         "any",
         ["==", ["get", "id"], entityId],
         ["==", ["get", "id"], `feat_vessel_${entityId}`],
+        ["==", ["get", "id"], `feat_berth_${entityId}`],
+        ["==", ["get", "id"], `feat_yard_${entityId}`],
+        ["==", ["get", "id"], `feat_${entityId}`],
         ["==", ["get", "vessel_call_id"], entityId],
         ["==", ["get", "vessel_id"], entityId],
+        ["==", ["get", "code"], entityId],
       ]);
     }
 
@@ -806,10 +977,30 @@ export function GeospatialPortMap({
               PCT Patenga
             </button>
           </div>
+
+          {/* Live Vessel Traffic Pulsing Status Pill */}
+          <div className="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-700/60 text-[10px] font-mono text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>LIVE FAIRWAY TRAFFIC · {initialVesselStatesRef.current.size || 12} VESSELS</span>
+          </div>
         </div>
 
         {/* Right Toolbar Controls */}
         <div className="flex items-center gap-1.5">
+          {/* Live Motion Toggle */}
+          <button
+            onClick={() => setIsLiveActive(!isLiveActive)}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded border text-[11px] font-medium transition-colors ${
+              isLiveActive
+                ? "bg-emerald-950/60 text-emerald-300 border-emerald-700 hover:bg-emerald-900/60"
+                : "bg-portos-navy-secondary/40 text-slate-300 border-portos-navy-secondary hover:text-white"
+            }`}
+            title="Toggle live fairway vessel traffic motion"
+          >
+            <Navigation className={`h-3 w-3 ${isLiveActive ? "text-emerald-400 animate-pulse" : "text-slate-400"}`} />
+            <span>{isLiveActive ? "Motion: Live" : "Motion: Paused"}</span>
+          </button>
+
           {/* Base Map Selector Button */}
           <button
             onClick={() => setShowBaseMapModal(!showBaseMapModal)}

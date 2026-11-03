@@ -17,6 +17,35 @@ import { ProceduralVessel3D } from "./ProceduralVessel3D";
 import { STSCrane3D } from "./STSCrane3D";
 import { YardBlock3D } from "./YardBlock3D";
 import { RealisticContainer3D } from "./RealisticContainer3D";
+import { localEnuToWgs84, PCT_TERMINAL_ORIGIN } from "@/lib/geospatial/coordinates";
+
+export interface HoverEntityInfo {
+  type: string;
+  title: string;
+  subtitle: string;
+  status?: string;
+  metric?: string;
+}
+
+// RSGT PCT Layout: 580m continuous quay with Berths 1, 2, 3 + Berth 4 Tanker
+// X positions along quay edge (Z = -2.8):
+const BERTH_POSITIONS = [-34, -18, -2, 14, 30, 48];
+
+// Specific PCT 12 Stacking Blocks designations matching masterplan Drawing No. PCT-MP-001
+const PCT_BLOCK_DESIGNATIONS = [
+  { code: "C01", name: "Block C01 (Import)", category: "IMPORT" },
+  { code: "C02", name: "Block C02 (Import)", category: "IMPORT" },
+  { code: "C03", name: "Block C03 (Export)", category: "EXPORT" },
+  { code: "C04", name: "Block C04 (Export)", category: "EXPORT" },
+  { code: "C05", name: "Block C05 (Transshipment)", category: "TRANSSHIPMENT" },
+  { code: "C06", name: "Block C06 (Empty)", category: "EMPTY" },
+  { code: "C07", name: "Block C07 (Import)", category: "IMPORT" },
+  { code: "C08", name: "Block C08 (Export)", category: "EXPORT" },
+  { code: "C09", name: "Block C09 (Export)", category: "EXPORT" },
+  { code: "C10", name: "Block C10 (Empty)", category: "EMPTY" },
+  { code: "C11", name: "Block C11 (Reefer)", category: "REEFER" },
+  { code: "C12", name: "Block C12 (Hazardous IMO)", category: "HAZARDOUS_IMO" },
+];
 
 interface TerminalScene3DProps {
   berths: BerthRead[];
@@ -26,6 +55,7 @@ interface TerminalScene3DProps {
   layers: LayerVisibility;
   selectedEntity: SelectedEntity | null;
   onSelectEntity: (entity: SelectedEntity) => void;
+  onHoverEntity?: (info: HoverEntityInfo | null) => void;
   isSimulating: boolean;
   simulationSpeed: 1 | 2 | 5;
   resetCameraSignal: number;
@@ -40,6 +70,7 @@ export function TerminalScene3D({
   layers,
   selectedEntity,
   onSelectEntity,
+  onHoverEntity,
   isSimulating,
   simulationSpeed,
   resetCameraSignal,
@@ -47,7 +78,6 @@ export function TerminalScene3D({
 }: TerminalScene3DProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const approachingVesselRef = useRef<THREE.Group>(null);
-  const tankerVesselRef = useRef<THREE.Group>(null);
   const truck1Ref = useRef<THREE.Group>(null);
   const truck2Ref = useRef<THREE.Group>(null);
   const truck3Ref = useRef<THREE.Group>(null);
@@ -57,51 +87,110 @@ export function TerminalScene3D({
   const waterRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
 
-  // Camera Presets handler
+  // Smooth Camera Lerping Targets
+  const targetCamPos = useRef(new THREE.Vector3(42, 45, 48));
+  const targetLookAt = useRef(new THREE.Vector3(0, 0, 8));
+  const isAnimatingCamera = useRef(false);
+
+  // Smoothly trigger a camera flight
+  const flyToTarget = (camX: number, camY: number, camZ: number, lookX: number, lookY: number, lookZ: number) => {
+    targetCamPos.current.set(camX, camY, camZ);
+    targetLookAt.current.set(lookX, lookY, lookZ);
+    isAnimatingCamera.current = true;
+  };
+
+  // Camera Presets handler with smooth gliding transition
   useEffect(() => {
-    if (!controlsRef.current) return;
     if (cameraPreset === "topdown") {
-      camera.position.set(0, 95, 14);
-      controlsRef.current.target.set(0, 0, 14);
+      flyToTarget(0, 95, 14, 0, 0, 14);
     } else if (cameraPreset === "operational") {
-      camera.position.set(-26, 12, 12);
-      controlsRef.current.target.set(0, 4, -4);
+      flyToTarget(-26, 12, 12, 0, 4, -4);
     } else {
-      // Default Isometric
-      camera.position.set(42, 45, 48);
-      controlsRef.current.target.set(0, 0, 8);
+      // Default Isometric overview
+      flyToTarget(42, 45, 48, 0, 0, 8);
     }
-    controlsRef.current.update();
-  }, [cameraPreset, camera]);
+  }, [cameraPreset]);
 
   // Reset Camera action handler
   useEffect(() => {
-    if (resetCameraSignal > 0 && controlsRef.current) {
-      camera.position.set(42, 45, 48);
-      controlsRef.current.target.set(0, 0, 8);
-      controlsRef.current.update();
+    if (resetCameraSignal > 0) {
+      flyToTarget(42, 45, 48, 0, 0, 8);
     }
-  }, [resetCameraSignal, camera]);
+  }, [resetCameraSignal]);
 
-  // Focus on Selected Entity
+  const berthedCalls = vesselCalls.filter((c) => c.status === "BERTHED");
+  const queueCalls = vesselCalls.filter((c) => c.status !== "BERTHED");
+  const approachingCall = queueCalls[0];
+
+  // Focus on Selected Entity (from 3D interaction or synchronized 2D map selection)
   useEffect(() => {
-    if (!selectedEntity || !controlsRef.current) return;
+    if (!selectedEntity) return;
 
     if (selectedEntity.type === "berth") {
-      controlsRef.current.target.set(-10, 0, -3);
-      controlsRef.current.update();
+      const idx = berths.findIndex((b) => b.id === selectedEntity.id);
+      const posX = idx >= 0 ? BERTH_POSITIONS[idx % BERTH_POSITIONS.length] : -10;
+      flyToTarget(posX + 16, 14, 10, posX, 1, -2.8);
+    } else if (selectedEntity.type === "vessel") {
+      const bIdx = berthedCalls.findIndex((c) => c.id === selectedEntity.id);
+      if (bIdx >= 0) {
+        const berthIdx = [0, 1, 3, 2, 4][bIdx % 5];
+        const posX = BERTH_POSITIONS[berthIdx];
+        flyToTarget(posX + 16, 14, 8, posX, 2, -6.8);
+      } else {
+        // Approaching channel vessel
+        flyToTarget(-12, 14, -12, -25, 2, -24);
+      }
+    } else if (selectedEntity.type === "crane") {
+      const cIdx = equipment.findIndex((e) => e.id === selectedEntity.id);
+      const posX = cIdx >= 0 ? BERTH_POSITIONS[cIdx % BERTH_POSITIONS.length] + 2.2 : 0;
+      flyToTarget(posX + 14, 12, 10, posX, 3, -1.8);
     } else if (selectedEntity.type === "yard") {
-      controlsRef.current.target.set(0, 2, 16);
-      controlsRef.current.update();
+      const bIdx = PCT_BLOCK_DESIGNATIONS.findIndex(
+        (b) => b.code.toLowerCase() === selectedEntity.id.toLowerCase() || `pct-block-${b.code.toLowerCase()}` === selectedEntity.id
+      );
+      if (bIdx >= 0) {
+        const isRow2 = bIdx >= 6;
+        const colIdx = bIdx % 6;
+        const posX = (colIdx - 2.5) * 13.5;
+        const posZ = isRow2 ? 23.5 : 9.5;
+        flyToTarget(posX + 12, 14, posZ + 14, posX, 2, posZ);
+      } else {
+        flyToTarget(12, 14, 20, 0, 2, 16);
+      }
     } else if (selectedEntity.type === "facility") {
-      controlsRef.current.target.set(-20, 2, 32);
-      controlsRef.current.update();
+      const fId = selectedEntity.id;
+      if (fId.includes("tower")) {
+        flyToTarget(-16, 14, 40, -26, 4, 31);
+      } else if (fId.includes("admin")) {
+        flyToTarget(-30, 12, 40, -42, 2, 31);
+      } else if (fId.includes("gate")) {
+        flyToTarget(0, 12, 46, -10, 2, 38);
+      } else if (fId.includes("fuel") || fId.includes("tank")) {
+        flyToTarget(58, 14, 26, 48, 2, 16);
+      } else if (fId.includes("workshop") || fId.includes("maintenance")) {
+        flyToTarget(-40, 12, 22, -52, 2, 14);
+      } else {
+        flyToTarget(-10, 14, 42, -20, 2, 32);
+      }
     }
-  }, [selectedEntity]);
+  }, [selectedEntity, berths, berthedCalls, equipment]);
 
-  // Frame animations: water shimmer, radar antenna rotation, approaching vessel, haulage trucks
+  // Frame animations: water wave shader, radar antenna, vessels, trucks, smooth camera lerp
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
+
+    // 0. Smooth Camera Lerp
+    if (isAnimatingCamera.current && controlsRef.current) {
+      camera.position.lerp(targetCamPos.current, 0.06);
+      controlsRef.current.target.lerp(targetLookAt.current, 0.06);
+      controlsRef.current.update();
+      if (
+        camera.position.distanceTo(targetCamPos.current) < 0.15 &&
+        controlsRef.current.target.distanceTo(targetLookAt.current) < 0.15
+      ) {
+        isAnimatingCamera.current = false;
+      }
+    }
 
     // 1. Water subtle wave shimmer
     if (waterRef.current) {
@@ -151,30 +240,6 @@ export function TerminalScene3D({
       (buoyRedRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = flashRed ? 1.4 : 0.1;
     }
   });
-
-  const berthedCalls = vesselCalls.filter((c) => c.status === "BERTHED");
-  const queueCalls = vesselCalls.filter((c) => c.status !== "BERTHED");
-  const approachingCall = queueCalls[0];
-
-  // RSGT PCT Layout: 580m continuous quay with Berths 1, 2, 3 + Berth 4 Tanker
-  // X positions along quay edge (Z = -2.8):
-  const berthPositions = [-34, -18, -2, 14, 30, 48];
-
-  // Specific PCT 12 Stacking Blocks designations matching masterplan Drawing No. PCT-MP-001
-  const pctBlockDesignations = [
-    { code: "C01", name: "Block C01 (Import)", category: "IMPORT" },
-    { code: "C02", name: "Block C02 (Import)", category: "IMPORT" },
-    { code: "C03", name: "Block C03 (Export)", category: "EXPORT" },
-    { code: "C04", name: "Block C04 (Export)", category: "EXPORT" },
-    { code: "C05", name: "Block C05 (Transshipment)", category: "TRANSSHIPMENT" },
-    { code: "C06", name: "Block C06 (Empty)", category: "EMPTY" },
-    { code: "C07", name: "Block C07 (Import)", category: "IMPORT" },
-    { code: "C08", name: "Block C08 (Export)", category: "EXPORT" },
-    { code: "C09", name: "Block C09 (Export)", category: "EXPORT" },
-    { code: "C10", name: "Block C10 (Empty)", category: "EMPTY" },
-    { code: "C11", name: "Block C11 (Reefer)", category: "REEFER" },
-    { code: "C12", name: "Block C12 (Hazardous IMO)", category: "HAZARDOUS_IMO" },
-  ];
 
   return (
     <>
@@ -232,7 +297,6 @@ export function TerminalScene3D({
           <boxGeometry args={[26, 1.2, 3.2]} />
           <meshStandardMaterial color="#475569" roughness={0.9} />
         </mesh>
-        {/* Stone Crest Top */}
         <mesh position={[0, 0.7, 0]}>
           <boxGeometry args={[25.5, 0.4, 2.2]} />
           <meshStandardMaterial color="#64748b" roughness={0.95} />
@@ -283,13 +347,12 @@ export function TerminalScene3D({
       {/* ============================================================ */}
       {/* 3. CONTINUOUS QUAY WALL (580m Berths 1-3 + Berth 4 Tanker)    */}
       {/* ============================================================ */}
-      {/* Concrete Quay Apron Slab (Width ~45m) */}
       <mesh position={[0, 0.08, -1.8]}>
         <boxGeometry args={[116, 0.28, 4.2]} />
         <meshStandardMaterial color="#1e293b" roughness={0.7} metalness={0.2} />
       </mesh>
 
-      {/* Quay Crane Rail Tracks (Dual continuous steel rails) */}
+      {/* Quay Crane Rail Tracks */}
       {[-3.6, -0.6].map((rz, ri) => (
         <mesh key={ri} position={[0, 0.23, rz]}>
           <boxGeometry args={[116, 0.04, 0.12]} />
@@ -302,12 +365,10 @@ export function TerminalScene3D({
         const fx = -54 + fi * 4.8;
         return (
           <group key={fi} position={[fx, 0, -4.0]}>
-            {/* Rubber Fender on Face */}
             <mesh position={[0, -0.15, 0]}>
               <boxGeometry args={[0.8, 0.45, 0.35]} />
               <meshStandardMaterial color="#020617" roughness={0.9} />
             </mesh>
-            {/* Mooring Bollard on Coping */}
             <mesh position={[0, 0.28, 0.2]}>
               <cylinderGeometry args={[0.14, 0.16, 0.32, 10]} />
               <meshStandardMaterial color="#eab308" roughness={0.4} />
@@ -322,7 +383,6 @@ export function TerminalScene3D({
           <boxGeometry args={[16, 0.3, 3.6]} />
           <meshStandardMaterial color="#334155" roughness={0.8} />
         </mesh>
-        {/* Product/Fuel Pipeline Racks extending towards storage tanks */}
         {[-0.8, 0, 0.8].map((pz, pi) => (
           <mesh key={pi} position={[-0.5, 0.3, pz]} rotation={[0, 0, Math.PI / 2]}>
             <cylinderGeometry args={[0.08, 0.08, 15, 8]} />
@@ -331,7 +391,7 @@ export function TerminalScene3D({
         ))}
       </group>
 
-      {/* Tug / Workboat Jetty (between Berth 3 & 4) */}
+      {/* Tug / Workboat Jetty */}
       <group position={[40, 0.06, -5.0]}>
         <mesh position={[0, 0, 0]}>
           <boxGeometry args={[3.2, 0.25, 2.8]} />
@@ -375,8 +435,9 @@ export function TerminalScene3D({
       {/* ============================================================ */}
       {layers.berths &&
         berths.slice(0, 6).map((berth, index) => {
-          const posX = berthPositions[index];
+          const posX = BERTH_POSITIONS[index];
           const isSelected = selectedEntity?.type === "berth" && selectedEntity.id === berth.id;
+          const geoCoord = localEnuToWgs84(posX, 0, -2.8, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon);
 
           return (
             <BerthZone3D
@@ -385,7 +446,28 @@ export function TerminalScene3D({
               length={14.8}
               berth={berth}
               isSelected={isSelected}
-              onSelect={() => onSelectEntity({ type: "berth", id: berth.id, data: berth })}
+              onSelect={() =>
+                onSelectEntity({
+                  type: "berth",
+                  id: berth.id,
+                  data: berth,
+                  sourceEnvironment: "3D",
+                  coordinates: geoCoord,
+                })
+              }
+              onHover={(isHovered) =>
+                onHoverEntity?.(
+                  isHovered
+                    ? {
+                        type: "Quayside Berth",
+                        title: berth.name,
+                        subtitle: `Design Depth -11.0m · Quay Length 190m`,
+                        status: berth.status,
+                        metric: `Berth Status: ${berth.status === "OCCUPIED" ? "Active Vessel Berthed" : "Available"}`,
+                      }
+                    : null
+                )
+              }
             />
           );
         })}
@@ -397,8 +479,9 @@ export function TerminalScene3D({
         <>
           {berthedCalls.map((call, idx) => {
             const berthIdx = [0, 1, 3, 2, 4][idx % 5];
-            const posX = berthPositions[berthIdx];
+            const posX = BERTH_POSITIONS[berthIdx];
             const isSelected = selectedEntity?.type === "vessel" && selectedEntity.id === call.id;
+            const geoCoord = localEnuToWgs84(posX, 0, -6.8, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon);
 
             return (
               <ProceduralVessel3D
@@ -408,7 +491,28 @@ export function TerminalScene3D({
                 scale={0.96}
                 call={call}
                 isSelected={isSelected}
-                onSelect={() => onSelectEntity({ type: "vessel", id: call.id, data: call })}
+                onSelect={() =>
+                  onSelectEntity({
+                    type: "vessel",
+                    id: call.id,
+                    data: call,
+                    sourceEnvironment: "3D",
+                    coordinates: geoCoord,
+                  })
+                }
+                onHover={(isHovered) =>
+                  onHoverEntity?.(
+                    isHovered
+                      ? {
+                          type: "Container Vessel",
+                          title: call.vessel?.name || "Vessel",
+                          subtitle: `IMO ${call.vessel?.imo_number || "9123456"} · Flag: ${call.vessel?.flag_country || "Bangladesh"}`,
+                          status: call.status,
+                          metric: `LOA ${call.vessel?.length_overall_m || 172}m · Cargo: ${call.inbound_teu || 850} TEU · Draft: ${call.vessel?.max_draft_m || 8.5}m`,
+                        }
+                      : null
+                  )
+                }
                 isSimulating={isSimulating}
                 isBerthed={true}
               />
@@ -429,7 +533,22 @@ export function TerminalScene3D({
                     type: "vessel",
                     id: approachingCall.id,
                     data: approachingCall,
+                    sourceEnvironment: "3D",
+                    coordinates: localEnuToWgs84(-25, 0, -24, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
                   })
+                }
+                onHover={(isHovered) =>
+                  onHoverEntity?.(
+                    isHovered
+                      ? {
+                          type: "Inbound Feeder Vessel",
+                          title: approachingCall.vessel?.name || "Vessel",
+                          subtitle: `Fairway Channel Transit · Speed: 11.5 kts`,
+                          status: approachingCall.status,
+                          metric: `Reported ETA: ${approachingCall.reported_eta ? new Date(approachingCall.reported_eta).toLocaleTimeString() : "Incoming"}`,
+                        }
+                      : null
+                  )
                 }
                 isSimulating={isSimulating}
                 isBerthed={false}
@@ -444,8 +563,9 @@ export function TerminalScene3D({
       {/* ============================================================ */}
       {layers.cranes &&
         equipment.slice(0, 6).map((crane, idx) => {
-          const posX = berthPositions[idx] + 2.2;
+          const posX = BERTH_POSITIONS[idx] + 2.2;
           const isSelected = selectedEntity?.type === "crane" && selectedEntity.id === crane.id;
+          const geoCoord = localEnuToWgs84(posX, 0, -2.1, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon);
 
           return (
             <STSCrane3D
@@ -455,7 +575,28 @@ export function TerminalScene3D({
               scale={0.96}
               crane={crane}
               isSelected={isSelected}
-              onSelect={() => onSelectEntity({ type: "crane", id: crane.id, data: crane })}
+              onSelect={() =>
+                onSelectEntity({
+                  type: "crane",
+                  id: crane.id,
+                  data: crane,
+                  sourceEnvironment: "3D",
+                  coordinates: geoCoord,
+                })
+              }
+              onHover={(isHovered) =>
+                onHoverEntity?.(
+                  isHovered
+                    ? {
+                        type: "Ship-to-Shore Gantry Crane",
+                        title: (crane as any).name || `STS Crane ${crane.code}`,
+                        subtitle: `Code: ${crane.code} · Super Post-Panamax (65m Outreach)`,
+                        status: crane.status,
+                        metric: `Cycle: 42s · Moves: 32/hr · Spreader: Dual 20ft/40ft`,
+                      }
+                    : null
+                )
+              }
               isSimulating={isSimulating}
             />
           );
@@ -465,10 +606,9 @@ export function TerminalScene3D({
       {/* 7. 12 CONTAINER YARD STACKING BLOCKS (C01 - C12)             */}
       {/* ============================================================ */}
       {layers.yardBlocks &&
-        pctBlockDesignations.map((designation, idx) => {
+        PCT_BLOCK_DESIGNATIONS.map((designation, idx) => {
           const isRow2 = idx >= 6;
           const colIdx = idx % 6;
-          // 6 blocks per row spaced across terminal
           const posX = (colIdx - 2.5) * 13.5;
           const posZ = isRow2 ? 23.5 : 9.5;
 
@@ -486,6 +626,7 @@ export function TerminalScene3D({
           };
 
           const isSelected = selectedEntity?.type === "yard" && selectedEntity.id === blockData.id;
+          const geoCoord = localEnuToWgs84(posX, 0, posZ, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon);
 
           return (
             <YardBlock3D
@@ -493,7 +634,28 @@ export function TerminalScene3D({
               position={[posX, 0, posZ]}
               block={blockData as any}
               isSelected={isSelected}
-              onSelect={() => onSelectEntity({ type: "yard", id: blockData.id, data: blockData as any })}
+              onSelect={() =>
+                onSelectEntity({
+                  type: "yard",
+                  id: blockData.id,
+                  data: blockData as any,
+                  sourceEnvironment: "3D",
+                  coordinates: geoCoord,
+                })
+              }
+              onHover={(isHovered) =>
+                onHoverEntity?.(
+                  isHovered
+                    ? {
+                        type: "Container Stacking Block",
+                        title: `Block ${designation.code} (${designation.category})`,
+                        subtitle: designation.name,
+                        status: (blockData as any).status || "NORMAL",
+                        metric: `Capacity: ${(blockData as any).max_capacity_teu || blockData.teu_capacity || 720} TEU · Utilization: ${Math.round(((blockData as any).utilization_rate || 0.6) * 100)}%`,
+                      }
+                    : null
+                )
+              }
             />
           );
         })}
@@ -559,25 +721,34 @@ export function TerminalScene3D({
             type: "facility",
             id: "pct-control-tower",
             data: { name: "PCT Port Operations Control Tower", status: "OPERATIONAL" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(-26, 0, 31, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
           });
         }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Port Operations Facility",
+            title: "PCT Control Tower",
+            subtitle: "Elevated VTS & Fairway Surveillance",
+            status: "ONLINE",
+            metric: "Radar 360° Fairway Coverage · Channel 12 VHF",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
       >
-        {/* Tower Concrete Shaft */}
         <mesh position={[0, 4.0, 0]}>
           <boxGeometry args={[2.4, 8.0, 2.4]} />
           <meshStandardMaterial color="#334155" roughness={0.8} />
         </mesh>
-        {/* Octagonal Glass Observation Cabin */}
         <mesh position={[0, 8.8, 0]}>
           <cylinderGeometry args={[2.0, 1.6, 1.8, 8]} />
           <meshStandardMaterial color="#0284c7" roughness={0.1} metalness={0.9} transparent opacity={0.85} />
         </mesh>
-        {/* Tower Roof Slab */}
         <mesh position={[0, 9.8, 0]}>
           <cylinderGeometry args={[2.2, 2.2, 0.25, 8]} />
           <meshStandardMaterial color="#0f172a" />
         </mesh>
-        {/* Rotating Radar Scanner */}
         <mesh ref={radarRef} position={[0, 10.3, 0]}>
           <boxGeometry args={[1.4, 0.15, 0.2]} />
           <meshStandardMaterial color="#f8fafc" />
@@ -585,17 +756,38 @@ export function TerminalScene3D({
       </group>
 
       {/* Administration Building (3-storey modern office with glass curtain wall) */}
-      <group position={[-42, 0, 31]}>
+      <group
+        position={[-42, 0, 31]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-admin",
+            data: { name: "PCT Administration Headquarters", status: "OPERATIONAL" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(-42, 0, 31, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Port Headquarters",
+            title: "PCT Administration Building",
+            subtitle: "Terminal Management & Customs Clearing Center",
+            status: "OPERATIONAL",
+            metric: "3-Storey Office Complex · Operations Command",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 2.5, 0]}>
           <boxGeometry args={[8.5, 5.0, 5.5]} />
           <meshStandardMaterial color="#1e293b" roughness={0.5} />
         </mesh>
-        {/* Entrance Canopy */}
         <mesh position={[0, 1.2, 2.9]}>
           <boxGeometry args={[3.2, 0.2, 1.2]} />
           <meshStandardMaterial color="#16a394" />
         </mesh>
-        {/* Staff Parking Area */}
         <mesh position={[0, 0.02, 6.2]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[8.5, 3.2]} />
           <meshStandardMaterial color="#334155" roughness={0.9} />
@@ -603,7 +795,30 @@ export function TerminalScene3D({
       </group>
 
       {/* Marine & Berth Operations Office */}
-      <group position={[-16, 0, 31]}>
+      <group
+        position={[-16, 0, 31]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-marine-ops",
+            data: { name: "Marine & Berth Operations Office", status: "OPERATIONAL" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(-16, 0, 31, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Operations Facility",
+            title: "Marine & Berth Operations Office",
+            subtitle: "Quay Operations & Stevedoring Coordination",
+            status: "ACTIVE",
+            metric: "Berths 1-3 Dispatch & Harbor Tug Control",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 1.8, 0]}>
           <boxGeometry args={[6.5, 3.6, 4.5]} />
           <meshStandardMaterial color="#334155" roughness={0.6} />
@@ -611,7 +826,30 @@ export function TerminalScene3D({
       </group>
 
       {/* Customs & Port Security + First Aid Clinic */}
-      <group position={[-6, 0, 31]}>
+      <group
+        position={[-6, 0, 31]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-security-clinic",
+            data: { name: "Customs Security & Port Clinic", status: "OPERATIONAL" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(-6, 0, 31, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Safety Facility",
+            title: "Customs & Port Security Complex",
+            subtitle: "ISPS Code Access Control & Medical Post",
+            status: "ACTIVE",
+            metric: "24/7 Security Patrol & Emergency First Aid",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 1.8, 0]}>
           <boxGeometry args={[8.0, 3.6, 4.5]} />
           <meshStandardMaterial color="#334155" roughness={0.6} />
@@ -619,12 +857,34 @@ export function TerminalScene3D({
       </group>
 
       {/* Fire Station with 2 Appliance Bays */}
-      <group position={[6, 0, 31]}>
+      <group
+        position={[6, 0, 31]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-fire-station",
+            data: { name: "Terminal Fire & Rescue Station", status: "STANDBY" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(6, 0, 31, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Safety Facility",
+            title: "Terminal Fire & Emergency Station",
+            subtitle: "2 Heavy Foam Fire Tenders & Hazmat Team",
+            status: "STANDBY",
+            metric: "Response Time: < 3 Minutes to Quay/Yard",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 1.9, 0]}>
           <boxGeometry args={[7.2, 3.8, 4.8]} />
           <meshStandardMaterial color="#475569" roughness={0.6} />
         </mesh>
-        {/* Fire Bay Doors (Red) */}
         {[-1.5, 1.5].map((bx, bi) => (
           <mesh key={bi} position={[bx, 1.4, 2.45]}>
             <boxGeometry args={[2.2, 2.6, 0.1]} />
@@ -634,12 +894,34 @@ export function TerminalScene3D({
       </group>
 
       {/* Equipment Maintenance Yard (Workshop & Spare Parts Store) */}
-      <group position={[-52, 0, 14]}>
+      <group
+        position={[-52, 0, 14]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-workshop",
+            data: { name: "Equipment Maintenance Yard & Heavy Workshop", status: "OPERATIONAL" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(-52, 0, 14, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Engineering Facility",
+            title: "Equipment Maintenance Yard & Workshop",
+            subtitle: "Heavy Gantry Crane & Spreader Service Bay",
+            status: "OPERATIONAL",
+            metric: "Isolation Forest Telemetry Monitored · 3 Bays",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 2.8, 0]}>
           <boxGeometry args={[7.5, 5.6, 8.5]} />
           <meshStandardMaterial color="#1e293b" roughness={0.6} />
         </mesh>
-        {/* Gabled Workshop Roof */}
         <mesh position={[0, 5.8, 0]} rotation={[0, 0, 0]}>
           <boxGeometry args={[7.8, 0.4, 8.8]} />
           <meshStandardMaterial color="#0f172a" />
@@ -647,7 +929,30 @@ export function TerminalScene3D({
       </group>
 
       {/* Electrical Substation & Backup Generator House */}
-      <group position={[22, 0, 31]}>
+      <group
+        position={[22, 0, 31]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-substation",
+            data: { name: "Electrical Substation & Generator House", status: "ONLINE" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(22, 0, 31, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Utility Facility",
+            title: "Primary 33kV Electrical Substation",
+            subtitle: "Quay Crane Shore Power & Reefer Distribution",
+            status: "ONLINE",
+            metric: "Capacity: 12 MVA · Dual Diesel Generators",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 1.5, 0]}>
           <boxGeometry args={[6.5, 3.0, 4.2]} />
           <meshStandardMaterial color="#475569" roughness={0.7} />
@@ -655,13 +960,34 @@ export function TerminalScene3D({
       </group>
 
       {/* Fuel Storage Area (3 Cylindrical Steel Tanks with Safety Containment Bund) */}
-      <group position={[48, 0, 16]}>
-        {/* Concrete Secondary Containment Bund Wall */}
+      <group
+        position={[48, 0, 16]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-fuel-tanks",
+            data: { name: "Bunker Fuel Storage Area", status: "SECURE" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(48, 0, 16, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Fuel Infrastructure",
+            title: "Bunker Fuel Storage Complex",
+            subtitle: "3 Cylindrical Tanks with Secondary Containment",
+            status: "SECURE",
+            metric: "Capacity: 12,000 m³ HFO/MGO · Berth 4 Pipeline",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 0.4, 0]}>
           <boxGeometry args={[11.5, 0.8, 8.5]} />
           <meshStandardMaterial color="#334155" wireframe />
         </mesh>
-        {/* 3 Large Cylindrical Storage Tanks */}
         {[-3.2, 0, 3.2].map((tx, ti) => (
           <mesh key={ti} position={[tx, 2.2, 0]}>
             <cylinderGeometry args={[1.5, 1.5, 4.2, 16]} />
@@ -674,7 +1000,30 @@ export function TerminalScene3D({
       {/* 10. PCT GATE COMPLEX & TRUCK STAGING AREA (Drawing PCT-MP-001) */}
       {/* ============================================================ */}
       {/* In-Gate Complex (3 OCR Portals, Weighbridges) */}
-      <group position={[-10, 0, 38]}>
+      <group
+        position={[-10, 0, 38]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-ingate",
+            data: { name: "PCT Automated In-Gate Complex", status: "ACTIVE" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(-10, 0, 38, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Gate Complex",
+            title: "PCT Automated In-Gate Complex",
+            subtitle: "3 OCR Inbound Portals & Static Weighbridges",
+            status: "ACTIVE",
+            metric: "Avg Processing Time: 45s/truck · OCR Match: 99.2%",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 2.6, 0]}>
           <boxGeometry args={[8.5, 0.3, 3.2]} />
           <meshStandardMaterial color="#1e4967" />
@@ -682,12 +1031,34 @@ export function TerminalScene3D({
       </group>
 
       {/* Customs Inspection & Container Scanner Canopy */}
-      <group position={[4, 0, 38]}>
+      <group
+        position={[4, 0, 38]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-customs-scanner",
+            data: { name: "Customs Inspection & Portal Scanner", status: "ACTIVE" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(4, 0, 38, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Customs Facility",
+            title: "Customs Inspection & Portal Scanner",
+            subtitle: "High-Energy Non-Intrusive X-Ray Cargo Inspection",
+            status: "ACTIVE",
+            metric: "Throughput: 20 Containers/hr · ASYCUDA Linked",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 3.2, 0]}>
           <boxGeometry args={[12.0, 0.35, 4.0]} />
           <meshStandardMaterial color="#16a394" />
         </mesh>
-        {/* Mobile / Portal Container Scanner Unit */}
         <mesh position={[0, 1.6, 0]}>
           <boxGeometry args={[3.2, 3.0, 2.8]} />
           <meshStandardMaterial color="#334155" roughness={0.5} />
@@ -695,7 +1066,30 @@ export function TerminalScene3D({
       </group>
 
       {/* Out-Gate Complex (OCR Portals, Weighbridges) */}
-      <group position={[18, 0, 38]}>
+      <group
+        position={[18, 0, 38]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectEntity({
+            type: "facility",
+            id: "pct-outgate",
+            data: { name: "PCT Automated Out-Gate Complex", status: "ACTIVE" },
+            sourceEnvironment: "3D",
+            coordinates: localEnuToWgs84(18, 0, 38, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon),
+          });
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHoverEntity?.({
+            type: "Gate Complex",
+            title: "PCT Automated Out-Gate Complex",
+            subtitle: "3 OCR Outbound Lanes & Exit Weighbridges",
+            status: "ACTIVE",
+            metric: "Throughput: 18 Trucks/hr · E-Gate Clearance",
+          });
+        }}
+        onPointerOut={() => onHoverEntity?.(null)}
+      >
         <mesh position={[0, 2.6, 0]}>
           <boxGeometry args={[8.5, 0.3, 3.2]} />
           <meshStandardMaterial color="#1e4967" />
@@ -708,7 +1102,6 @@ export function TerminalScene3D({
           <planeGeometry args={[18, 7.5]} />
           <meshStandardMaterial color="#1a2333" roughness={0.9} />
         </mesh>
-        {/* Parked Container Chassis Trailers */}
         {[-6, -2, 2, 6].map((tx, ti) => (
           <mesh key={ti} position={[tx, 0.65, 0]}>
             <boxGeometry args={[2.8, 1.1, 1.0]} />

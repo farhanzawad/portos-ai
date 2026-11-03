@@ -49,3 +49,4 @@ def test_ais_test_connection_diagnostics():
         assert data["status"] in ["connected", "simulated_fallback"]
         assert "provider" in data
         assert "audit_note" in data
+

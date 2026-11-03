@@ -203,3 +203,4 @@ class MaintenanceAnomalyService:
 
 
 maintenance_service = MaintenanceAnomalyService()
+

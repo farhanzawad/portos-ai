@@ -144,3 +144,4 @@ def compute_research_evaluation(n_samples: int = 2500, n_splits: int = 5) -> Res
         is_well_calibrated=(ece < 0.08),
         generated_at=datetime.now(timezone.utc),
     )
+
