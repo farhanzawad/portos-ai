@@ -141,3 +141,4 @@ export function calculateBearingDegrees(
   const bearing = (Math.atan2(y, x) * 180) / Math.PI;
   return (bearing + 360) % 360;
 }
+

@@ -64,3 +64,4 @@ class WGS84Coordinate(BaseModel):
     altitude_m: float = 0.0
     crs: str = "WGS84 (EPSG:4326)"
     data_status: DataStatusEnum = DataStatusEnum.DERIVED
+

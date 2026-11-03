@@ -1047,3 +1047,4 @@ export function GeospatialPortMap({
     </div>
   );
 }
+

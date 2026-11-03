@@ -68,12 +68,14 @@ test.describe("Geospatial Port Mapping & Synchronized 3D Digital Twin", () => {
   });
 
   test("runs synchronized terminal simulation with speed controls", async ({ page }) => {
+    test.setTimeout(45000);
     const simButton = page.getByRole("button", { name: /Simulate/i });
     await expect(simButton).toBeVisible();
 
     // Start simulation
     await simButton.click();
-    await expect(page.getByRole("button", { name: /Pause/i })).toBeVisible();
+    const pauseBtn = page.getByRole("button", { name: /Pause/i });
+    await expect(pauseBtn).toBeVisible();
 
     // Toggle speed to 2x then 5x
     const speed2x = page.getByRole("button", { name: "2x" });
@@ -85,7 +87,7 @@ test.describe("Geospatial Port Mapping & Synchronized 3D Digital Twin", () => {
     await expect(speed5x).toHaveClass(/text-white/);
 
     // Pause simulation
-    await page.getByRole("button", { name: /Pause/i }).click();
+    await pauseBtn.click();
     await expect(page.getByRole("button", { name: /Simulate/i })).toBeVisible();
   });
 

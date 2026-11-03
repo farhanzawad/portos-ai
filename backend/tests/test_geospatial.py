@@ -141,3 +141,4 @@ def test_distance_and_bearing_calculation(client: TestClient):
     assert data["distance_meters"] > 9000.0
     assert data["distance_nautical_miles"] > 4.5
     assert 180.0 <= data["initial_bearing_degrees"] <= 270.0  # South-West
+

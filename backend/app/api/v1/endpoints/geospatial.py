@@ -95,3 +95,4 @@ def calculate_spatial_distance(
         "point_2": {"lat": lat2, "lon": lon2},
         "crs": "WGS84 (EPSG:4326)",
     }
+

@@ -114,3 +114,4 @@ def initial_bearing_deg(lat1: float, lon1: float, lat2: float, lon2: float) -> f
     x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(delta_lambda)
     bearing = math.degrees(math.atan2(y, x))
     return (bearing + 360.0) % 360.0
+

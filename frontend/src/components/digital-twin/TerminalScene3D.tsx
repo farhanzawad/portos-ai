@@ -16,6 +16,7 @@ import { BerthZone3D } from "./BerthZone3D";
 import { ProceduralVessel3D } from "./ProceduralVessel3D";
 import { STSCrane3D } from "./STSCrane3D";
 import { YardBlock3D } from "./YardBlock3D";
+import { RealisticContainer3D } from "./RealisticContainer3D";
 
 interface TerminalScene3DProps {
   berths: BerthRead[];
@@ -529,10 +530,9 @@ export function TerminalScene3D({
           <boxGeometry args={[1.0, 1.1, 0.9]} />
           <meshStandardMaterial color="#ea580c" roughness={0.4} />
         </mesh>
-        <mesh position={[-0.8, 0.95, 0]}>
-          <boxGeometry args={[3.2, 0.95, 0.88]} />
-          <meshStandardMaterial color="#0284c7" roughness={0.5} />
-        </mesh>
+        <group position={[-0.8, 0.45, 0]}>
+          <RealisticContainer3D carrier="MAERSK" scale={0.92} />
+        </group>
       </group>
 
       {/* Dynamic Terminal Tractor 2 */}
@@ -541,10 +541,9 @@ export function TerminalScene3D({
           <boxGeometry args={[1.0, 1.1, 0.9]} />
           <meshStandardMaterial color="#eab308" roughness={0.4} />
         </mesh>
-        <mesh position={[-0.8, 0.95, 0]}>
-          <boxGeometry args={[3.2, 0.95, 0.88]} />
-          <meshStandardMaterial color="#047857" roughness={0.5} />
-        </mesh>
+        <group position={[-0.8, 0.45, 0]}>
+          <RealisticContainer3D carrier="EVERGREEN" scale={0.92} />
+        </group>
       </group>
 
       {/* ============================================================ */}
