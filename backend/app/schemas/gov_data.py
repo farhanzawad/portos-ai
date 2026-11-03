@@ -107,3 +107,4 @@ class GovThroughputBenchmarkRead(BaseModel):
     dwell_time_export_days: float
     data_source_publication: str
     data_status: DataStatusEnum = DataStatusEnum.OBSERVED
+

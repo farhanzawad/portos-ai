@@ -1112,3 +1112,81 @@ export interface GovThroughputBenchmark {
   data_status: DataStatus;
 }
 
+// ==========================================
+// Geospatial & Digital Twin GIS Types
+// ==========================================
+
+export interface GeoJSONGeometry {
+  type: "Point" | "MultiPoint" | "LineString" | "MultiLineString" | "Polygon" | "MultiPolygon";
+  coordinates: any;
+}
+
+export interface GeoJSONFeature {
+  type: "Feature";
+  id: string;
+  geometry: GeoJSONGeometry;
+  properties: Record<string, any>;
+}
+
+export interface GeoJSONFeatureCollection {
+  type: "FeatureCollection";
+  features: GeoJSONFeature[];
+  crs?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface SpatialLayerRead {
+  layer_id: string;
+  name: string;
+  category: string;
+  feature_count: number;
+  default_visible: boolean;
+  description: string;
+  icon?: string;
+}
+
+export interface WGS84ToENURequest {
+  latitude: number;
+  longitude: number;
+  altitude_m?: number;
+  origin_lat?: number;
+  origin_lon?: number;
+}
+
+export interface ENUCoordinate {
+  x: number;
+  y: number;
+  z: number;
+  origin_lat: number;
+  origin_lon: number;
+  crs: string;
+  data_status: DataStatus;
+}
+
+export interface ENUToWGS84Request {
+  x: number;
+  y?: number;
+  z: number;
+  origin_lat?: number;
+  origin_lon?: number;
+}
+
+export interface WGS84Coordinate {
+  latitude: number;
+  longitude: number;
+  altitude_m: number;
+  crs: string;
+  data_status: DataStatus;
+}
+
+export interface DistanceBearingResponse {
+  distance_m: number;
+  distance_nm: number;
+  initial_bearing_deg: number;
+  compass_direction: string;
+  from_point: { lat: number; lon: number };
+  to_point: { lat: number; lon: number };
+  data_status: DataStatus;
+}
+
+

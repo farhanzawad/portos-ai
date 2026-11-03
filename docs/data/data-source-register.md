@@ -73,6 +73,7 @@ In accordance with Blue AI Challenge governance:
 
 ---
 
+### Source 5: Synthetic Port Calibration Corpus (PORTOS Generator)
 ### Source 5: CPA Official Berth Specifications Circular
 - **Source Identifier:** `SRC-CPA-BERTH-SPEC-2026`
 - **Origin Organization:** Chattogram Port Authority (CPA) / Traffic Operations Department

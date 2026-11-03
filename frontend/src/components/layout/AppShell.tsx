@@ -36,9 +36,8 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div
-      className={`min-h-screen flex bg-portos-bg ${
-        mounted && reducedMotion ? "motion-reduce" : ""
-      }`}
+      className={`min-h-screen flex bg-portos-bg ${mounted && reducedMotion ? "motion-reduce" : ""
+        }`}
     >
       {/* Left Persistent Navigation Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

@@ -46,6 +46,13 @@ import {
   GovBerthSpec,
   GovMetBulletin,
   GovThroughputBenchmark,
+  GeoJSONFeatureCollection,
+  SpatialLayerRead,
+  WGS84ToENURequest,
+  ENUCoordinate,
+  ENUToWGS84Request,
+  WGS84Coordinate,
+  DistanceBearingResponse,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -452,6 +459,51 @@ export async function getGovSampleFile(file_type: string): Promise<string> {
   }
   return res.text();
 }
+
+// ==========================================
+// Geospatial & GIS Navigation API
+// ==========================================
+
+export async function getPortGeoJSON(layer?: string): Promise<GeoJSONFeatureCollection> {
+  const query = layer ? `?layer=${encodeURIComponent(layer)}` : "";
+  return fetchFromApi<GeoJSONFeatureCollection>(`/api/v1/geospatial/geojson${query}`);
+}
+
+export async function getSpatialLayers(): Promise<SpatialLayerRead[]> {
+  return fetchFromApi<SpatialLayerRead[]>("/api/v1/geospatial/layers");
+}
+
+export async function transformWGS84ToENU(req: WGS84ToENURequest): Promise<ENUCoordinate> {
+  return fetchFromApi<ENUCoordinate>("/api/v1/geospatial/transform/wgs84-to-enu", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
+}
+
+export async function transformENUToWGS84(req: ENUToWGS84Request): Promise<WGS84Coordinate> {
+  return fetchFromApi<WGS84Coordinate>("/api/v1/geospatial/transform/enu-to-wgs84", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
+}
+
+export async function calculateDistanceAndBearing(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): Promise<DistanceBearingResponse> {
+  const params = new URLSearchParams({
+    lat1: String(lat1),
+    lon1: String(lon1),
+    lat2: String(lat2),
+    lon2: String(lon2),
+  });
+  return fetchFromApi<DistanceBearingResponse>(`/api/v1/geospatial/distance?${params.toString()}`);
+}
+
 
 
 

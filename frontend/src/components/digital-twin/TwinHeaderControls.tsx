@@ -1,25 +1,28 @@
 "use client";
 
 import React from "react";
-import { LayerVisibility, SimulationState } from "./types";
+import { LayerVisibility, SimulationState, ViewMode, CameraPreset } from "./types";
 import {
   Play,
   Pause,
   RotateCcw,
   Box,
   Map,
+  Columns2,
   Ship,
   Anchor,
   Cpu,
   Grid3X3,
-  Eye,
-  SlidersHorizontal,
+  Compass,
+  Video,
 } from "lucide-react";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
 
 interface TwinHeaderControlsProps {
-  viewMode: "3d" | "2d";
-  onViewModeChange: (mode: "3d" | "2d") => void;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+  cameraPreset?: CameraPreset;
+  onCameraPresetChange?: (preset: CameraPreset) => void;
   layers: LayerVisibility;
   onToggleLayer: (layer: keyof LayerVisibility) => void;
   simulation: SimulationState;
@@ -31,6 +34,8 @@ interface TwinHeaderControlsProps {
 export function TwinHeaderControls({
   viewMode,
   onViewModeChange,
+  cameraPreset = "isometric",
+  onCameraPresetChange,
   layers,
   onToggleLayer,
   simulation,
@@ -50,7 +55,7 @@ export function TwinHeaderControls({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-portos-navy text-white rounded-t-lg border-b border-portos-navy-secondary text-xs select-none">
-      {/* Left: View Mode Toggle & Title */}
+      {/* Left: View Mode Switcher (3D Twin | 2D GIS Map | 2D Schematic | Split View) */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
           <span className="font-bold tracking-tight text-sm text-white">
@@ -59,29 +64,55 @@ export function TwinHeaderControls({
           <DataStatusBadge status="SIMULATED" size="sm" />
         </div>
 
-        {/* 3D vs 2D Toggle */}
+        {/* 4-Way Mode Toggle */}
         <div className="flex items-center bg-portos-navy-secondary/60 p-0.5 rounded border border-portos-navy-secondary">
           <button
             onClick={() => onViewModeChange("3d")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors text-[11px] font-medium ${
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-colors text-[11px] font-medium ${
               viewMode === "3d"
                 ? "bg-portos-teal text-white font-semibold"
                 : "text-slate-300 hover:text-white"
             }`}
+            title="Full 3D Interactive Terminal Digital Twin"
           >
             <Box className="h-3.5 w-3.5" />
-            <span>3D Interactive</span>
+            <span>3D Twin</span>
+          </button>
+          <button
+            onClick={() => onViewModeChange("map")}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-colors text-[11px] font-medium ${
+              viewMode === "map"
+                ? "bg-portos-teal text-white font-semibold"
+                : "text-slate-300 hover:text-white"
+            }`}
+            title="2D Regional Maritime GIS Port Map"
+          >
+            <Map className="h-3.5 w-3.5" />
+            <span>2D GIS Map</span>
           </button>
           <button
             onClick={() => onViewModeChange("2d")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors text-[11px] font-medium ${
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-colors text-[11px] font-medium ${
               viewMode === "2d"
                 ? "bg-portos-teal text-white font-semibold"
                 : "text-slate-300 hover:text-white"
             }`}
+            title="2D Operations Schematic Plan View"
           >
-            <Map className="h-3.5 w-3.5" />
+            <Compass className="h-3.5 w-3.5" />
             <span>2D Schematic</span>
+          </button>
+          <button
+            onClick={() => onViewModeChange("split")}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-colors text-[11px] font-medium ${
+              viewMode === "split"
+                ? "bg-portos-teal text-white font-semibold"
+                : "text-slate-300 hover:text-white"
+            }`}
+            title="Synchronized Split View: 2D GIS Map & 3D Terminal Twin"
+          >
+            <Columns2 className="h-3.5 w-3.5" />
+            <span>Split View</span>
           </button>
         </div>
       </div>
@@ -119,7 +150,7 @@ export function TwinHeaderControls({
               className={`px-1.5 py-0.5 rounded transition-colors ${
                 simulation.speed === spd
                   ? "bg-portos-teal text-white font-bold"
-                  : "text-slate-400 hover:text-white"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               {spd}x
@@ -127,66 +158,98 @@ export function TwinHeaderControls({
           ))}
         </div>
 
-        {/* Sim Time Elapsed */}
-        <div className="font-mono text-[11px] text-portos-teal pl-1 tabular-nums">
-          <span className="text-[10px] text-slate-400 mr-1">TICK:</span>
+        {/* Elapsed Simulation Time Clock */}
+        <div className="font-mono text-[11px] text-portos-teal bg-portos-navy px-2 py-0.5 rounded border border-portos-navy-secondary">
           {formatSimTime(simulation.elapsedSeconds)}
         </div>
       </div>
 
-      {/* Right: Layers & Camera Controls */}
+      {/* Right: Camera Presets & Layer Filters */}
       <div className="flex items-center gap-2">
-        {/* Layer Visibility Chips */}
-        <div className="hidden lg:flex items-center gap-1 bg-portos-navy-secondary/40 px-2 py-1 rounded border border-portos-navy-secondary text-[10px]">
-          <span className="text-slate-400 mr-1 flex items-center gap-1">
-            <LayersIcon />
-            <span>Layers:</span>
-          </span>
+        {/* Camera Presets (Visible in 3D & Split View) */}
+        {(viewMode === "3d" || viewMode === "split") && onCameraPresetChange && (
+          <div className="flex items-center gap-1 bg-portos-navy-secondary/60 p-0.5 rounded border border-portos-navy-secondary text-[11px]">
+            <Video className="h-3 w-3 text-slate-400 ml-1" />
+            <button
+              onClick={() => onCameraPresetChange("isometric")}
+              className={`px-2 py-0.5 rounded transition-colors ${
+                cameraPreset === "isometric"
+                  ? "bg-portos-teal text-white font-semibold"
+                  : "text-slate-300 hover:text-white"
+              }`}
+              title="Isometric 45° terminal overview"
+            >
+              Isometric
+            </button>
+            <button
+              onClick={() => onCameraPresetChange("topdown")}
+              className={`px-2 py-0.5 rounded transition-colors ${
+                cameraPreset === "topdown"
+                  ? "bg-portos-teal text-white font-semibold"
+                  : "text-slate-300 hover:text-white"
+              }`}
+              title="Top-down orthographic masterplan view"
+            >
+              Plan (Top)
+            </button>
+            <button
+              onClick={() => onCameraPresetChange("operational")}
+              className={`px-2 py-0.5 rounded transition-colors ${
+                cameraPreset === "operational"
+                  ? "bg-portos-teal text-white font-semibold"
+                  : "text-slate-300 hover:text-white"
+              }`}
+              title="Low-angle quayside operational view"
+            >
+              Operational
+            </button>
+          </div>
+        )}
 
-          <LayerButton
-            active={layers.berths}
-            onClick={() => onToggleLayer("berths")}
-            icon={<Anchor className="h-3 w-3" />}
-            label="Berths"
-          />
-          <LayerButton
-            active={layers.vessels}
-            onClick={() => onToggleLayer("vessels")}
-            icon={<Ship className="h-3 w-3" />}
-            label="Vessels"
-          />
-          <LayerButton
-            active={layers.cranes}
-            onClick={() => onToggleLayer("cranes")}
-            icon={<Cpu className="h-3 w-3" />}
-            label="Cranes"
-          />
-          <LayerButton
-            active={layers.yardBlocks}
-            onClick={() => onToggleLayer("yardBlocks")}
-            icon={<Grid3X3 className="h-3 w-3" />}
-            label="Yard"
-          />
-        </div>
+        {/* 3D Layers Toggle */}
+        {(viewMode === "3d" || viewMode === "split") && (
+          <div className="hidden lg:flex items-center gap-1 bg-portos-navy-secondary/40 px-2 py-1 rounded border border-portos-navy-secondary text-[11px]">
+            <LayerButton
+              active={layers.berths}
+              onClick={() => onToggleLayer("berths")}
+              icon={<Anchor className="h-3 w-3" />}
+              label="Berths"
+            />
+            <LayerButton
+              active={layers.vessels}
+              onClick={() => onToggleLayer("vessels")}
+              icon={<Ship className="h-3 w-3" />}
+              label="Vessels"
+            />
+            <LayerButton
+              active={layers.cranes}
+              onClick={() => onToggleLayer("cranes")}
+              icon={<Cpu className="h-3 w-3" />}
+              label="Cranes"
+            />
+            <LayerButton
+              active={layers.yardBlocks}
+              onClick={() => onToggleLayer("yardBlocks")}
+              icon={<Grid3X3 className="h-3 w-3" />}
+              label="Yard"
+            />
+          </div>
+        )}
 
         {/* Camera Reset */}
-        {viewMode === "3d" && (
+        {(viewMode === "3d" || viewMode === "split") && (
           <button
             onClick={onResetCamera}
             className="flex items-center gap-1 px-2.5 py-1 rounded bg-portos-navy-secondary hover:bg-slate-700 text-slate-200 hover:text-white transition-colors text-[11px] font-medium border border-portos-navy-secondary"
-            title="Reset Isometric Camera"
+            title="Reset Camera"
           >
             <RotateCcw className="h-3 w-3" />
-            <span>Reset View</span>
+            <span>Reset</span>
           </button>
         )}
       </div>
     </div>
   );
-}
-
-function LayersIcon() {
-  return <SlidersHorizontal className="h-3 w-3 text-slate-400" />;
 }
 
 function LayerButton({
@@ -214,4 +277,3 @@ function LayerButton({
     </button>
   );
 }
-

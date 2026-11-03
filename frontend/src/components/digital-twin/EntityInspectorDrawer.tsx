@@ -116,7 +116,7 @@ function getEntityTitle(entity: SelectedEntity): string {
   switch (entity.type) {
     case "vessel": {
       const v = entity.data as VesselCallRead;
-      return v.vessel?.name || v.call_number;
+      return v?.vessel?.name || v?.call_number || "Vessel";
     }
     case "berth": {
       const b = entity.data as BerthRead;
@@ -130,6 +130,8 @@ function getEntityTitle(entity: SelectedEntity): string {
       const y = entity.data as YardBlockRead;
       return `${y.code} · ${y.name}`;
     }
+    default:
+      return (entity.data as any)?.name || entity.id || "Port Entity";
   }
 }
 
@@ -139,38 +141,42 @@ function getEntityStatusType(
   switch (entity.type) {
     case "vessel": {
       const v = entity.data as VesselCallRead;
-      if (v.delay_risk_status === "HIGH_RISK") return "danger";
-      if (v.delay_risk_status === "WATCH") return "watch";
+      if (v?.delay_risk_status === "HIGH_RISK") return "danger";
+      if (v?.delay_risk_status === "WATCH") return "watch";
       return "normal";
     }
     case "berth": {
       const b = entity.data as BerthRead;
-      if (b.status === "OCCUPIED") return "normal";
-      if (b.status === "MAINTENANCE") return "watch";
+      if (b?.status === "OCCUPIED") return "normal";
+      if (b?.status === "MAINTENANCE") return "watch";
       return "neutral";
     }
     case "crane": {
       const c = entity.data as EquipmentRead;
-      if (c.status === "OPERATIONAL") return "normal";
-      if (c.status === "DEGRADED") return "watch";
+      if (c?.status === "OPERATIONAL") return "normal";
+      if (c?.status === "DEGRADED") return "watch";
       return "danger";
     }
     case "yard": {
       return "normal";
     }
+    default:
+      return "normal";
   }
 }
 
 function getEntityStatusLabel(entity: SelectedEntity): string {
   switch (entity.type) {
     case "vessel":
-      return (entity.data as VesselCallRead).status.replace("_", " ");
+      return (entity.data as VesselCallRead)?.status?.replace("_", " ") || "ACTIVE";
     case "berth":
-      return (entity.data as BerthRead).status;
+      return (entity.data as BerthRead)?.status || "AVAILABLE";
     case "crane":
-      return (entity.data as EquipmentRead).status;
+      return (entity.data as EquipmentRead)?.status || "OPERATIONAL";
     case "yard":
-      return `${(entity.data as YardBlockRead).zone} ZONE`;
+      return `${(entity.data as YardBlockRead)?.zone || "CONTAINER"} ZONE`;
+    default:
+      return (entity.data as any)?.status || "OPERATIONAL";
   }
 }
 

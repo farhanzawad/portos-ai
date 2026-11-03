@@ -22,21 +22,27 @@ export function YardBlock3D({
   const [hovered, setHovered] = useState(false);
 
   // Derive visual status and stacking tiers
-  const isCongested = block.code === "YB-04";
-  const isWatch = block.code === "YB-02";
-  const stackTier = isCongested ? 4 : isWatch ? 3 : 2;
+  const isCongested = block.code === "YB-04" || block.code === "C04";
+  const isWatch = block.code === "YB-02" || block.code === "C02";
+  const isReefer = block.zone === "REEFER" || (block as any).category === "REEFER" || block.code === "C11" || block.code === "YB-11";
+  const isHazardous = (block as any).category === "HAZARDOUS_IMO" || block.code === "C12" || block.code === "YB-12";
+  const stackTier = isHazardous ? 2 : isCongested ? 4 : isWatch ? 3 : 2;
 
   // Authentic Shipping Line Livery Palette
-  const carrierColors = [
-    "#0284c7", // Maersk Line Cyan Blue
-    "#047857", // Evergreen Marine Green
-    "#ea580c", // Hapag-Lloyd Flame Orange
-    "#d97706", // Mediterranean Shipping Co (MSC) Yellow
-    "#1d4ed8", // CMA CGM Deep Navy
-    "#be185d", // Ocean Network Express (ONE) Magenta
-    "#f8fafc", // Thermo King / Carrier Reefer White
-    "#334155", // Neutral Slate Grey
-  ];
+  const carrierColors = isReefer
+    ? ["#f8fafc", "#f1f5f9", "#e2e8f0", "#0284c7"] // Predominantly Reefer White with Maersk Blue
+    : isHazardous
+    ? ["#ef4444", "#ea580c", "#d97706", "#334155"] // Hazardous warning red & flame orange
+    : [
+        "#0284c7", // Maersk Line Cyan Blue
+        "#047857", // Evergreen Marine Green
+        "#ea580c", // Hapag-Lloyd Flame Orange
+        "#d97706", // Mediterranean Shipping Co (MSC) Yellow
+        "#1d4ed8", // CMA CGM Deep Navy
+        "#be185d", // Ocean Network Express (ONE) Magenta
+        "#f8fafc", // Thermo King / Carrier Reefer White
+        "#334155", // Neutral Slate Grey
+      ];
 
   return (
     <group
@@ -88,6 +94,49 @@ export function YardBlock3D({
           <meshStandardMaterial color="#eab308" roughness={0.4} />
         </mesh>
       ))}
+
+      {/* Reefer Power Plug Distribution Gantries (Block C11) */}
+      {isReefer && (
+        <group position={[0, 0.1, 0]}>
+          {[-2.2, 0, 2.2].map((rx, ri) => (
+            <group key={ri} position={[rx, 0, 0]}>
+              <mesh position={[0, 1.2, 0]}>
+                <boxGeometry args={[0.15, 2.3, 0.15]} />
+                <meshStandardMaterial color="#38bdf8" metalness={0.7} />
+              </mesh>
+              <mesh position={[0, 2.3, 0]}>
+                <boxGeometry args={[0.5, 0.25, 0.3]} />
+                <meshStandardMaterial color="#0284c7" emissive="#0284c7" emissiveIntensity={0.3} />
+              </mesh>
+            </group>
+          ))}
+        </group>
+      )}
+
+      {/* Hazardous IMO Concrete Safety Containment Bund Wall (Block C12) */}
+      {isHazardous && (
+        <group position={[0, 0.25, 0]}>
+          {/* North and South Bund Walls */}
+          {[-2.25, 2.25].map((wz, wi) => (
+            <mesh key={`h-ns-${wi}`} position={[0, 0, wz]}>
+              <boxGeometry args={[6.7, 0.5, 0.2]} />
+              <meshStandardMaterial color="#ef4444" roughness={0.6} />
+            </mesh>
+          ))}
+          {/* East and West Bund Walls */}
+          {[-3.35, 3.35].map((wx, wi) => (
+            <mesh key={`h-ew-${wi}`} position={[wx, 0, 0]}>
+              <boxGeometry args={[0.2, 0.5, 4.5]} />
+              <meshStandardMaterial color="#ef4444" roughness={0.6} />
+            </mesh>
+          ))}
+          {/* Flashing Hazardous Warning Beacon */}
+          <mesh position={[3.2, 0.6, 2.1]}>
+            <cylinderGeometry args={[0.1, 0.1, 0.25, 8]} />
+            <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={1.2} />
+          </mesh>
+        </group>
+      )}
 
       {/* ============================================================ */}
       {/* 2. REALISTIC CONTAINER CARGO STACKS (3 Bays x 2 Rows)        */}

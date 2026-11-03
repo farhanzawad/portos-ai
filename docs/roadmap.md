@@ -28,6 +28,7 @@
 | **15**| **15** | Unified Event Stream & Workflow Sync | WebSockets/SSE, Cross-module | **COMPLETE** | 2026-11-03 |
 | **16**| **16** | Responsible AI, Security & Accessibility QA | Hardening, Audit, Disclosure | **COMPLETE** | 2026-11-03 |
 | **17**| **17** | Competition Package, Runbook & Demo Script | 5-Minute Showcase, Local Setup | **COMPLETE** | 2026-11-03 |
+| **Opt**| **06A**| Geospatial Port Mapping & Synchronized 3D Twin | MapLibre GIS, PCT Masterplan 3D, Split View | **COMPLETE** | 2026-11-03 |
 | **Opt**| **A**  | External Weather Integration | Open-Meteo Adapter, Fairway Sea State | **COMPLETE** | 2026-11-03 |
 
 ---
@@ -109,6 +110,14 @@
 ---
 
 ## Optional Extension Milestones (Post-Prompt 17)
+
+### Prompt 06A — Geospatial Port Mapping & Synchronized 3D Digital Twin (COMPLETE — 2026-11-03)
+- **Deliverables:**
+  - **Environment A (Geospatial 2D Map):** Professional MapLibre GL JS maritime GIS workspace for Chattogram Port / Karnaphuli River approach. 12 independently controllable spatial layers (River fairway, bathymetry contours, navigation corridors, anchorages, terminals, berths, container yards C01-C12, facilities, roads/railways, vessels, tracks, alerts). 4 Base maps (Nautical Dark, Maritime Standard, Topographic, and 100% Offline Vector Fallback). Interactive Distance & Bearing Measurement tool, GetInfo Feature Inspector, live DMM coordinates (`22°14.80'N, 91°46.50'E`), graphic ratio scale bar (`1 : 25,000`), north indicator compass.
+  - **Environment B (Interactive 3D Terminal Twin):** High-realism 3D digital twin modeled on RSGT Patenga Container Terminal (PCT) conceptual masterplan (Drawing No. PCT-MP-001) and high-realism aerial perspective: 580m continuous quay (Berths 1-3) + Berth 4 Oil/Tanker Service jetty with pipeline corridor, 45m apron with dual crane rails, arch rubber fenders, and mooring bollards; Stacking blocks C01-C12 with specific designations (Import, Export, Transshipment, Empty, Reefer with power racks, Hazardous IMO with concrete bund wall); RTGs, animated haulage tractors on loop road; In/Out Gate with OCR portals and weighbridges; Customs inspection canopy with container scanner; Control tower with elevated octagonal glass cabin & rotating radar; Admin, fire station, workshop, electrical substation, and 3 cylindrical fuel storage tanks with secondary containment bund wall. 3 camera presets: Isometric, Top-down Plan, and Low-angle Operational.
+  - **Environment C (Synchronization & Split View):** Unified workspace switcher (`3D Twin`, `2D GIS Map`, `2D Schematic`, `Split View`). Bidirectional selection and focusing between 2D and 3D. Unified simulation timeline driving fairway vessel transit and quayside cargo handling simultaneously.
+  - **Data Provenance & Operational Truthfulness:** Strict `DEMO ENVIRONMENT` banner, data status tags (`SIMULATED`, `OBSERVED`, `CONCEPTUAL`), explicit disclaimers regarding engineering conceptual masterplan.
+- **Target Outcome:** Two synchronized, engineering-scale spatial visualization environments linked by bidirectional selection and deterministic simulation.
 
 ### Optional A — External Weather Integration (COMPLETE — 2026-11-03)
 - **Deliverables:** Open-Meteo API maritime integration (`22.23°N, 91.81°E` Karnaphuli approach), 15-minute in-memory caching, graceful timeout recovery, deterministic fallback (`PORTOS Synthetic Marine Generator`), REST endpoints (`/api/v1/weather/current`, `/api/v1/weather/forecast`), typed Copilot tool allowlist integration (`get_external_weather`), mandatory CC BY 4.0 license attribution, and prominent safety disclaimer: *"Contextual marine weather product only. Not certified for navigational clearance, vessel pilotage, or berth maneuvering safety decisions."*

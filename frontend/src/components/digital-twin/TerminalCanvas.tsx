@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import {
   SelectedEntity,
   LayerVisibility,
   SimulationState,
+  ViewMode,
+  CameraPreset,
 } from "./types";
 import {
   BerthRead,
@@ -20,6 +21,7 @@ import { EntityInspectorDrawer } from "./EntityInspectorDrawer";
 import { TwinLegend } from "./TwinLegend";
 import { TerminalSchematic2D } from "./TerminalSchematic2D";
 import { TerminalScene3D } from "./TerminalScene3D";
+import { GeospatialPortMap } from "@/components/geospatial/GeospatialPortMap";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
 
 interface TerminalCanvasProps {
@@ -39,7 +41,8 @@ export function TerminalCanvas({
   isLoading = false,
   initialSelectedBlockCode,
 }: TerminalCanvasProps) {
-  const [viewMode, setViewMode] = useState<"3d" | "2d">("3d");
+  const [viewMode, setViewMode] = useState<ViewMode>("3d");
+  const [cameraPreset, setCameraPreset] = useState<CameraPreset>("isometric");
   const [hasWebGL, setHasWebGL] = useState(true);
   const [selectedEntity, setSelectedEntity] = useState<SelectedEntity | null>(
     null
@@ -123,6 +126,11 @@ export function TerminalCanvas({
     setResetCameraSignal((prev) => prev + 1);
   };
 
+  const handleOpen3DView = (entityId?: string) => {
+    setViewMode("3d");
+    setCameraPreset("operational");
+  };
+
   if (isLoading) {
     return (
       <div className="rounded-lg border border-portos-border bg-portos-surface shadow-sm overflow-hidden flex flex-col h-[700px]">
@@ -149,6 +157,8 @@ export function TerminalCanvas({
       <TwinHeaderControls
         viewMode={viewMode}
         onViewModeChange={(mode) => setViewMode(mode)}
+        cameraPreset={cameraPreset}
+        onCameraPresetChange={(preset) => setCameraPreset(preset)}
         layers={layers}
         onToggleLayer={toggleLayer}
         simulation={simulation}
@@ -157,25 +167,74 @@ export function TerminalCanvas({
         onResetCamera={handleResetCamera}
       />
 
-      {/* Main Canvas Area */}
-      <div className="relative w-full h-[660px] bg-slate-950 overflow-hidden select-none">
-        {viewMode === "3d" && hasWebGL ? (
-          <Canvas
-            shadows
-            camera={{ position: [38, 40, 44], fov: 38 }}
-            className="w-full h-full cursor-grab active:cursor-grabbing"
-            gl={{
-              antialias: true,
-              alpha: false,
-              powerPreference: "high-performance",
-            }}
-            onCreated={({ gl }) => {
-              gl.toneMapping = THREE.ACESFilmicToneMapping;
-              gl.toneMappingExposure = 1.14;
-            }}
-          >
-            <color attach="background" args={["#0c1926"]} />
-            <TerminalScene3D
+      {/* Main Workspace Area */}
+      <div className="relative w-full min-h-[660px] bg-slate-950 overflow-hidden select-none">
+        {/* VIEW MODE 1: 3D DIGITAL TWIN */}
+        {viewMode === "3d" && (
+          <div className="w-full h-[660px] relative">
+            {hasWebGL ? (
+              <Canvas
+                shadows
+                camera={{ position: [42, 45, 48], fov: 38 }}
+                className="w-full h-full cursor-grab active:cursor-grabbing"
+                gl={{
+                  antialias: true,
+                  alpha: false,
+                  powerPreference: "high-performance",
+                }}
+                onCreated={({ gl }) => {
+                  gl.toneMapping = THREE.ACESFilmicToneMapping;
+                  gl.toneMappingExposure = 1.14;
+                }}
+              >
+                <color attach="background" args={["#0c1926"]} />
+                <TerminalScene3D
+                  berths={berths}
+                  vesselCalls={vesselCalls}
+                  equipment={equipment}
+                  yardBlocks={yardBlocks}
+                  layers={layers}
+                  selectedEntity={selectedEntity}
+                  onSelectEntity={(entity) => setSelectedEntity(entity)}
+                  isSimulating={simulation.isPlaying}
+                  simulationSpeed={simulation.speed}
+                  resetCameraSignal={resetCameraSignal}
+                  cameraPreset={cameraPreset}
+                />
+              </Canvas>
+            ) : (
+              <TerminalSchematic2D
+                berths={berths}
+                vesselCalls={vesselCalls}
+                equipment={equipment}
+                yardBlocks={yardBlocks}
+                layers={layers}
+                selectedEntity={selectedEntity}
+                onSelectEntity={(entity) => setSelectedEntity(entity)}
+              />
+            )}
+            <TwinLegend />
+          </div>
+        )}
+
+        {/* VIEW MODE 2: 2D REGIONAL MARITIME GIS MAP */}
+        {viewMode === "map" && (
+          <div className="w-full h-[660px] relative">
+            <GeospatialPortMap
+              selectedEntity={selectedEntity}
+              onSelectEntity={(entity) => setSelectedEntity(entity)}
+              isSimulating={simulation.isPlaying}
+              simulationSpeed={simulation.speed}
+              onOpen3DView={handleOpen3DView}
+              height="h-[660px]"
+            />
+          </div>
+        )}
+
+        {/* VIEW MODE 3: 2D OPERATIONS SCHEMATIC PLAN */}
+        {viewMode === "2d" && (
+          <div className="w-full min-h-[660px] relative">
+            <TerminalSchematic2D
               berths={berths}
               vesselCalls={vesselCalls}
               equipment={equipment}
@@ -183,33 +242,79 @@ export function TerminalCanvas({
               layers={layers}
               selectedEntity={selectedEntity}
               onSelectEntity={(entity) => setSelectedEntity(entity)}
-              isSimulating={simulation.isPlaying}
-              simulationSpeed={simulation.speed}
-              resetCameraSignal={resetCameraSignal}
             />
-          </Canvas>
-        ) : (
-          <TerminalSchematic2D
-            berths={berths}
-            vesselCalls={vesselCalls}
-            equipment={equipment}
-            yardBlocks={yardBlocks}
-            layers={layers}
-            selectedEntity={selectedEntity}
-            onSelectEntity={(entity) => setSelectedEntity(entity)}
-          />
+          </div>
         )}
 
-        {/* Floating Entity Inspector Drawer */}
+        {/* VIEW MODE 4: SYNCHRONIZED SPLIT VIEW (2D GIS MAP & 3D TWIN SIDE-BY-SIDE) */}
+        {viewMode === "split" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 w-full h-[660px] divide-y lg:divide-y-0 lg:divide-x divide-portos-navy-secondary">
+            {/* Left Column: 2D Maritime GIS Map */}
+            <div className="relative w-full h-[330px] lg:h-[660px]">
+              <GeospatialPortMap
+                selectedEntity={selectedEntity}
+                onSelectEntity={(entity) => setSelectedEntity(entity)}
+                isSimulating={simulation.isPlaying}
+                simulationSpeed={simulation.speed}
+                onOpen3DView={handleOpen3DView}
+                height="h-full"
+              />
+            </div>
+
+            {/* Right Column: 3D Terminal Digital Twin */}
+            <div className="relative w-full h-[330px] lg:h-[660px] bg-slate-950">
+              {hasWebGL ? (
+                <Canvas
+                  shadows
+                  camera={{ position: [42, 45, 48], fov: 38 }}
+                  className="w-full h-full cursor-grab active:cursor-grabbing"
+                  gl={{
+                    antialias: true,
+                    alpha: false,
+                    powerPreference: "high-performance",
+                  }}
+                  onCreated={({ gl }) => {
+                    gl.toneMapping = THREE.ACESFilmicToneMapping;
+                    gl.toneMappingExposure = 1.14;
+                  }}
+                >
+                  <color attach="background" args={["#0c1926"]} />
+                  <TerminalScene3D
+                    berths={berths}
+                    vesselCalls={vesselCalls}
+                    equipment={equipment}
+                    yardBlocks={yardBlocks}
+                    layers={layers}
+                    selectedEntity={selectedEntity}
+                    onSelectEntity={(entity) => setSelectedEntity(entity)}
+                    isSimulating={simulation.isPlaying}
+                    simulationSpeed={simulation.speed}
+                    resetCameraSignal={resetCameraSignal}
+                    cameraPreset={cameraPreset}
+                  />
+                </Canvas>
+              ) : (
+                <TerminalSchematic2D
+                  berths={berths}
+                  vesselCalls={vesselCalls}
+                  equipment={equipment}
+                  yardBlocks={yardBlocks}
+                  layers={layers}
+                  selectedEntity={selectedEntity}
+                  onSelectEntity={(entity) => setSelectedEntity(entity)}
+                />
+              )}
+              <TwinLegend />
+            </div>
+          </div>
+        )}
+
+        {/* Floating Entity Inspector Drawer for selected entities */}
         <EntityInspectorDrawer
           entity={selectedEntity}
           onClose={() => setSelectedEntity(null)}
         />
-
-        {/* Bottom Legend Overlay */}
-        <TwinLegend />
       </div>
     </div>
   );
 }
-

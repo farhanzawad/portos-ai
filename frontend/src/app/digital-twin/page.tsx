@@ -81,11 +81,16 @@ function DigitalTwinContent() {
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-portos-navy">
               Interactive Terminal Digital Twin
             </h1>
+            <span className="text-portos-muted font-normal text-sm hidden md:inline">
+              | Geospatial Port GIS
+            </span>
             <DataStatusBadge status="SIMULATED" />
+            <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] bg-slate-100 text-slate-600 rounded border border-slate-300 font-mono">
+              RSGT PCT MASTERPLAN CONCEPTUAL
+            </span>
           </div>
           <p className="text-xs text-portos-muted mt-0.5">
-            Procedural 3D spatial twin and 2D schematic operations view for
-            Karnaphuli container berths.
+            Synchronized 2D regional maritime GIS tracking of Karnaphuli fairway and interactive 3D digital twin of Patenga Container Terminal (PCT).
           </p>
         </div>
 
@@ -93,7 +98,7 @@ function DigitalTwinContent() {
         <div className="flex items-center gap-2 text-xs">
           <div className="px-2.5 py-1 bg-white rounded border border-portos-border text-portos-navy font-medium flex items-center gap-1.5 shadow-xs">
             <Layers className="h-3.5 w-3.5 text-portos-navy-secondary" />
-            <span>Terminal: CCT & NCT Complex</span>
+            <span>Terminal: RSGT Patenga (PCT) & CCT/NCT</span>
           </div>
           <div className="px-2.5 py-1 bg-portos-teal-light text-portos-teal rounded border border-portos-teal/30 font-medium">
             Datum: CD +0.0m
