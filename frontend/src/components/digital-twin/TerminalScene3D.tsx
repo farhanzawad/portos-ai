@@ -5,7 +5,14 @@ import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { SelectedEntity, LayerVisibility, CameraPreset, NavSignal } from "./types";
+import {
+  SelectedEntity,
+  LayerVisibility,
+  CameraPreset,
+  NavSignal,
+  MouseInteractionMode,
+  CameraMetrics,
+} from "./types";
 import {
   BerthRead,
   VesselCallRead,
@@ -68,6 +75,8 @@ interface TerminalScene3DProps {
   resetCameraSignal: number;
   cameraPreset?: CameraPreset;
   navSignal?: NavSignal | null;
+  mouseMode?: MouseInteractionMode;
+  onCameraMetrics?: (metrics: CameraMetrics) => void;
 }
 
 export function TerminalScene3D({
@@ -84,8 +93,11 @@ export function TerminalScene3D({
   resetCameraSignal,
   cameraPreset = "isometric",
   navSignal,
+  mouseMode = "pan",
+  onCameraMetrics,
 }: TerminalScene3DProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
+  const frameCounter = useRef(0);
   const approachingVesselRef = useRef<THREE.Group>(null);
   const truck1Ref = useRef<THREE.Group>(null);
   const truck2Ref = useRef<THREE.Group>(null);
@@ -277,6 +289,56 @@ export function TerminalScene3D({
         camera.position.copy(controls.target).add(offset);
         break;
       }
+      case "panNorth": {
+        // Pan North upriver towards CCT / NCT along -Z
+        const panDelta = new THREE.Vector3(0, 0, -8.0);
+        camera.position.add(panDelta);
+        controls.target.add(panDelta);
+        break;
+      }
+      case "panSouth": {
+        // Pan South seaward towards Bay of Bengal along +Z
+        const panDelta = new THREE.Vector3(0, 0, 8.0);
+        camera.position.add(panDelta);
+        controls.target.add(panDelta);
+        break;
+      }
+      case "panEast": {
+        // Pan East towards yard, gates & land along +X
+        const panDelta = new THREE.Vector3(8.0, 0, 0);
+        camera.position.add(panDelta);
+        controls.target.add(panDelta);
+        break;
+      }
+      case "panWest": {
+        // Pan West towards fairway & breakwater along -X
+        const panDelta = new THREE.Vector3(-8.0, 0, 0);
+        camera.position.add(panDelta);
+        controls.target.add(panDelta);
+        break;
+      }
+      case "resetNorth": {
+        // Reset camera heading to face True North (looking towards -Z)
+        const target = controls.target;
+        const curOffset = new THREE.Vector3().subVectors(camera.position, target);
+        const radiusHoriz = Math.max(14, Math.sqrt(curOffset.x * curOffset.x + curOffset.z * curOffset.z));
+        flyToTarget(target.x, camera.position.y, target.z + radiusHoriz, target.x, target.y, target.z);
+        break;
+      }
+      case "togglePitch": {
+        const target = controls.target;
+        const curDir = new THREE.Vector3();
+        camera.getWorldDirection(curDir);
+        const curPitch = Math.acos(Math.max(-1, Math.min(1, -curDir.y))) * (180 / Math.PI);
+        if (curPitch < 25) {
+          // In 2D Top-down -> tilt into 3D isometric perspective view
+          flyToTarget(target.x + 35, target.y + 40, target.z + 42, target.x, target.y, target.z);
+        } else {
+          // In 3D -> tilt straight down to 2D Top-down plan view
+          flyToTarget(target.x, target.y + 85, target.z + 0.05, target.x, target.y, target.z);
+        }
+        break;
+      }
     }
     controls.update();
   }, [navSignal, camera]);
@@ -353,6 +415,18 @@ export function TerminalScene3D({
       ) {
         isAnimatingCamera.current = false;
       }
+    }
+
+    // 0b. Periodically compute and publish live camera metrics (bearing, pitch, zoom distance)
+    frameCounter.current = (frameCounter.current + 1) % 6;
+    if (frameCounter.current === 0 && onCameraMetrics && controlsRef.current) {
+      const dir = new THREE.Vector3();
+      camera.getWorldDirection(dir);
+      let bearing = Math.round((Math.atan2(dir.x, -dir.z) * 180) / Math.PI);
+      if (bearing < 0) bearing += 360;
+      const pitch = Math.round(Math.acos(Math.max(-1, Math.min(1, -dir.y))) * (180 / Math.PI));
+      const distance = Math.round(camera.position.distanceTo(controlsRef.current.target));
+      onCameraMetrics({ bearing, pitch, distance });
     }
 
     // 0b. Continuous Free Roam Keyboard Navigation (WASD / Arrows / QE / Space / Shift)
@@ -553,6 +627,15 @@ export function TerminalScene3D({
         dampingFactor={0.08}
         rotateSpeed={0.9}
         zoomSpeed={1.2}
+        mouseButtons={{
+          LEFT: mouseMode === "pan" ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+          MIDDLE: THREE.MOUSE.DOLLY,
+          RIGHT: mouseMode === "pan" ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+        }}
+        touches={{
+          ONE: mouseMode === "pan" ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE,
+          TWO: THREE.TOUCH.DOLLY_PAN,
+        }}
       />
 
       {/* ============================================================ */}

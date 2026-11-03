@@ -51,7 +51,21 @@ export type NavActionType =
   | "zoomIn"
   | "zoomOut"
   | "rotateLeft"
-  | "rotateRight";
+  | "rotateRight"
+  | "panNorth"
+  | "panSouth"
+  | "panEast"
+  | "panWest"
+  | "resetNorth"
+  | "togglePitch";
+
+export type MouseInteractionMode = "pan" | "orbit";
+
+export interface CameraMetrics {
+  bearing: number; // 0° = North, 90° = East, 180° = South, 270° = West
+  pitch: number;   // 0° = top-down 2D plan, ~50° = 3D perspective
+  distance: number;
+}
 
 export interface NavSignal {
   action: NavActionType;

@@ -11,6 +11,8 @@ import {
   CameraPreset,
   NavSignal,
   NavActionType,
+  MouseInteractionMode,
+  CameraMetrics,
 } from "./types";
 import {
   BerthRead,
@@ -21,7 +23,7 @@ import {
 import { TwinHeaderControls } from "./TwinHeaderControls";
 import { EntityInspectorDrawer } from "./EntityInspectorDrawer";
 import { TwinLegend } from "./TwinLegend";
-import { FreeRoamHud } from "./FreeRoamHud";
+import { MapNavControl } from "./MapNavControl";
 import { TerminalSchematic2D } from "./TerminalSchematic2D";
 import { TerminalScene3D, HoverEntityInfo } from "./TerminalScene3D";
 import { GeospatialPortMap } from "@/components/geospatial/GeospatialPortMap";
@@ -53,9 +55,19 @@ export function TerminalCanvas({
   const [hoveredInfo, setHoveredInfo] = useState<HoverEntityInfo | null>(null);
   const [resetCameraSignal, setResetCameraSignal] = useState(0);
   const [navSignal, setNavSignal] = useState<NavSignal | null>(null);
+  const [mouseMode, setMouseMode] = useState<MouseInteractionMode>("pan");
+  const [cameraMetrics, setCameraMetrics] = useState<CameraMetrics>({
+    bearing: 42,
+    pitch: 48,
+    distance: 75,
+  });
 
   const handleNavigate = (action: NavActionType) => {
     setNavSignal({ action, timestamp: Date.now() });
+  };
+
+  const handleToggle2D3D = () => {
+    handleNavigate("togglePitch");
   };
 
   const [layers, setLayers] = useState<LayerVisibility>({
@@ -186,7 +198,11 @@ export function TerminalCanvas({
                 shadows
                 dpr={[1, 1.5]}
                 camera={{ position: [42, 45, 48], fov: 38 }}
-                className="w-full h-full cursor-grab active:cursor-grabbing"
+                className={`w-full h-full ${
+                  mouseMode === "pan"
+                    ? "cursor-grab active:cursor-grabbing"
+                    : "cursor-crosshair active:cursor-grabbing"
+                }`}
                 gl={{
                   antialias: true,
                   alpha: false,
@@ -213,6 +229,8 @@ export function TerminalCanvas({
                   resetCameraSignal={resetCameraSignal}
                   cameraPreset={cameraPreset}
                   navSignal={navSignal}
+                  mouseMode={mouseMode}
+                  onCameraMetrics={setCameraMetrics}
                 />
               </Canvas>
             ) : (
@@ -228,12 +246,14 @@ export function TerminalCanvas({
             )}
             <TwinLegend />
 
-            {/* Floating Free Navigation & Roam Controls (WASD / D-Pad / Elevate / Zoom) */}
-            <FreeRoamHud
+            {/* Map-Style Navigation Controls (Pan Rose N/S/E/W, Compass Needle, Pan vs Orbit, Zoom, 2D/3D Pitch) */}
+            <MapNavControl
               onNavigate={handleNavigate}
               onResetCamera={handleResetCamera}
-              cameraPreset={cameraPreset}
-              onSetPreset={setCameraPreset}
+              mouseMode={mouseMode}
+              onSetMouseMode={setMouseMode}
+              cameraMetrics={cameraMetrics}
+              onToggle2D3D={handleToggle2D3D}
             />
 
             {/* Floating Live 3D Asset Telemetry HUD */}
@@ -320,7 +340,11 @@ export function TerminalCanvas({
                   shadows
                   dpr={[1, 1.5]}
                   camera={{ position: [42, 45, 48], fov: 38 }}
-                  className="w-full h-full cursor-grab active:cursor-grabbing"
+                  className={`w-full h-full ${
+                    mouseMode === "pan"
+                      ? "cursor-grab active:cursor-grabbing"
+                      : "cursor-crosshair active:cursor-grabbing"
+                  }`}
                   gl={{
                     antialias: true,
                     alpha: false,
@@ -347,6 +371,8 @@ export function TerminalCanvas({
                     resetCameraSignal={resetCameraSignal}
                     cameraPreset={cameraPreset}
                     navSignal={navSignal}
+                    mouseMode={mouseMode}
+                    onCameraMetrics={setCameraMetrics}
                   />
                 </Canvas>
               ) : (
@@ -362,12 +388,14 @@ export function TerminalCanvas({
               )}
               <TwinLegend />
 
-              {/* Floating Free Navigation & Roam Controls (WASD / D-Pad / Elevate / Zoom) */}
-              <FreeRoamHud
+              {/* Map-Style Navigation Controls (Pan Rose N/S/E/W, Compass Needle, Pan vs Orbit, Zoom, 2D/3D Pitch) */}
+              <MapNavControl
                 onNavigate={handleNavigate}
                 onResetCamera={handleResetCamera}
-                cameraPreset={cameraPreset}
-                onSetPreset={setCameraPreset}
+                mouseMode={mouseMode}
+                onSetMouseMode={setMouseMode}
+                cameraMetrics={cameraMetrics}
+                onToggle2D3D={handleToggle2D3D}
               />
 
               {/* Floating Live 3D Asset Telemetry HUD in Split View */}
