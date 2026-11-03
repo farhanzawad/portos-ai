@@ -201,6 +201,9 @@ export function GeospatialPortMap({
     map.on("load", () => {
       setMapLoaded(true);
       mapRef.current = map;
+      if (typeof window !== "undefined") {
+        (window as any).__portMap = map;
+      }
     });
 
     map.on("mousemove", (e) => {

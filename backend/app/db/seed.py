@@ -179,18 +179,18 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
     ]
 
     vessel_spatial_profiles = {
-        "vsl_01": {"lat": 22.3080, "lon": 91.8118, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside CCT-01", "dist": 0.0},
-        "vsl_02": {"lat": 22.3040, "lon": 91.8115, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside CCT-02", "dist": 0.0},
-        "vsl_03": {"lat": 22.2960, "lon": 91.8110, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside NCT-04", "dist": 0.0},
-        "vsl_04": {"lat": 22.1750, "lon": 91.7420, "spd": 0.0, "hdg": 210.0, "nav": "At anchor (Anchorage Alpha)", "dist": 4.5},
-        "vsl_05": {"lat": 22.1520, "lon": 91.7180, "spd": 0.0, "hdg": 195.0, "nav": "At anchor (Anchorage Bravo)", "dist": 7.2},
-        "vsl_06": {"lat": 22.1940, "lon": 91.7560, "spd": 0.0, "hdg": 200.0, "nav": "At anchor (Anchorage Charlie)", "dist": 2.8},
-        "vsl_07": {"lat": 22.1350, "lon": 91.7050, "spd": 13.8, "hdg": 35.0, "nav": "Under way (Bay of Bengal approaching)", "dist": 14.5},
-        "vsl_08": {"lat": 22.1750, "lon": 91.7450, "spd": 12.0, "hdg": 35.0, "nav": "Under way (Outer Fairway Approach)", "dist": 8.5},
-        "vsl_09": {"lat": 22.1980, "lon": 91.7680, "spd": 10.5, "hdg": 42.0, "nav": "Under way (Outer Bar Pilot Boarding)", "dist": 4.0},
-        "vsl_10": {"lat": 22.2120, "lon": 91.7880, "spd": 8.5, "hdg": 45.0, "nav": "Under way (Patenga River Mouth Inbound)", "dist": 2.2},
-        "vsl_11": {"lat": 22.2260, "lon": 91.8080, "spd": 7.2, "hdg": 30.0, "nav": "Under way (Rounding Patenga Point)", "dist": 1.0},
-        "vsl_12": {"lat": 22.2650, "lon": 91.8230, "spd": 5.4, "hdg": 340.0, "nav": "Under way (Gupta Bend Transit)", "dist": 0.0},
+        "vsl_01": {"lat": 22.3040, "lon": 91.8020, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside CCT-01", "dist": 0.0},
+        "vsl_02": {"lat": 22.3000, "lon": 91.7990, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside CCT-02", "dist": 0.0},
+        "vsl_03": {"lat": 22.2940, "lon": 91.7960, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside NCT-04", "dist": 0.0},
+        "vsl_04": {"lat": 22.1750, "lon": 91.7500, "spd": 0.0, "hdg": 210.0, "nav": "At anchor (Anchorage Alpha)", "dist": 4.5},
+        "vsl_05": {"lat": 22.1550, "lon": 91.7250, "spd": 0.0, "hdg": 195.0, "nav": "At anchor (Anchorage Bravo)", "dist": 7.2},
+        "vsl_06": {"lat": 22.1950, "lon": 91.7750, "spd": 11.2, "hdg": 40.0, "nav": "Under way (Outer Fairway Buoy Reach)", "dist": 2.8},
+        "vsl_07": {"lat": 22.1300, "lon": 91.7000, "spd": 13.8, "hdg": 35.0, "nav": "Under way (Bay of Bengal Approaching)", "dist": 14.5},
+        "vsl_08": {"lat": 22.1700, "lon": 91.7450, "spd": 0.0, "hdg": 205.0, "nav": "At anchor (Anchorage Alpha)", "dist": 8.5},
+        "vsl_09": {"lat": 22.2080, "lon": 91.7920, "spd": 9.5, "hdg": 42.0, "nav": "Under way (Outer Bar Pilot Boarding)", "dist": 4.0},
+        "vsl_10": {"lat": 22.2260, "lon": 91.8095, "spd": 8.5, "hdg": 45.0, "nav": "Under way (Patenga River Mouth Inbound)", "dist": 2.2},
+        "vsl_11": {"lat": 22.2450, "lon": 91.8295, "spd": 7.2, "hdg": 30.0, "nav": "Under way (Patenga Reach PCT Transit)", "dist": 1.0},
+        "vsl_12": {"lat": 22.2800, "lon": 91.7998, "spd": 5.4, "hdg": 345.0, "nav": "Under way (Gupta Bend Apex Navigation)", "dist": 0.0},
     }
 
     for (v_id, imo, name, cs, loa, beam, draft, teu, dwt, call_status, risk_status, risk_score, delay_hrs, eta_offset_hrs, assigned_b_id) in vessel_data:

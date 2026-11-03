@@ -116,17 +116,25 @@ def _generate_corridor_track(call: VesselCall, base_pos: Optional[VesselPosition
 
     ref_time = base_pos.timestamp if base_pos else (call.reported_eta or datetime.utcnow())
 
-    # Verified Karnaphuli channel waypoints from Bay of Bengal towards CCT/NCT terminal
+    # Verified Karnaphuli channel waypoints following natural river meander strictly in water
     waypoints = [
-        (22.1350, 91.7050, 14.2, 35.0, "Under way (Bay of Bengal)", 14.5),
-        (22.1750, 91.7450, 12.0, 35.0, "Outer Fairway Approach", 8.5),
-        (22.1980, 91.7680, 10.5, 42.0, "Pilot boarding approach", 4.0),
-        (22.2120, 91.7880, 8.5, 45.0, "Outer Bar fairway transit", 2.2),
-        (22.2260, 91.8080, 7.2, 30.0, "Rounding Patenga Point", 1.0),
-        (22.2450, 91.8180, 6.5, 20.0, "Inward Patenga reach transit", 0.5),
-        (22.2650, 91.8230, 5.0, 340.0, "Navigating Gupta Bend", 0.2),
-        (22.2960, 91.8110, 3.5, 350.0, "Inward NCT river transit", 0.1),
-        (22.3080, 91.8118, 0.0, 0.0, "Moored at berth" if call.status == CallStatusEnum.BERTHED else "At anchor", 0.0),
+        (22.1300, 91.7000, 14.2, 35.0, "Under way (Bay of Bengal)", 14.5),
+        (22.1750, 91.7500, 12.0, 35.0, "Outer Fairway Approach", 8.5),
+        (22.1950, 91.7750, 10.5, 40.0, "Pilot boarding approach", 4.0),
+        (22.2080, 91.7920, 9.5, 42.0, "Pilot station boarding", 3.0),
+        (22.2200, 91.8050, 8.5, 45.0, "River mouth transit", 2.0),
+        (22.2260, 91.8095, 8.0, 45.0, "Lower reach channel transit", 1.5),
+        (22.2350, 91.8180, 7.5, 35.0, "Lower reach river transit", 1.2),
+        (22.2450, 91.8295, 7.0, 25.0, "Patenga reach PCT transit", 1.0),
+        (22.2550, 91.8355, 6.5, 15.0, "River reach east of airport", 0.8),
+        (22.2650, 91.8355, 6.2, 355.0, "Approaching river meander", 0.6),
+        (22.2700, 91.8230, 5.8, 320.0, "Curving northwest into Gupta bend", 0.5),
+        (22.2750, 91.8120, 5.5, 305.0, "Gupta bend entry transit", 0.4),
+        (22.2800, 91.7998, 5.0, 345.0, "Gupta Bend apex navigation", 0.3),
+        (22.2850, 91.7980, 4.6, 350.0, "NCT approach reach", 0.2),
+        (22.2900, 91.7960, 4.2, 355.0, "North transit past NCT", 0.15),
+        (22.2980, 91.7960, 3.8, 15.0, "CCT channel approach", 0.1),
+        (22.3040, 91.8020, 0.0, 0.0, "Moored at berth" if call.status == CallStatusEnum.BERTHED else "At berth", 0.0),
     ]
 
     if call.status == CallStatusEnum.OUTER_ANCHORAGE:

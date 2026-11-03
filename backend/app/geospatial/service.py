@@ -19,72 +19,92 @@ TERMINAL_ORIGIN_LAT = 22.2850
 TERMINAL_ORIGIN_LON = 91.8020
 
 # Verified Hydrographic Fairway Centerline Waypoints (Bay of Bengal to Sadarghat)
-# Navigates exclusively within the water channel, rounding Patenga Point into the Karnaphuli river
+# Strictly follows the natural hydrographic Karnaphuli river channel verified against MapLibre vector water layers
 KARNAPHULI_FAIRWAY_CENTERLINE = [
-    [91.7000, 22.1300],  # 0: Deep Sea Bay of Bengal / Outer Approaches
-    [91.7200, 22.1500],  # 1: Anchorage Area Bravo Corridor
-    [91.7450, 22.1750],  # 2: Anchorage Area Alpha Corridor
-    [91.7680, 22.1980],  # 3: Outer Fairway Buoy
-    [91.7880, 22.2120],  # 4: Outer Bar Pilot Boarding Station
-    [91.8050, 22.2220],  # 5: Rounding Patenga Point (Water entrance south of lighthouse)
-    [91.8140, 22.2320],  # 6: River mouth fairway entry (between Patenga and KAFCO)
-    [91.8180, 22.2450],  # 7: Patenga Reach (PCT frontage deep water)
-    [91.8240, 22.2580],  # 8: Approach to Gupta Bend (River reach)
-    [91.8220, 22.2700],  # 9: Gupta Bend Apex (Navigational hairpin C-curve)
-    [91.8160, 22.2820],  # 10: Gupta Bend North Transit
-    [91.8140, 22.2950],  # 11: NCT Container Terminal Fairway
-    [91.8140, 22.3080],  # 12: CCT Container Terminal Fairway
-    [91.8180, 22.3180],  # 13: CPA Jetties Fairway / Majhirghat
-    [91.8280, 22.3240],  # 14: Sadarghat Basin
+    [91.7000, 22.1300],  # 0: Outer deep sea (Bay of Bengal)
+    [91.7250, 22.1550],  # 1: Anchorage Area Bravo Corridor
+    [91.7500, 22.1750],  # 2: Anchorage Area Alpha Corridor
+    [91.7750, 22.1950],  # 3: Fairway buoy
+    [91.7920, 22.2080],  # 4: Pilot boarding station
+    [91.8050, 22.2200],  # 5: Water mouth entry (south of Patenga)
+    [91.8095, 22.2260],  # 6: River mouth fairway entry
+    [91.8180, 22.2350],  # 7: Lower reach channel transit
+    [91.8295, 22.2450],  # 8: Patenga reach (PCT frontage water)
+    [91.8355, 22.2550],  # 9: River reach east of airport
+    [91.8355, 22.2650],  # 10: River reach approaching meander
+    [91.8230, 22.2700],  # 11: Meander curve swinging northwest
+    [91.8120, 22.2750],  # 12: Gupta Bend entry
+    [91.7998, 22.2800],  # 13: Gupta Bend apex (in water)
+    [91.7980, 22.2850],  # 14: NCT approach fairway reach
+    [91.7960, 22.2900],  # 15: NCT container terminal fairway
+    [91.7960, 22.2980],  # 16: CCT container terminal fairway
+    [91.8040, 22.3050],  # 17: CPA Jetties fairway
+    [91.8125, 22.3120],  # 18: Majhirghat transition
+    [91.8235, 22.3180],  # 19: East reach to Sadarghat
+    [91.8370, 22.3240],  # 20: Sadarghat basin
 ]
 
-# Dredged Navigational Fairway Corridor (240m wide corridor polygon along centerline)
+# Dredged Navigational Fairway Corridor (150m-180m navigable polygon along centerline)
 KARNAPHULI_FAIRWAY_CORRIDOR = [
-    [91.71915, 22.15073],
-    [91.74415, 22.17573],
-    [91.76721, 22.19879],
-    [91.78733, 22.21288],
-    [91.80426, 22.22283],
-    [91.81297, 22.23250],
-    [91.81690, 22.24536],
-    [91.82285, 22.25816],
-    [91.82089, 22.26968],
-    [91.81488, 22.28169],
-    [91.81284, 22.29492],
-    [91.81285, 22.30817],
-    [91.81710, 22.31868],
-    [91.82737, 22.32491],
-    [91.82863, 22.32309],
-    [91.81890, 22.31732],
-    [91.81515, 22.30783],
-    [91.81516, 22.29508],
-    [91.81712, 22.28231],
-    [91.82311, 22.27032],
-    [91.82515, 22.25784],
-    [91.81910, 22.24464],
-    [91.81503, 22.23150],
-    [91.80574, 22.22117],
-    [91.78867, 22.21112],
-    [91.76879, 22.19721],
-    [91.74585, 22.17427],
-    [91.72085, 22.14927],
-    [91.71915, 22.15073],
+    [91.69947, 22.13046],
+    [91.72449, 22.15548],
+    [91.74952, 22.17551],
+    [91.77453, 22.19551],
+    [91.79151, 22.2085],
+    [91.80446, 22.22045],
+    [91.80893, 22.22642],
+    [91.81748, 22.23547],
+    [91.82893, 22.24542],
+    [91.8348, 22.25518],
+    [91.83492, 22.26459],
+    [91.8227, 22.26939],
+    [91.81182, 22.27463],
+    [91.79953, 22.27968],
+    [91.79759, 22.28487],
+    [91.79557, 22.28994],
+    [91.79561, 22.29818],
+    [91.80351, 22.3055],
+    [91.81207, 22.31255],
+    [91.82316, 22.3186],
+    [91.83668, 22.32461],
+    [91.83732, 22.32339],
+    [91.82384, 22.3174],
+    [91.81293, 22.31145],
+    [91.80449, 22.3045],
+    [91.79639, 22.29782],
+    [91.79643, 22.29006],
+    [91.79841, 22.28513],
+    [91.80007, 22.28032],
+    [91.81218, 22.27537],
+    [91.8233, 22.27061],
+    [91.83608, 22.26541],
+    [91.8362, 22.25482],
+    [91.83007, 22.24458],
+    [91.81852, 22.23453],
+    [91.81007, 22.22558],
+    [91.80554, 22.21955],
+    [91.79249, 22.2075],
+    [91.77547, 22.19449],
+    [91.75048, 22.17449],
+    [91.72551, 22.15452],
+    [91.70053, 22.12954],
+    [91.69947, 22.13046],
 ]
 
-# Verified Quayside Coordinates for CCT, NCT and PCT Container Berths
+# Verified Quayside Coordinates for CCT, NCT and PCT Container Berths along actual quay wall
 QUAYSIDE_BERTH_COORDINATES = {
-    "berth_01": [91.8118, 22.3080],  # CCT Berth 1
-    "berth_02": [91.8115, 22.3040],  # CCT Berth 2
-    "berth_03": [91.8112, 22.3000],  # CCT Berth 3
-    "berth_04": [91.8110, 22.2960],  # NCT Berth 4
-    "berth_05": [91.8107, 22.2920],  # NCT Berth 5
-    "berth_06": [91.8105, 22.2880],  # NCT Berth 6
-    "BERTH-01": [91.8118, 22.3080],
-    "BERTH-02": [91.8115, 22.3040],
-    "BERTH-03": [91.8112, 22.3000],
-    "BERTH-04": [91.8110, 22.2960],
-    "BERTH-05": [91.8107, 22.2920],
-    "BERTH-06": [91.8105, 22.2880],
+    "berth_01": [91.8020, 22.3040],  # CCT Berth 1
+    "berth_02": [91.7990, 22.3000],  # CCT Berth 2
+    "berth_03": [91.7970, 22.2960],  # CCT Berth 3
+    "berth_04": [91.7955, 22.2920],  # NCT Berth 4
+    "berth_05": [91.7945, 22.2880],  # NCT Berth 5
+    "berth_06": [91.7965, 22.2840],  # NCT Berth 6
+    "BERTH-01": [91.8020, 22.3040],
+    "BERTH-02": [91.7990, 22.3000],
+    "BERTH-03": [91.7970, 22.2960],
+    "BERTH-04": [91.7955, 22.2920],
+    "BERTH-05": [91.7945, 22.2880],
+    "BERTH-06": [91.7965, 22.2840],
 }
 
 
@@ -243,7 +263,7 @@ class GeospatialService:
         """Returns verified static geographic features of Chattogram Port and Karnaphuli river."""
         features = []
 
-        # 1. Karnaphuli River Waterway Polygon (Strictly in water, wraps around Patenga Point)
+        # 1. Karnaphuli River Waterway Polygon (Strictly in water, wraps around Patenga Point & Gupta Bend)
         features.append(
             GeoJSONFeature(
                 id="feat_karnaphuli_river",
@@ -252,24 +272,37 @@ class GeospatialService:
                     coordinates=[[
                         [91.7300, 22.1800],
                         [91.7700, 22.2050],
-                        [91.7920, 22.2220],  # Patenga Point tip
-                        [91.8020, 22.2280],  # Naval Academy shoreline
-                        [91.8100, 22.2420],  # PCT shoreline
-                        [91.8150, 22.2600],  # Gupta Bend west shoreline
-                        [91.8100, 22.2850],  # NCT quay shoreline
-                        [91.8110, 22.3100],  # CCT quay shoreline
-                        [91.8160, 22.3220],  # Majhirghat shoreline
-                        [91.8300, 22.3260],  # Sadarghat shoreline
+                        [91.7920, 22.2100],  # Outer bar pilot reach
+                        [91.8020, 22.2200],  # Naval Academy shoreline
+                        [91.8050, 22.2260],  # River mouth entrance
+                        [91.8120, 22.2350],  # Lower reach west bank
+                        [91.8245, 22.2450],  # PCT shoreline
+                        [91.8305, 22.2550],  # North Patenga shoreline
+                        [91.8305, 22.2650],  # Approach to meander
+                        [91.8100, 22.2750],  # Gupta bend approach
+                        [91.7972, 22.2800],  # Gupta bend apex (west shoreline)
+                        [91.7940, 22.2900],  # NCT quay shoreline
+                        [91.7890, 22.2980],  # CCT quay shoreline
+                        [91.7990, 22.3050],  # CPA Jetties shoreline
+                        [91.8070, 22.3120],  # Majhirghat shoreline
+                        [91.8140, 22.3180],  # Sadarghat west shoreline
+                        [91.8290, 22.3240],  # Sadarghat basin
                         [91.8550, 22.3280],  # Shah Amanat Bridge (North)
                         [91.8550, 22.3220],  # Shah Amanat Bridge (South)
-                        [91.8300, 22.3200],  # South riverbank
-                        [91.8220, 22.3120],  # South riverbank
-                        [91.8180, 22.2850],  # East bank opposite NCT
-                        [91.8250, 22.2700],  # East bank opposite Gupta Bend
-                        [91.8300, 22.2550],  # Boat Club / Marine Academy shoreline
-                        [91.8250, 22.2400],  # East bank
-                        [91.8400, 22.2280],  # KAFCO Jetty shoreline
-                        [91.8250, 22.2150],  # Outer mouth south bank
+                        [91.8445, 22.3240],  # South riverbank Sadarghat
+                        [91.8330, 22.3180],  # South riverbank Majhirghat
+                        [91.8175, 22.3120],  # South riverbank opposite CPA
+                        [91.8100, 22.3050],  # East bank opposite CCT
+                        [91.8005, 22.2980],  # East bank opposite NCT
+                        [91.8065, 22.2900],  # East bank north of Gupta bend
+                        [91.8134, 22.2800],  # East bank at Gupta Bend apex
+                        [91.8280, 22.2750],  # East bank meander curve
+                        [91.8400, 22.2650],  # Dangarchar shoreline
+                        [91.8400, 22.2550],  # Marine Academy shoreline
+                        [91.8340, 22.2450],  # CUFL shoreline
+                        [91.8235, 22.2350],  # KAFCO Jetty shoreline
+                        [91.8140, 22.2260],  # Outer mouth south bank
+                        [91.8080, 22.2200],  # Outer mouth south bank
                         [91.7900, 22.1950],  # Outer bar south
                         [91.7450, 22.1650],  # Outer bay
                         [91.7300, 22.1800],  # Close polygon
@@ -357,19 +390,20 @@ class GeospatialService:
             )
         )
 
-        # 5. Turning Basin (Diameter ~600m in river basin)
+        # 5. Turning Basin (Diameter ~600m in Gupta Bend river basin)
         features.append(
             GeoJSONFeature(
                 id="feat_turning_basin",
                 geometry=GeoJSONGeometry(
                     type="Polygon",
                     coordinates=[[
-                        [91.8190, 22.2700],
-                        [91.8235, 22.2725],
-                        [91.8250, 22.2685],
-                        [91.8220, 22.2650],
-                        [91.8180, 22.2670],
-                        [91.8190, 22.2700],
+                        [91.7970, 22.2800],
+                        [91.7985, 22.2825],
+                        [91.8015, 22.2825],
+                        [91.8028, 22.2800],
+                        [91.8015, 22.2775],
+                        [91.7985, 22.2775],
+                        [91.7970, 22.2800],
                     ]],
                 ),
                 properties={
@@ -412,10 +446,10 @@ class GeospatialService:
 
         # 7. Terminal Boundaries
         terminals_geo = [
-            ("term_cct", "Chittagong Container Terminal (CCT)", [91.8115, 22.3040], 605.0, DataStatusEnum.OBSERVED.value),
-            ("term_nct", "New Mooring Container Terminal (NCT)", [91.8108, 22.2920], 1000.0, DataStatusEnum.OBSERVED.value),
-            ("term_gcb", "General Cargo Berths (GCB)", [91.8130, 22.3160], 850.0, DataStatusEnum.OBSERVED.value),
-            ("term_pct", "RSGT Patenga Container Terminal (PCT)", [91.8110, 22.2420], 580.0, "CONCEPTUAL"),
+            ("term_cct", "Chittagong Container Terminal (CCT)", [91.8020, 22.3040], 605.0, DataStatusEnum.OBSERVED.value),
+            ("term_nct", "New Mooring Container Terminal (NCT)", [91.7960, 22.2920], 1000.0, DataStatusEnum.OBSERVED.value),
+            ("term_gcb", "General Cargo Berths (GCB)", [91.8080, 22.3120], 850.0, DataStatusEnum.OBSERVED.value),
+            ("term_pct", "RSGT Patenga Container Terminal (PCT)", [91.8295, 22.2450], 580.0, "CONCEPTUAL"),
         ]
         for t_id, t_name, coords, quay_len, status in terminals_geo:
             features.append(
