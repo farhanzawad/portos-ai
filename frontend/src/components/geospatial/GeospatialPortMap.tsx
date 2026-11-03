@@ -742,7 +742,7 @@ export function GeospatialPortMap({
                 nextHeading = motion.heading;
 
                 // Dynamic trailing wake line
-                const wake = getTrailingWakeCoordinates(motion.currentProgress, state.isOutbound, 4);
+                const wake = getTrailingWakeCoordinates(motion.currentProgress, motion.isOutbound, 4);
                 if (feat.properties?.id) vesselWakeMap.set(String(feat.properties.id), wake);
                 if (feat.id) vesselWakeMap.set(String(feat.id), wake);
               }

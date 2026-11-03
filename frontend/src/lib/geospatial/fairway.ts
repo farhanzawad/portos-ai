@@ -83,43 +83,110 @@ export function interpolateFairwayPosition(progress: number): {
   return { lon: lastWp[0], lat: lastWp[1], heading: 45 };
 }
 
+// Navigation loop bounds along the hydrographic fairway
+export const MIN_FAIRWAY_PROGRESS = 0.05; // Outer Sea / Fairway Buoy (Bay of Bengal)
+export const MAX_FAIRWAY_PROGRESS = 0.76; // Karnaphuli Ø 600m Turning Basin (-11m CD)
+export const FAIRWAY_SPAN = MAX_FAIRWAY_PROGRESS - MIN_FAIRWAY_PROGRESS; // 0.71 (~15.6 km)
+
 /**
  * Simulate live vessel motion along the Karnaphuli fairway corridor
  * based on elapsed time, vessel velocity, and transit route.
- * Uses an optimized visualization speed multiplier so vessel movement
- * is clearly, smoothly observable in real-time operations dashboards.
+ * 
+ * Features:
+ * 1. Realistic maritime harbor speed calibration (calm, steady glide).
+ * 2. Closed-loop 4-phase voyage cycle with ZERO teleportation:
+ *    - Phase 1 (0.00-0.44): Inbound transit from Sea to Turning Basin.
+ *    - Phase 2 (0.44-0.50): 180° swing maneuver inside Karnaphuli 600m Turning Basin.
+ *    - Phase 3 (0.50-0.94): Outbound transit downriver along fairway to Sea.
+ *    - Phase 4 (0.94-1.00): 180° swing maneuver in Bay of Bengal outer waiting roads.
  */
 export function getLiveVesselFairwayCoord(
   baseProgress: number,
   speedKnots: number,
   elapsedSeconds: number,
-  isOutbound: boolean = false
-): { lon: number; lat: number; heading: number; currentProgress: number } {
+  isOutboundInitial: boolean = false
+): {
+  lon: number;
+  lat: number;
+  heading: number;
+  currentProgress: number;
+  isOutbound: boolean;
+  transitPhase: "INBOUND" | "TURNING_BASIN" | "OUTBOUND" | "SEA_TURNAROUND";
+} {
   // Speed in meters per second (1 knot ~ 0.5144 m/s)
-  // Visualization multiplier (24x) for smooth, distinctly visible real-time motion
-  const speedMps = Math.max(7.0, speedKnots) * 0.5144 * 24.0;
+  // Calibrated visualization multiplier (3.2x) for calm, realistic harbor motion
+  const vesselKnots = speedKnots > 0 ? speedKnots : 8.5;
+  const speedMps = vesselKnots * 0.5144 * 3.2;
+
+  // Total round-trip distance along the 2-way fairway corridor
+  const roundTripDistanceM = 2 * FAIRWAY_SPAN * TOTAL_FAIRWAY_DISTANCE_M;
   const distTraveledM = speedMps * elapsedSeconds;
-  const progressDelta = distTraveledM / TOTAL_FAIRWAY_DISTANCE_M;
+  const cycleDelta = distTraveledM / roundTripDistanceM;
+
+  // Map initial vessel position into continuous [0, 1) cycle
+  const clampedBase = Math.max(MIN_FAIRWAY_PROGRESS, Math.min(MAX_FAIRWAY_PROGRESS, baseProgress));
+  let initialCycle: number;
+  if (!isOutboundInitial) {
+    // Inbound: maps [MIN, MAX] to [0.00, 0.44]
+    initialCycle = ((clampedBase - MIN_FAIRWAY_PROGRESS) / FAIRWAY_SPAN) * 0.44;
+  } else {
+    // Outbound: maps [MAX, MIN] to [0.50, 0.94]
+    initialCycle = 0.50 + ((MAX_FAIRWAY_PROGRESS - clampedBase) / FAIRWAY_SPAN) * 0.44;
+  }
+
+  const cycle = (initialCycle + cycleDelta) % 1.0;
 
   let currentProgress: number;
-  if (!isOutbound) {
-    // Inbound: moving from sea (0.02) to terminals (around 0.4 - 0.75)
-    currentProgress = (baseProgress + progressDelta) % 0.82;
+  let heading: number;
+  let isOutbound: boolean;
+  let transitPhase: "INBOUND" | "TURNING_BASIN" | "OUTBOUND" | "SEA_TURNAROUND";
+
+  if (cycle < 0.44) {
+    // Phase 1: Inbound Voyage (Upriver transit)
+    transitPhase = "INBOUND";
+    isOutbound = false;
+    const u = cycle / 0.44;
+    currentProgress = MIN_FAIRWAY_PROGRESS + u * FAIRWAY_SPAN;
+    const pt = interpolateFairwayPosition(currentProgress);
+    heading = pt.heading;
+  } else if (cycle < 0.50) {
+    // Phase 2: Karnaphuli 600m Turning Basin Swing Maneuver
+    transitPhase = "TURNING_BASIN";
+    currentProgress = MAX_FAIRWAY_PROGRESS;
+    const u = (cycle - 0.44) / 0.06;
+    isOutbound = u >= 0.5;
+    const pt = interpolateFairwayPosition(currentProgress);
+    // Smooth S-curve easing for realistic vessel 180° swing assisted by tugs
+    const ease = (1 - Math.cos(u * Math.PI)) / 2;
+    heading = Math.round((pt.heading + ease * 180) % 360);
+  } else if (cycle < 0.94) {
+    // Phase 3: Outbound Voyage (Downriver transit to Sea)
+    transitPhase = "OUTBOUND";
+    isOutbound = true;
+    const u = (cycle - 0.50) / 0.44;
+    currentProgress = MAX_FAIRWAY_PROGRESS - u * FAIRWAY_SPAN;
+    const pt = interpolateFairwayPosition(currentProgress);
+    heading = Math.round((pt.heading + 180) % 360);
   } else {
-    // Outbound: moving from terminal (0.80) out to sea (0.02)
-    currentProgress = (baseProgress - progressDelta + 1.0) % 0.82;
+    // Phase 4: Bay of Bengal Sea Turnaround / Waiting Roads Maneuver
+    transitPhase = "SEA_TURNAROUND";
+    currentProgress = MIN_FAIRWAY_PROGRESS;
+    const u = (cycle - 0.94) / 0.06;
+    isOutbound = u < 0.5;
+    const pt = interpolateFairwayPosition(currentProgress);
+    // Smooth S-curve easing for vessel swing in outer anchorage
+    const ease = (1 - Math.cos(u * Math.PI)) / 2;
+    heading = Math.round((pt.heading + 180 + ease * 180) % 360);
   }
 
   const result = interpolateFairwayPosition(currentProgress);
-  let heading = result.heading;
-  if (isOutbound) {
-    heading = (result.heading + 180) % 360;
-  }
   return {
     lon: result.lon,
     lat: result.lat,
     heading,
     currentProgress,
+    isOutbound,
+    transitPhase,
   };
 }
 
@@ -133,12 +200,12 @@ export function getTrailingWakeCoordinates(
   wakePointsCount: number = 3
 ): [number, number][] {
   const coords: [number, number][] = [];
-  const wakeSpan = 0.025; // ~600m trailing wake
+  const wakeSpan = 0.018; // ~400m realistic trailing wake
   for (let i = wakePointsCount; i >= 0; i--) {
     const fraction = i / wakePointsCount;
     const p = isOutbound
-      ? (currentProgress + fraction * wakeSpan) % 0.82
-      : (currentProgress - fraction * wakeSpan + 1.0) % 0.82;
+      ? Math.min(MAX_FAIRWAY_PROGRESS, currentProgress + fraction * wakeSpan)
+      : Math.max(MIN_FAIRWAY_PROGRESS, currentProgress - fraction * wakeSpan);
     const pt = interpolateFairwayPosition(p);
     coords.push([pt.lon, pt.lat]);
   }

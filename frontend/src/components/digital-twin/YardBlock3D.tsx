@@ -42,11 +42,11 @@ export function YardBlock3D({
   const carrierList: ContainerCarrier[] = isReefer
     ? ["REEFER"]
     : isHazardous
-    ? ["HAZARDOUS"]
-    : ["MAERSK", "EVERGREEN", "HAPAG", "MSC", "CMACGM", "ONE", "COSCO"];
+      ? ["HAZARDOUS"]
+      : ["MAERSK", "EVERGREEN", "HAPAG", "MSC", "CMACGM", "ONE", "COSCO"];
 
-  const blockCategory = String((block as any).category || block.zone || "IMPORT");
   const blockCode = block.code;
+  const blockCategory = String((block as any).category || block.zone || "IMPORT");
   const padTexture = useMemo(() => {
     return getYardBlockGroundTexture(blockCode, blockCategory);
   }, [blockCode, blockCategory]);

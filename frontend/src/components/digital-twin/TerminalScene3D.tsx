@@ -223,29 +223,100 @@ export function TerminalScene3D({
       radarRef.current.rotation.y = t * 2.2;
     }
 
-    // 3. Animate approaching vessel along Karnaphuli channel
+    // 3. Animate approaching vessel along Karnaphuli channel in closed-circuit loop
+    // Follows Inbound Lane -> 600m Turning Basin 180° swing -> Outbound Lane -> Sea Reach turnaround
     if (approachingVesselRef.current && isSimulating) {
-      const cycleTime = t * 0.22 * simulationSpeed;
-      const newX = -52 + ((cycleTime * 5.5) % 85);
-      approachingVesselRef.current.position.x = newX;
-      approachingVesselRef.current.rotation.y = Math.PI / 1.96 + Math.sin(t * 0.4) * 0.02;
+      const vTrackLen = 193.7;
+      const vSpeed = 1.6 * simulationSpeed; // Calm, realistic harbor speed
+      const vDist = (t * vSpeed) % vTrackLen;
+
+      let vX = -58;
+      let vZ = -26.0;
+      let vRotY = 0;
+
+      if (vDist < 78) {
+        // Leg 1: Inbound Fairway Transit (Eastbound towards berths)
+        const u = vDist / 78;
+        vX = -58 + u * 78;
+        vZ = -26.0;
+        vRotY = 0;
+      } else if (vDist < 96.85) {
+        // Leg 2: Karnaphuli Ø 600m Turning Basin 180° Swing Maneuver
+        const u = (vDist - 78) / 18.85;
+        const theta = -Math.PI / 2 + u * Math.PI;
+        vX = 20 + 6.0 * Math.cos(theta);
+        vZ = -32 + 6.0 * Math.sin(theta);
+        vRotY = u * Math.PI;
+      } else if (vDist < 174.85) {
+        // Leg 3: Outbound Fairway Transit (Westbound towards Sea)
+        const u = (vDist - 96.85) / 78;
+        vX = 20 - u * 78;
+        vZ = -38.0;
+        vRotY = Math.PI;
+      } else {
+        // Leg 4: Bay of Bengal Sea Reach Turnaround Maneuver
+        const u = (vDist - 174.85) / 18.85;
+        const theta = Math.PI / 2 + u * Math.PI;
+        vX = -58 + 6.0 * Math.cos(theta);
+        vZ = -32 + 6.0 * Math.sin(theta);
+        vRotY = Math.PI + u * Math.PI;
+      }
+
+      // Add subtle tidal roll & heave
+      approachingVesselRef.current.position.set(vX, Math.sin(t * 1.2) * 0.03, vZ);
+      approachingVesselRef.current.rotation.y = vRotY + Math.sin(t * 0.3) * 0.015;
     }
 
-    // 4. Animate Internal Terminal Haulage Trucks along circulation lanes
+    // 4. Animate Internal Terminal Haulage Tractors along PCT-MP-001 One-Way Loop
+    // Quayside Apron (Z = 3.5) -> East Turnaround -> Yard Road (Z = 16.5) -> West Turnaround
+    const trackLen = 208.84;
+    const truckSpeed = 3.8 * simulationSpeed;
+
+    const calcTruckPose = (offsetDist: number) => {
+      const normDist = ((offsetDist % trackLen) + trackLen) % trackLen;
+      if (normDist < 84) {
+        // Apron Road heading East
+        const p = normDist / 84;
+        return { x: -42 + p * 84, z: 3.5, rotY: 0 };
+      } else if (normDist < 104.42) {
+        // East Turnaround Loop
+        const p = (normDist - 84) / 20.42;
+        const angle = -Math.PI / 2 + p * Math.PI;
+        return {
+          x: 42 + 6.5 * Math.cos(angle),
+          z: 10.0 + 6.5 * Math.sin(angle),
+          rotY: p * Math.PI,
+        };
+      } else if (normDist < 188.42) {
+        // Yard Road heading West
+        const p = (normDist - 104.42) / 84;
+        return { x: 42 - p * 84, z: 16.5, rotY: Math.PI };
+      } else {
+        // West Turnaround Loop
+        const p = (normDist - 188.42) / 20.42;
+        const angle = Math.PI / 2 + p * Math.PI;
+        return {
+          x: -42 + 6.5 * Math.cos(angle),
+          z: 10.0 + 6.5 * Math.sin(angle),
+          rotY: Math.PI + p * Math.PI,
+        };
+      }
+    };
+
     if (truck1Ref.current && isSimulating) {
-      const truckSpeed = t * 3.5 * simulationSpeed;
-      const truck1X = -46 + (truckSpeed % 92);
-      truck1Ref.current.position.x = truck1X;
+      const pose1 = calcTruckPose(t * truckSpeed);
+      truck1Ref.current.position.set(pose1.x, 0.02, pose1.z);
+      truck1Ref.current.rotation.y = pose1.rotY;
     }
     if (truck2Ref.current && isSimulating) {
-      const truckSpeed2 = t * 2.8 * simulationSpeed;
-      const truck2X = 42 - (truckSpeed2 % 88);
-      truck2Ref.current.position.x = truck2X;
+      const pose2 = calcTruckPose(t * truckSpeed + 0.333 * trackLen);
+      truck2Ref.current.position.set(pose2.x, 0.02, pose2.z);
+      truck2Ref.current.rotation.y = pose2.rotY;
     }
     if (truck3Ref.current && isSimulating) {
-      const truckSpeed3 = t * 3.1 * simulationSpeed;
-      const truck3X = -35 + (truckSpeed3 % 75);
-      truck3Ref.current.position.x = truck3X;
+      const pose3 = calcTruckPose(t * truckSpeed + 0.666 * trackLen);
+      truck3Ref.current.position.set(pose3.x, 0.02, pose3.z);
+      truck3Ref.current.rotation.y = pose3.rotY;
     }
 
     // 5. Rhythmic flashing of Channel Lateral Buoys
@@ -560,7 +631,7 @@ export function TerminalScene3D({
             <group ref={approachingVesselRef} position={[-25, 0, -24]}>
               <ProceduralVessel3D
                 position={[0, 0, 0]}
-                rotation={[0, Math.PI / 1.95, 0]}
+                rotation={[0, 0, 0]}
                 scale={0.92}
                 call={approachingCall}
                 isSelected={selectedEntity?.type === "vessel" && selectedEntity.id === approachingCall.id}
@@ -723,6 +794,18 @@ export function TerminalScene3D({
         </mesh>
       ))}
 
+      {/* East Turnaround Road Connector (Connecting Apron to Yard Road at X = 42) */}
+      <mesh position={[42, 0.014, 10.0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[5.2, 17.0]} />
+        <meshStandardMaterial color="#1a2333" roughness={0.7} />
+      </mesh>
+
+      {/* West Turnaround Road Connector (Connecting Yard Road to Apron at X = -42) */}
+      <mesh position={[-42, 0.014, 10.0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[5.2, 17.0]} />
+        <meshStandardMaterial color="#1a2333" roughness={0.7} />
+      </mesh>
+
       {/* Dynamic Terminal Tractor 1 */}
       <group ref={truck1Ref} position={[-25, 0.02, 3.5]}>
         <mesh position={[1.4, 0.75, 0]}>
@@ -742,6 +825,17 @@ export function TerminalScene3D({
         </mesh>
         <group position={[-0.8, 0.45, 0]}>
           <RealisticContainer3D carrier="EVERGREEN" scale={0.92} />
+        </group>
+      </group>
+
+      {/* Dynamic Terminal Tractor 3 */}
+      <group ref={truck3Ref} position={[0, 0.02, 16.5]} rotation={[0, Math.PI, 0]}>
+        <mesh position={[1.4, 0.75, 0]}>
+          <boxGeometry args={[1.0, 1.1, 0.9]} />
+          <meshStandardMaterial color="#0284c7" roughness={0.4} />
+        </mesh>
+        <group position={[-0.8, 0.45, 0]}>
+          <RealisticContainer3D carrier="HAPAG" scale={0.92} />
         </group>
       </group>
 
