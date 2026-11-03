@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     gemini_api_key: Optional[str] = None
     gemini_model: str = "gemini-2.5-flash"
 
+    # AIS Provider configuration (Optional B)
+    ais_stream_api_key: Optional[str] = None
+    ais_provider_name: str = "AISStream.io"
+
     # Simulation settings
     simulation_seed: int = 42
     simulation_speed: float = 1.0

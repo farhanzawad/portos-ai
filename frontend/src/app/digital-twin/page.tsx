@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +21,7 @@ import {
   Layers,
   ShieldAlert,
 } from "lucide-react";
+import { EquipmentMaintenanceModal } from "@/components/digital-twin/EquipmentMaintenanceModal";
 
 // Dynamically import Three.js Canvas to ensure zero server-side WebGL canvas errors
 const TerminalCanvas = dynamic(
@@ -44,6 +45,7 @@ const TerminalCanvas = dynamic(
 function DigitalTwinContent() {
   const searchParams = useSearchParams();
   const blockParam = searchParams.get("block");
+  const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
 
   const { data: berths = [], isLoading: berthsLoading } = useQuery({
     queryKey: ["digital-twin-berths"],
@@ -95,7 +97,15 @@ function DigitalTwinContent() {
         </div>
 
         {/* Operational Context Badges */}
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <button
+            onClick={() => setIsMaintenanceModalOpen(true)}
+            className="px-2.5 py-1 bg-white hover:bg-slate-50 text-portos-navy rounded border border-portos-border font-medium flex items-center gap-1.5 shadow-xs transition-colors"
+            title="Inspect STS crane telemetry & Isolation Forest anomaly detection"
+          >
+            <Cpu className="h-3.5 w-3.5 text-portos-teal" />
+            <span>Equipment Health & Anomaly Detector</span>
+          </button>
           <div className="px-2.5 py-1 bg-white rounded border border-portos-border text-portos-navy font-medium flex items-center gap-1.5 shadow-xs">
             <Layers className="h-3.5 w-3.5 text-portos-navy-secondary" />
             <span>Terminal: RSGT Patenga (PCT) & CCT/NCT</span>
@@ -188,6 +198,12 @@ function DigitalTwinContent() {
           </div>
         </div>
       </div>
+
+      {/* Equipment Maintenance & Isolation Forest Anomaly Detection Modal */}
+      <EquipmentMaintenanceModal
+        isOpen={isMaintenanceModalOpen}
+        onClose={() => setIsMaintenanceModalOpen(false)}
+      />
     </div>
   );
 }

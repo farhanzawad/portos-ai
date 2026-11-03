@@ -22,7 +22,9 @@ import {
   Maximize2,
   Minimize2,
   ExternalLink,
+  Radio,
 } from "lucide-react";
+import { AISDiagnosticsModal } from "@/components/vessels/AISDiagnosticsModal";
 
 // Dynamically import unified MapLibre GL Geospatial Port Map
 const GeospatialPortMap = dynamic(
@@ -49,6 +51,7 @@ export default function VesselsPage() {
   const [mobileTab, setMobileTab] = useState<"list" | "map" | "detail">("list");
   const [isQueueCollapsed, setIsQueueCollapsed] = useState(false);
   const [isMaximizedMap, setIsMaximizedMap] = useState(false);
+  const [isAISModalOpen, setIsAISModalOpen] = useState(false);
 
   const [filters, setFilters] = useState<VesselFilterState>({
     search: "",
@@ -155,6 +158,16 @@ export default function VesselsPage() {
 
         {/* Operational Context Badges & Quick Action Controls */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
+          {/* AIS Provider Diagnostics Button (Optional B) */}
+          <button
+            onClick={() => setIsAISModalOpen(true)}
+            className="px-2.5 py-1 bg-white hover:bg-slate-50 text-portos-navy rounded border border-portos-border font-medium flex items-center gap-1.5 shadow-xs transition-colors"
+            title="Inspect commercial AIS provider connection & transponder stream"
+          >
+            <Radio className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+            <span>AIS Provider Diagnostics</span>
+          </button>
+
           {/* Quick 3D Digital Twin Button */}
           <button
             onClick={() => handleOpen3DView()}
@@ -323,6 +336,12 @@ export default function VesselsPage() {
           </div>
         )}
       </div>
+
+      {/* Commercial AIS Provider Diagnostics Modal (Optional B) */}
+      <AISDiagnosticsModal
+        isOpen={isAISModalOpen}
+        onClose={() => setIsAISModalOpen(false)}
+      />
     </div>
   );
 }

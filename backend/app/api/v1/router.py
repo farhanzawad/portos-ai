@@ -18,6 +18,9 @@ from app.api.v1.endpoints import (
     weather,
     gov_data,
     geospatial,
+    ais,
+    maintenance,
+    evaluation,
 )
 
 api_v1_router = APIRouter(prefix="/api/v1")
@@ -41,3 +44,6 @@ api_v1_router.include_router(copilot.router)
 api_v1_router.include_router(weather.router)
 api_v1_router.include_router(gov_data.router)
 api_v1_router.include_router(geospatial.router)
+api_v1_router.include_router(ais.router)
+api_v1_router.include_router(maintenance.router)
+api_v1_router.include_router(evaluation.router)

@@ -30,6 +30,9 @@
 | **17**| **17** | Competition Package, Runbook & Demo Script | 5-Minute Showcase, Local Setup | **COMPLETE** | 2026-11-03 |
 | **Opt**| **06A**| Geospatial Port Mapping & Synchronized 3D Twin | MapLibre GIS, PCT Masterplan 3D, Split View | **COMPLETE** | 2026-11-03 |
 | **Opt**| **A**  | External Weather Integration | Open-Meteo Adapter, Fairway Sea State | **COMPLETE** | 2026-11-03 |
+| **Opt**| **B**  | Commercial AIS Provider Adapter | Stream Transponder Gating, Replay Fallback | **COMPLETE** | 2026-11-03 |
+| **Opt**| **C**  | Equipment Maintenance & Telemetry Anomaly | scikit-learn Isolation Forest, Injection | **COMPLETE** | 2026-11-03 |
+| **Opt**| **D**  | Research-Grade Model Evaluation | 5-Fold Temporal Expanding Window, ECE & Brier | **COMPLETE** | 2026-11-03 |
 
 ---
 
@@ -123,6 +126,14 @@
 - **Deliverables:** Open-Meteo API maritime integration (`22.23°N, 91.81°E` Karnaphuli approach), 15-minute in-memory caching, graceful timeout recovery, deterministic fallback (`PORTOS Synthetic Marine Generator`), REST endpoints (`/api/v1/weather/current`, `/api/v1/weather/forecast`), typed Copilot tool allowlist integration (`get_external_weather`), mandatory CC BY 4.0 license attribution, and prominent safety disclaimer: *"Contextual marine weather product only. Not certified for navigational clearance, vessel pilotage, or berth maneuvering safety decisions."*
 - **Target Outcome:** Auditable, low-cost external weather contextualization adhering to all maritime safety boundaries.
 
-- **Optional B:** Live AIS Provider Adapter (behind licensed provider key flag).
-- **Optional C:** Advanced Equipment Maintenance Anomaly Demo (synthetic telemetry & Isolation Forest).
-- **Optional D:** Research-Grade Model Evaluation (temporal cross-validation and calibration analysis).
+### Optional B — Commercial AIS Provider Adapter (COMPLETE — 2026-11-03)
+- **Deliverables:** Commercial AIS stream adapter (`AISProviderAdapter`), secure credential gating via server environment (`AIS_STREAM_API_KEY`), strict Prime Directive 3 truthfulness enforcement (`data_status: SIMULATED` vs `OBSERVED`), realistic synthetic hydrographic replay fallback along the Karnaphuli fairway, REST endpoints (`/api/v1/ais/status`, `/api/v1/ais/feed`, `/api/v1/ais/test-connection`), and interactive frontend diagnostics modal (`AISDiagnosticsModal`) on the Vessel Intelligence page.
+- **Target Outcome:** Auditable, credential-isolated AIS adapter with transparent diagnostics and zero false claims of live feeds without an active license key.
+
+### Optional C — Advanced Equipment Maintenance & Anomaly Detection (COMPLETE — 2026-11-03)
+- **Deliverables:** Telemetry ingestion engine for quayside STS gantry cranes and mobile equipment, scikit-learn `IsolationForest` multivariate anomaly inference (hoist vibration, hydraulic temperature, motor power draw, hoist cycle time, operating hours), automated z-score dominant feature contributor attribution, 0-100% equipment health index, REST endpoints (`/api/v1/maintenance/overview`, `/equipment/{id}`, `/inject-anomaly`, `/reset-anomalies`), and interactive operator drawer (`EquipmentMaintenanceModal`) with live anomaly injection simulator.
+- **Target Outcome:** Actionable predictive maintenance and unsupervised anomaly detection adhering to Minimal Industrial Futurism design.
+
+### Optional D — Research-Grade Model Evaluation (COMPLETE — 2026-11-03)
+- **Deliverables:** Academic-grade machine learning validation suite utilizing scikit-learn `TimeSeriesSplit(n_splits=5)` for strictly non-leaking chronological expanding windows, temporal regression metrics ($MAE$, $RMSE$, $R^2$), probability calibration via reliability curves, Expected Calibration Error ($ECE$), Brier score verification, REST endpoint (`/api/v1/ml/research-evaluation`), and Model Centre visualization card (`ResearchEvaluationCard`).
+- **Target Outcome:** Statistically rigorous, publication-ready model validation demonstrating absence of future data leakage in port arrival delay forecasts.

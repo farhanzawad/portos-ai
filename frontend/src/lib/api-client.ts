@@ -53,6 +53,11 @@ import {
   ENUToWGS84Request,
   WGS84Coordinate,
   DistanceBearingResponse,
+  AISProviderStatus,
+  AISFeedResponse,
+  MaintenanceOverviewResponse,
+  AnomalyAssessment,
+  ResearchEvaluationReport,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -503,6 +508,77 @@ export async function calculateDistanceAndBearing(
   });
   return fetchFromApi<DistanceBearingResponse>(`/api/v1/geospatial/distance?${params.toString()}`);
 }
+
+// ==========================================
+// Optional B: AIS Provider Adapter API
+// ==========================================
+
+export async function getAISStatus(): Promise<AISProviderStatus> {
+  return fetchFromApi<AISProviderStatus>("/api/v1/ais/status");
+}
+
+export async function getAISFeed(): Promise<AISFeedResponse> {
+  return fetchFromApi<AISFeedResponse>("/api/v1/ais/feed");
+}
+
+export async function testAISConnection(): Promise<{
+  status: string;
+  api_key_configured: boolean;
+  provider: string;
+  audit_note: string;
+  disclaimer: string;
+}> {
+  return fetchFromApi("/api/v1/ais/test-connection", {
+    method: "POST",
+  });
+}
+
+// ==========================================
+// Optional C: Equipment Predictive Maintenance API
+// ==========================================
+
+export async function getMaintenanceOverview(): Promise<MaintenanceOverviewResponse> {
+  return fetchFromApi<MaintenanceOverviewResponse>("/api/v1/maintenance/overview");
+}
+
+export async function getEquipmentAssessment(equipmentId: string): Promise<AnomalyAssessment> {
+  return fetchFromApi<AnomalyAssessment>(`/api/v1/maintenance/equipment/${encodeURIComponent(equipmentId)}`);
+}
+
+export async function injectEquipmentAnomaly(
+  equipmentId: string,
+  vibration?: number,
+  temp?: number,
+  power?: number,
+  cycleTime?: number
+): Promise<{ status: string; equipment_id: string; telemetry: any }> {
+  return fetchFromApi("/api/v1/maintenance/inject-anomaly", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      equipment_id: equipmentId,
+      vibration_mm_s: vibration,
+      hydraulic_temp_c: temp,
+      power_draw_kw: power,
+      hoist_cycle_time_s: cycleTime,
+    }),
+  });
+}
+
+export async function resetEquipmentAnomalies(): Promise<{ status: string; cleared_count: number }> {
+  return fetchFromApi("/api/v1/maintenance/reset-anomalies", {
+    method: "POST",
+  });
+}
+
+// ==========================================
+// Optional D: Research Model Evaluation API
+// ==========================================
+
+export async function getResearchModelEvaluation(): Promise<ResearchEvaluationReport> {
+  return fetchFromApi<ResearchEvaluationReport>("/api/v1/ml/research-evaluation");
+}
+
 
 
 

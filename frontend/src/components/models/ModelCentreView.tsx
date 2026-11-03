@@ -27,6 +27,7 @@ import {
   AlertTriangle,
   Info,
 } from "lucide-react";
+import { ResearchEvaluationCard } from "@/components/models/ResearchEvaluationCard";
 
 export function ModelCentreView() {
   const {
@@ -527,6 +528,9 @@ export function ModelCentreView() {
           )}
         </div>
       </div>
+
+      {/* Research-Grade Model Evaluation: Temporal CV & Calibration (Optional D) */}
+      <ResearchEvaluationCard />
     </div>
   );
 }

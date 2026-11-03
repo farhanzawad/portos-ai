@@ -1189,4 +1189,126 @@ export interface DistanceBearingResponse {
   data_status: DataStatus;
 }
 
+// ==========================================
+// Optional B: Commercial AIS Adapter Types
+// ==========================================
+
+export interface AISVesselMessage {
+  mmsi: string;
+  imo?: string;
+  ship_name: string;
+  call_sign?: string;
+  latitude: number;
+  longitude: number;
+  speed_over_ground_knots: number;
+  course_over_ground_degrees: number;
+  heading_degrees: number;
+  navigational_status: string;
+  distance_to_pilot_nm: number;
+  destination: string;
+  eta?: string;
+  data_status: DataStatus;
+  timestamp: string;
+}
+
+export interface AISProviderStatus {
+  provider_name: string;
+  is_connected: boolean;
+  api_key_configured: boolean;
+  channel_monitored: string;
+  bounding_box: number[];
+  active_target_count: number;
+  last_message_received_at?: string;
+  data_status: DataStatus;
+  disclaimer: string;
+  audit_note: string;
+}
+
+export interface AISFeedResponse {
+  provider_status: AISProviderStatus;
+  targets: AISVesselMessage[];
+  total_targets: number;
+  generated_at: string;
+}
+
+// ==========================================
+// Optional C: Equipment Predictive Maintenance
+// ==========================================
+
+export interface TelemetryReading {
+  vibration_mm_s: number;
+  hydraulic_temp_c: number;
+  power_draw_kw: number;
+  hoist_cycle_time_s: number;
+  operating_hours: number;
+}
+
+export interface AnomalyAssessment {
+  equipment_id: string;
+  equipment_code: string;
+  equipment_type: string;
+  status: string;
+  is_anomaly: boolean;
+  anomaly_score: number;
+  health_index_pct: number;
+  risk_level: "NORMAL" | "WATCH" | "CRITICAL";
+  telemetry: TelemetryReading;
+  dominant_contributing_feature: string;
+  recommended_action: string;
+  model_version: string;
+  data_status: DataStatus;
+}
+
+export interface MaintenanceOverviewResponse {
+  total_units: number;
+  operational_units: number;
+  watch_units: number;
+  critical_units: number;
+  mean_health_index: number;
+  units: AnomalyAssessment[];
+  generated_at: string;
+  disclaimer: string;
+}
+
+// ==========================================
+// Optional D: Research-Grade Model Evaluation
+// ==========================================
+
+export interface TemporalCVSplitResult {
+  split_index: number;
+  train_size: number;
+  test_size: number;
+  mae_hours: number;
+  rmse_hours: number;
+  r2_score: number;
+  brier_score: number;
+  accuracy: number;
+  f1_score: number;
+}
+
+export interface CalibrationBin {
+  bin_index: number;
+  mean_predicted_probability: number;
+  fraction_of_positives: number;
+  sample_count: number;
+}
+
+export interface ResearchEvaluationReport {
+  model_name: string;
+  model_version: string;
+  evaluation_methodology: string;
+  total_samples: number;
+  mean_temporal_mae_hours: number;
+  mean_temporal_rmse_hours: number;
+  mean_temporal_r2: number;
+  overall_brier_score: number;
+  expected_calibration_error: number;
+  splits: TemporalCVSplitResult[];
+  calibration_bins: CalibrationBin[];
+  is_well_calibrated: boolean;
+  generated_at: string;
+  methodology_note: string;
+}
+
+
 
