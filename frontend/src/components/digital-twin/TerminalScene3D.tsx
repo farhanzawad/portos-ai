@@ -184,11 +184,12 @@ export function TerminalScene3D({
       <ambientLight intensity={0.68} color="#e0f2fe" />
       <directionalLight
         position={[45, 62, 40]}
-        intensity={1.4}
+        intensity={1.35}
         color="#fffbeb"
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-bias={-0.0004}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
         shadow-camera-near={10}
         shadow-camera-far={160}
         shadow-camera-left={-75}

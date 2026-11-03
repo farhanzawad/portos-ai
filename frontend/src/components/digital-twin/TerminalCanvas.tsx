@@ -175,12 +175,14 @@ export function TerminalCanvas({
             {hasWebGL ? (
               <Canvas
                 shadows
+                dpr={[1, 1.5]}
                 camera={{ position: [42, 45, 48], fov: 38 }}
                 className="w-full h-full cursor-grab active:cursor-grabbing"
                 gl={{
                   antialias: true,
                   alpha: false,
                   powerPreference: "high-performance",
+                  precision: "highp",
                 }}
                 onCreated={({ gl }) => {
                   gl.toneMapping = THREE.ACESFilmicToneMapping;
@@ -266,12 +268,14 @@ export function TerminalCanvas({
               {hasWebGL ? (
                 <Canvas
                   shadows
+                  dpr={[1, 1.5]}
                   camera={{ position: [42, 45, 48], fov: 38 }}
                   className="w-full h-full cursor-grab active:cursor-grabbing"
                   gl={{
                     antialias: true,
                     alpha: false,
                     powerPreference: "high-performance",
+                    precision: "highp",
                   }}
                   onCreated={({ gl }) => {
                     gl.toneMapping = THREE.ACESFilmicToneMapping;
