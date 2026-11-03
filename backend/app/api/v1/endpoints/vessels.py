@@ -116,26 +116,29 @@ def _generate_corridor_track(call: VesselCall, base_pos: Optional[VesselPosition
 
     ref_time = base_pos.timestamp if base_pos else (call.reported_eta or datetime.utcnow())
 
-    # Realistic Karnaphuli channel waypoints from Bay of Bengal towards CCT/NCT terminal
+    # Verified Karnaphuli channel waypoints from Bay of Bengal towards CCT/NCT terminal
     waypoints = [
-        (22.1200, 91.7000, 14.2, 345.0, "Under way using engine", 14.5),
-        (22.1650, 91.7350, 11.8, 350.0, "Under way using engine", 10.2),
-        (22.2100, 91.7800, 9.5, 15.0, "Pilot boarding approach", 6.8),
-        (22.2550, 91.8020, 7.2, 25.0, "Navigating channel bend", 3.5),
-        (22.2900, 91.8150, 5.0, 35.0, "Inward river transit", 1.2),
-        (22.3180, 91.8240, 0.0, 40.0, "Moored at berth" if call.status == CallStatusEnum.BERTHED else "At anchor", 0.0),
+        (22.1350, 91.7050, 14.2, 35.0, "Under way (Bay of Bengal)", 14.5),
+        (22.1750, 91.7450, 12.0, 35.0, "Outer Fairway Approach", 8.5),
+        (22.1980, 91.7680, 10.5, 42.0, "Pilot boarding approach", 4.0),
+        (22.2120, 91.7880, 8.5, 45.0, "Outer Bar fairway transit", 2.2),
+        (22.2260, 91.8080, 7.2, 30.0, "Rounding Patenga Point", 1.0),
+        (22.2450, 91.8180, 6.5, 20.0, "Inward Patenga reach transit", 0.5),
+        (22.2650, 91.8230, 5.0, 340.0, "Navigating Gupta Bend", 0.2),
+        (22.2960, 91.8110, 3.5, 350.0, "Inward NCT river transit", 0.1),
+        (22.3080, 91.8118, 0.0, 0.0, "Moored at berth" if call.status == CallStatusEnum.BERTHED else "At anchor", 0.0),
     ]
 
     if call.status == CallStatusEnum.OUTER_ANCHORAGE:
         count = 2
     elif call.status == CallStatusEnum.EN_ROUTE:
-        count = 3
-    elif call.status == CallStatusEnum.PILOT_BOARDING:
         count = 4
+    elif call.status == CallStatusEnum.PILOT_BOARDING:
+        count = 5
     elif call.status in [CallStatusEnum.BERTHED, CallStatusEnum.OPERATING]:
-        count = 6
+        count = len(waypoints)
     else:
-        count = 3
+        count = 4
 
     result = []
     for idx, (lat, lon, spd, hdg, nav_status, dist) in enumerate(waypoints[:count]):

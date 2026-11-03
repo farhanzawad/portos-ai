@@ -178,6 +178,21 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
         ("vsl_12", "9412012", "DEMO MV Jamuna Horizon", "S2AP12", 180.0, 28.0, 9.4, 1600, 20500.0, CallStatusEnum.EN_ROUTE, DelayRiskStatusEnum.HIGH_RISK, 0.82, 3.8, 48, None),
     ]
 
+    vessel_spatial_profiles = {
+        "vsl_01": {"lat": 22.3080, "lon": 91.8118, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside CCT-01", "dist": 0.0},
+        "vsl_02": {"lat": 22.3040, "lon": 91.8115, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside CCT-02", "dist": 0.0},
+        "vsl_03": {"lat": 22.2960, "lon": 91.8110, "spd": 0.0, "hdg": 0.0, "nav": "Moored alongside NCT-04", "dist": 0.0},
+        "vsl_04": {"lat": 22.1750, "lon": 91.7420, "spd": 0.0, "hdg": 210.0, "nav": "At anchor (Anchorage Alpha)", "dist": 4.5},
+        "vsl_05": {"lat": 22.1520, "lon": 91.7180, "spd": 0.0, "hdg": 195.0, "nav": "At anchor (Anchorage Bravo)", "dist": 7.2},
+        "vsl_06": {"lat": 22.1940, "lon": 91.7560, "spd": 0.0, "hdg": 200.0, "nav": "At anchor (Anchorage Charlie)", "dist": 2.8},
+        "vsl_07": {"lat": 22.1350, "lon": 91.7050, "spd": 13.8, "hdg": 35.0, "nav": "Under way (Bay of Bengal approaching)", "dist": 14.5},
+        "vsl_08": {"lat": 22.1750, "lon": 91.7450, "spd": 12.0, "hdg": 35.0, "nav": "Under way (Outer Fairway Approach)", "dist": 8.5},
+        "vsl_09": {"lat": 22.1980, "lon": 91.7680, "spd": 10.5, "hdg": 42.0, "nav": "Under way (Outer Bar Pilot Boarding)", "dist": 4.0},
+        "vsl_10": {"lat": 22.2120, "lon": 91.7880, "spd": 8.5, "hdg": 45.0, "nav": "Under way (Patenga River Mouth Inbound)", "dist": 2.2},
+        "vsl_11": {"lat": 22.2260, "lon": 91.8080, "spd": 7.2, "hdg": 30.0, "nav": "Under way (Rounding Patenga Point)", "dist": 1.0},
+        "vsl_12": {"lat": 22.2650, "lon": 91.8230, "spd": 5.4, "hdg": 340.0, "nav": "Under way (Gupta Bend Transit)", "dist": 0.0},
+    }
+
     for (v_id, imo, name, cs, loa, beam, draft, teu, dwt, call_status, risk_status, risk_score, delay_hrs, eta_offset_hrs, assigned_b_id) in vessel_data:
         # Create or fetch vessel
         vessel = db.query(Vessel).filter_by(id=v_id).first()
@@ -227,25 +242,38 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
             db.add(call)
             db.flush()
 
-            # Seed simulated vessel position
+        # Update or seed simulated vessel position strictly along water fairway/berths
+        pos_info = vessel_spatial_profiles.get(
+            v_id,
+            {"lat": 22.1980, "lon": 91.7680, "spd": 10.0, "hdg": 40.0, "nav": "Under way", "dist": 5.0},
+        )
+        existing_pos = db.query(VesselPosition).filter_by(id=f"pos_{call_id}").first()
+        if existing_pos:
+            existing_pos.latitude = pos_info["lat"]
+            existing_pos.longitude = pos_info["lon"]
+            existing_pos.speed_knots = pos_info["spd"]
+            existing_pos.heading_degrees = pos_info["hdg"]
+            existing_pos.navigational_status = pos_info["nav"]
+            existing_pos.distance_to_pilot_nm = pos_info["dist"]
+        else:
             db.add(
                 VesselPosition(
                     id=f"pos_{call_id}",
                     vessel_call_id=call_id,
                     timestamp=ref_time,
-                    latitude=22.1800 + (eta_offset_hrs * 0.015),
-                    longitude=91.7200 + (eta_offset_hrs * 0.015),
-                    speed_knots=0.0 if call_status in [CallStatusEnum.BERTHED, CallStatusEnum.OUTER_ANCHORAGE] else 12.4,
-                    heading_degrees=340.0,
-                    navigational_status="Moored" if call_status == CallStatusEnum.BERTHED else "At anchor",
-                    distance_to_pilot_nm=0.0 if call_status == CallStatusEnum.BERTHED else max(0.0, eta_offset_hrs * 12.0),
+                    latitude=pos_info["lat"],
+                    longitude=pos_info["lon"],
+                    speed_knots=pos_info["spd"],
+                    heading_degrees=pos_info["hdg"],
+                    navigational_status=pos_info["nav"],
+                    distance_to_pilot_nm=pos_info["dist"],
                     data_status=DataStatusEnum.SIMULATED,
                     source_name="PORTOS Seed Engine",
                 )
             )
 
-            # If currently berthed, add berth assignment
-            if assigned_b_id:
+        # If currently berthed, add berth assignment
+        if assigned_b_id:
                 assign_id = f"assign_{call_id}"
                 if not db.query(BerthAssignment).filter_by(id=assign_id).first():
                     db.add(

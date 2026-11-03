@@ -39,6 +39,7 @@ import {
 } from "@/lib/geospatial/coordinates";
 import { SelectedEntity } from "../digital-twin/types";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
+import { MaritimeMapLegend } from "./MaritimeMapLegend";
 
 interface GeospatialPortMapProps {
   selectedEntity?: SelectedEntity | null;
@@ -130,6 +131,7 @@ export function GeospatialPortMap({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [activeBaseMap, setActiveBaseMap] = useState<BaseMapStyle>("nautical-dark");
   const [showOverlaysPanel, setShowOverlaysPanel] = useState(true);
+  const [showLegend, setShowLegend] = useState(true);
   const [showBaseMapModal, setShowBaseMapModal] = useState(false);
   const [cursorCoords, setCursorCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(12.5);
@@ -288,7 +290,32 @@ export function GeospatialPortMap({
       },
     });
 
-    // 3. Navigation Channels & Centerlines
+    // 3a. Navigation Corridor (Dredged Channel Polygon)
+    map.addLayer({
+      id: "layer-navigation-corridor-fill",
+      type: "fill",
+      source: "portos-features",
+      filter: ["==", ["get", "entity_type"], "NavigationCorridor"],
+      paint: {
+        "fill-color": "#eab308",
+        "fill-opacity": 0.12,
+      },
+    });
+
+    map.addLayer({
+      id: "layer-navigation-corridor-line",
+      type: "line",
+      source: "portos-features",
+      filter: ["==", ["get", "entity_type"], "NavigationCorridor"],
+      paint: {
+        "line-color": "#eab308",
+        "line-width": 1.2,
+        "line-dasharray": [3, 2],
+        "line-opacity": 0.5,
+      },
+    });
+
+    // 3b. Navigation Channels & Centerlines
     map.addLayer({
       id: "layer-navigation-channels-line",
       type: "line",
@@ -298,7 +325,7 @@ export function GeospatialPortMap({
         "line-color": "#eab308",
         "line-width": 2.5,
         "line-dasharray": [4, 3],
-        "line-opacity": 0.85,
+        "line-opacity": 0.9,
       },
     });
 
@@ -570,7 +597,11 @@ export function GeospatialPortMap({
     const layerMap: Record<string, string[]> = {
       base_geography: ["layer-base-geography-fill", "layer-base-geography-line"],
       bathymetry: ["layer-bathymetry-fill", "layer-bathymetry-line"],
-      navigation_channels: ["layer-navigation-channels-line"],
+      navigation_channels: [
+        "layer-navigation-channels-line",
+        "layer-navigation-corridor-fill",
+        "layer-navigation-corridor-line",
+      ],
       anchorage_zones: ["layer-anchorage-fill", "layer-anchorage-line"],
       terminals: ["layer-terminals-fill", "layer-terminals-line"],
       berths: ["layer-berths-line"],
@@ -750,6 +781,21 @@ export function GeospatialPortMap({
           >
             <Info className="h-3 w-3" />
             <span>Inspect</span>
+          </button>
+
+          {/* Cartographic Legend Toggle */}
+          <button
+            onClick={() => setShowLegend(!showLegend)}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded border text-[11px] font-medium transition-colors ${
+              showLegend
+                ? "bg-portos-teal text-white border-portos-teal font-semibold"
+                : "bg-portos-navy-secondary/40 text-slate-200 border-portos-navy-secondary hover:text-white"
+            }`}
+            title="Toggle cartographic map legend"
+            aria-label="Toggle map legend"
+          >
+            <Compass className="h-3 w-3" />
+            <span>Legend</span>
           </button>
 
           {/* Overlays Drawer Toggle */}
@@ -933,7 +979,13 @@ export function GeospatialPortMap({
           </div>
         )}
 
-        {/* 6. FEATURE INSPECTOR CARD (When feature is clicked) */}
+        {/* 6. MARITIME CARTOGRAPHIC LEGEND */}
+        <MaritimeMapLegend
+          isOpen={showLegend}
+          onClose={() => setShowLegend(false)}
+        />
+
+        {/* 7. FEATURE INSPECTOR CARD (When feature is clicked) */}
         {inspectedFeature && (
           <div className="absolute bottom-10 right-3 z-20 w-80 bg-portos-navy/95 backdrop-blur-md border border-portos-teal/50 rounded-lg shadow-2xl p-3 text-xs">
             <div className="flex items-center justify-between pb-2 border-b border-portos-navy-secondary mb-2">

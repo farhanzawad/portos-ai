@@ -113,4 +113,43 @@ test.describe("Geospatial Port Mapping & Synchronized 3D Digital Twin", () => {
     await expect(page.getByText("Nautical Dark", { exact: true })).toBeVisible();
     await expect(page.getByText("Offline Vector (Zero Network)", { exact: true })).toBeVisible();
   });
+
+  test("displays and toggles interactive Maritime Cartographic Map Legend", async ({ page }) => {
+    // Switch to 2D GIS Map
+    await page.getByRole("button", { name: /2D GIS Map/i }).click();
+
+    // Verify Legend is present and visible
+    await expect(page.getByText("MARITIME CARTOGRAPHIC LEGEND")).toBeVisible();
+    await expect(page.getByText("Vessels (AIS Telemetry & Status)")).toBeVisible();
+    await expect(page.getByText("Fairway Channels & Vessel Tracks")).toBeVisible();
+    await expect(page.getByText("Bathymetric Depth Contours (CD)")).toBeVisible();
+    await expect(page.getByText("Cartographic Provenance")).toBeVisible();
+
+    // Switch tabs within the legend
+    await page.getByRole("button", { name: "Vessels", exact: true }).click();
+    await expect(page.getByText("Berthed Alongside Quay")).toBeVisible();
+    await expect(page.getByText("Inbound / Fairway Transit")).toBeVisible();
+
+    await page.getByRole("button", { name: "Fairway", exact: true }).click();
+    await expect(page.getByText("Main Navigation Fairway")).toBeVisible();
+    await expect(page.getByText("Dredged Channel Corridor")).toBeVisible();
+
+    // Collapse legend
+    const collapseBtn = page.getByRole("button", { name: "Toggle legend collapse" });
+    await collapseBtn.click();
+    await expect(page.getByText("Main Navigation Fairway")).not.toBeVisible();
+
+    // Expand legend
+    await collapseBtn.click();
+    await expect(page.getByText("Main Navigation Fairway")).toBeVisible();
+
+    // Toggle legend off via top toolbar button
+    const legendToolbarBtn = page.getByRole("button", { name: "Toggle map legend" });
+    await legendToolbarBtn.click();
+    await expect(page.getByText("MARITIME CARTOGRAPHIC LEGEND")).not.toBeVisible();
+
+    // Toggle legend back on
+    await legendToolbarBtn.click();
+    await expect(page.getByText("MARITIME CARTOGRAPHIC LEGEND")).toBeVisible();
+  });
 });
