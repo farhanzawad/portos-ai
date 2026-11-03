@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { SelectedEntity, LayerVisibility, CameraPreset } from "./types";
+import { SelectedEntity, LayerVisibility, CameraPreset, NavSignal } from "./types";
 import {
   BerthRead,
   VesselCallRead,
@@ -67,6 +67,7 @@ interface TerminalScene3DProps {
   simulationSpeed: 1 | 2 | 5;
   resetCameraSignal: number;
   cameraPreset?: CameraPreset;
+  navSignal?: NavSignal | null;
 }
 
 export function TerminalScene3D({
@@ -82,6 +83,7 @@ export function TerminalScene3D({
   simulationSpeed,
   resetCameraSignal,
   cameraPreset = "isometric",
+  navSignal,
 }: TerminalScene3DProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const approachingVesselRef = useRef<THREE.Group>(null);
@@ -119,6 +121,9 @@ export function TerminalScene3D({
       flyToTarget(0, 95, 14, 0, 0, 14);
     } else if (cameraPreset === "operational") {
       flyToTarget(-26, 12, 12, 0, 4, -4);
+    } else if (cameraPreset === "free") {
+      // Free Roam low-altitude inspection overview
+      flyToTarget(0, 16, 26, 0, 3, 0);
     } else {
       // Default Isometric overview
       flyToTarget(42, 45, 48, 0, 0, 8);
@@ -131,6 +136,150 @@ export function TerminalScene3D({
       flyToTarget(42, 45, 48, 0, 0, 8);
     }
   }, [resetCameraSignal]);
+
+  // Keyboard Free-Roam Movement Engine (WASD, Arrow Keys, QE, Space, Shift)
+  const keysPressed = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement;
+      if (activeEl) {
+        const tag = activeEl.tagName.toLowerCase();
+        if (tag === "input" || tag === "textarea" || (activeEl as HTMLElement).isContentEditable) {
+          return;
+        }
+      }
+
+      const code = e.code;
+      if (
+        [
+          "KeyW", "KeyA", "KeyS", "KeyD",
+          "KeyQ", "KeyE", "KeyC", "Space",
+          "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+          "ShiftLeft", "ShiftRight",
+        ].includes(code)
+      ) {
+        if (e.key.startsWith("Arrow") || e.key === " ") {
+          e.preventDefault();
+        }
+        keysPressed.current.add(code);
+        isAnimatingCamera.current = false;
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysPressed.current.delete(e.code);
+    };
+
+    const handleBlur = () => {
+      keysPressed.current.clear();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, []);
+
+  // Listen to manual mouse/touch orbit & pan on OrbitControls to immediately yield control
+  useEffect(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+
+    const onControlsStart = () => {
+      isAnimatingCamera.current = false;
+    };
+
+    controls.addEventListener("start", onControlsStart);
+    return () => {
+      controls.removeEventListener("start", onControlsStart);
+    };
+  }, []);
+
+  // Handle On-Screen Navigation Button Signals (D-Pad, Elevate, Zoom, Rotate)
+  useEffect(() => {
+    if (!navSignal || !controlsRef.current) return;
+    isAnimatingCamera.current = false;
+    const controls = controlsRef.current;
+
+    const forward = new THREE.Vector3();
+    camera.getWorldDirection(forward);
+    forward.y = 0;
+    if (forward.lengthSq() > 0.001) forward.normalize();
+    else forward.set(0, 0, -1);
+
+    const right = new THREE.Vector3();
+    right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+    const moveStep = 6.0;
+
+    switch (navSignal.action) {
+      case "forward": {
+        const delta = forward.clone().multiplyScalar(moveStep);
+        camera.position.add(delta);
+        controls.target.add(delta);
+        break;
+      }
+      case "backward": {
+        const delta = forward.clone().multiplyScalar(-moveStep);
+        camera.position.add(delta);
+        controls.target.add(delta);
+        break;
+      }
+      case "left": {
+        const delta = right.clone().multiplyScalar(-moveStep);
+        camera.position.add(delta);
+        controls.target.add(delta);
+        break;
+      }
+      case "right": {
+        const delta = right.clone().multiplyScalar(moveStep);
+        camera.position.add(delta);
+        controls.target.add(delta);
+        break;
+      }
+      case "up": {
+        camera.position.y += 4.5;
+        controls.target.y += 4.5;
+        break;
+      }
+      case "down": {
+        camera.position.y = Math.max(1.5, camera.position.y - 4.5);
+        controls.target.y = Math.max(0.5, controls.target.y - 4.5);
+        break;
+      }
+      case "zoomIn": {
+        const dir = new THREE.Vector3().subVectors(controls.target, camera.position);
+        if (dir.length() > 2.0) {
+          camera.position.addScaledVector(dir, 0.22);
+        }
+        break;
+      }
+      case "zoomOut": {
+        const dir = new THREE.Vector3().subVectors(camera.position, controls.target);
+        camera.position.addScaledVector(dir, 0.25);
+        break;
+      }
+      case "rotateLeft": {
+        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+        offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 12);
+        camera.position.copy(controls.target).add(offset);
+        break;
+      }
+      case "rotateRight": {
+        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+        offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 12);
+        camera.position.copy(controls.target).add(offset);
+        break;
+      }
+    }
+    controls.update();
+  }, [navSignal, camera]);
 
   const berthedCalls = vesselCalls.filter((c) => c.status === "BERTHED");
   const queueCalls = vesselCalls.filter((c) => c.status !== "BERTHED");
@@ -203,6 +352,42 @@ export function TerminalScene3D({
         controlsRef.current.target.distanceTo(targetLookAt.current) < 0.15
       ) {
         isAnimatingCamera.current = false;
+      }
+    }
+
+    // 0b. Continuous Free Roam Keyboard Navigation (WASD / Arrows / QE / Space / Shift)
+    const activeKeys = keysPressed.current;
+    if (activeKeys.size > 0 && controlsRef.current) {
+      isAnimatingCamera.current = false;
+      const isSprint = activeKeys.has("ShiftLeft") || activeKeys.has("ShiftRight");
+      const moveSpeed = isSprint ? 45.0 : 20.0;
+      const moveDelta = moveSpeed * 0.016;
+
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.y = 0;
+      if (forward.lengthSq() > 0.001) {
+        forward.normalize();
+      } else {
+        forward.set(0, 0, -1);
+      }
+
+      const right = new THREE.Vector3();
+      right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+      const moveVec = new THREE.Vector3();
+      if (activeKeys.has("KeyW") || activeKeys.has("ArrowUp")) moveVec.add(forward);
+      if (activeKeys.has("KeyS") || activeKeys.has("ArrowDown")) moveVec.sub(forward);
+      if (activeKeys.has("KeyD") || activeKeys.has("ArrowRight")) moveVec.add(right);
+      if (activeKeys.has("KeyA") || activeKeys.has("ArrowLeft")) moveVec.sub(right);
+      if (activeKeys.has("KeyE") || activeKeys.has("Space")) moveVec.y += 1;
+      if (activeKeys.has("KeyQ") || activeKeys.has("KeyC")) moveVec.y -= 1;
+
+      if (moveVec.lengthSq() > 0) {
+        moveVec.normalize().multiplyScalar(moveDelta);
+        camera.position.add(moveVec);
+        controlsRef.current.target.add(moveVec);
+        controlsRef.current.update();
       }
     }
 
@@ -357,12 +542,17 @@ export function TerminalScene3D({
       <OrbitControls
         ref={controlsRef}
         makeDefault
-        minDistance={14}
-        maxDistance={135}
-        maxPolarAngle={Math.PI / 2.08}
-        minPolarAngle={Math.PI / 8.5}
-        enableDamping
-        dampingFactor={0.06}
+        minDistance={1.2}
+        maxDistance={350}
+        maxPolarAngle={Math.PI / 2.005}
+        minPolarAngle={0.01}
+        enablePan={true}
+        panSpeed={1.5}
+        screenSpacePanning={true}
+        enableDamping={true}
+        dampingFactor={0.08}
+        rotateSpeed={0.9}
+        zoomSpeed={1.2}
       />
 
       {/* ============================================================ */}

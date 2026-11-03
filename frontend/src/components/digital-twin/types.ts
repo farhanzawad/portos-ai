@@ -39,7 +39,24 @@ export interface LayerVisibility {
 
 export type ViewMode = "3d" | "map" | "2d" | "split";
 
-export type CameraPreset = "isometric" | "topdown" | "operational";
+export type CameraPreset = "isometric" | "topdown" | "operational" | "free";
+
+export type NavActionType =
+  | "forward"
+  | "backward"
+  | "left"
+  | "right"
+  | "up"
+  | "down"
+  | "zoomIn"
+  | "zoomOut"
+  | "rotateLeft"
+  | "rotateRight";
+
+export interface NavSignal {
+  action: NavActionType;
+  timestamp: number;
+}
 
 export interface SimulationState {
   isPlaying: boolean;

@@ -9,6 +9,8 @@ import {
   SimulationState,
   ViewMode,
   CameraPreset,
+  NavSignal,
+  NavActionType,
 } from "./types";
 import {
   BerthRead,
@@ -19,6 +21,7 @@ import {
 import { TwinHeaderControls } from "./TwinHeaderControls";
 import { EntityInspectorDrawer } from "./EntityInspectorDrawer";
 import { TwinLegend } from "./TwinLegend";
+import { FreeRoamHud } from "./FreeRoamHud";
 import { TerminalSchematic2D } from "./TerminalSchematic2D";
 import { TerminalScene3D, HoverEntityInfo } from "./TerminalScene3D";
 import { GeospatialPortMap } from "@/components/geospatial/GeospatialPortMap";
@@ -49,6 +52,11 @@ export function TerminalCanvas({
   );
   const [hoveredInfo, setHoveredInfo] = useState<HoverEntityInfo | null>(null);
   const [resetCameraSignal, setResetCameraSignal] = useState(0);
+  const [navSignal, setNavSignal] = useState<NavSignal | null>(null);
+
+  const handleNavigate = (action: NavActionType) => {
+    setNavSignal({ action, timestamp: Date.now() });
+  };
 
   const [layers, setLayers] = useState<LayerVisibility>({
     vessels: true,
@@ -204,6 +212,7 @@ export function TerminalCanvas({
                   simulationSpeed={simulation.speed}
                   resetCameraSignal={resetCameraSignal}
                   cameraPreset={cameraPreset}
+                  navSignal={navSignal}
                 />
               </Canvas>
             ) : (
@@ -218,6 +227,14 @@ export function TerminalCanvas({
               />
             )}
             <TwinLegend />
+
+            {/* Floating Free Navigation & Roam Controls (WASD / D-Pad / Elevate / Zoom) */}
+            <FreeRoamHud
+              onNavigate={handleNavigate}
+              onResetCamera={handleResetCamera}
+              cameraPreset={cameraPreset}
+              onSetPreset={setCameraPreset}
+            />
 
             {/* Floating Live 3D Asset Telemetry HUD */}
             {hoveredInfo && (
@@ -329,6 +346,7 @@ export function TerminalCanvas({
                     simulationSpeed={simulation.speed}
                     resetCameraSignal={resetCameraSignal}
                     cameraPreset={cameraPreset}
+                    navSignal={navSignal}
                   />
                 </Canvas>
               ) : (
@@ -343,6 +361,14 @@ export function TerminalCanvas({
                 />
               )}
               <TwinLegend />
+
+              {/* Floating Free Navigation & Roam Controls (WASD / D-Pad / Elevate / Zoom) */}
+              <FreeRoamHud
+                onNavigate={handleNavigate}
+                onResetCamera={handleResetCamera}
+                cameraPreset={cameraPreset}
+                onSetPreset={setCameraPreset}
+              />
 
               {/* Floating Live 3D Asset Telemetry HUD in Split View */}
               {hoveredInfo && (

@@ -203,6 +203,18 @@ export function TwinHeaderControls({
             >
               Operational
             </button>
+            <button
+              onClick={() => onCameraPresetChange("free")}
+              className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors ${
+                cameraPreset === "free"
+                  ? "bg-portos-teal text-white font-semibold"
+                  : "text-slate-300 hover:text-white"
+              }`}
+              title="Free Roam unrestricted camera (WASD / Arrows to move freely)"
+            >
+              <Compass className="h-3 w-3" />
+              <span>Free Roam</span>
+            </button>
           </div>
         )}
 
