@@ -196,7 +196,7 @@ export function GeospatialPortMap({
       attributionControl: false,
     });
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: true, showZoom: true }), "top-right");
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false, showZoom: true }), "top-right");
 
     map.on("load", () => {
       setMapLoaded(true);
@@ -491,6 +491,21 @@ export function GeospatialPortMap({
       },
     });
 
+    // 11b. Selected Entity Highlight Target Ring
+    map.addLayer({
+      id: "layer-selected-entity-ring",
+      type: "circle",
+      source: "portos-features",
+      filter: ["==", ["get", "id"], ""],
+      paint: {
+        "circle-radius": 15,
+        "circle-color": "transparent",
+        "circle-stroke-color": "#38bdf8",
+        "circle-stroke-width": 2.5,
+        "circle-opacity": 0.9,
+      },
+    });
+
     // 12. Operational Incidents / Weather Alerts
     map.addLayer({
       id: "layer-incidents-circle",
@@ -625,24 +640,60 @@ export function GeospatialPortMap({
     });
   }, [layerVisibility, mapLoaded]);
 
-  // Synchronize Selected Entity focus from 3D scene
+  // Synchronize Selected Entity focus and target highlight ring
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded || !selectedEntity) return;
+    if (!map || !mapLoaded) return;
 
-    // If coordinates are explicitly attached or available in data
-    const lat = selectedEntity.coordinates?.lat || (selectedEntity.data as any)?.latitude;
-    const lon = selectedEntity.coordinates?.lon || (selectedEntity.data as any)?.longitude;
+    if (!selectedEntity) {
+      if (map.getLayer("layer-selected-entity-ring")) {
+        map.setFilter("layer-selected-entity-ring", ["==", ["get", "id"], "__none__"]);
+      }
+      return;
+    }
+
+    const entityId = selectedEntity.id;
+    // Update target highlight ring filter
+    if (map.getLayer("layer-selected-entity-ring")) {
+      map.setFilter("layer-selected-entity-ring", [
+        "any",
+        ["==", ["get", "id"], entityId],
+        ["==", ["get", "id"], `feat_vessel_${entityId}`],
+        ["==", ["get", "vessel_call_id"], entityId],
+        ["==", ["get", "vessel_id"], entityId],
+      ]);
+    }
+
+    // Resolve coordinates if explicitly attached or find matching feature in GeoJSON
+    let lat = selectedEntity.coordinates?.lat || (selectedEntity.data as any)?.latitude;
+    let lon = selectedEntity.coordinates?.lon || (selectedEntity.data as any)?.longitude;
+
+    if ((!lat || !lon) && geojsonData?.features) {
+      const match = geojsonData.features.find(
+        (f) =>
+          f.id === entityId ||
+          f.id === `feat_vessel_${entityId}` ||
+          f.properties?.id === entityId ||
+          f.properties?.vessel_call_id === entityId ||
+          f.properties?.vessel_id === entityId ||
+          (selectedEntity.data as any)?.vessel?.name &&
+            f.properties?.vessel_name?.toLowerCase() === (selectedEntity.data as any)?.vessel?.name?.toLowerCase()
+      );
+      if (match?.geometry && match.geometry.type === "Point") {
+        lon = match.geometry.coordinates[0];
+        lat = match.geometry.coordinates[1];
+      }
+    }
 
     if (lat && lon && selectedEntity.sourceEnvironment !== "2D") {
       map.flyTo({
         center: [lon, lat],
-        zoom: Math.max(map.getZoom(), 14.5),
+        zoom: Math.max(map.getZoom(), 13.8),
         speed: 1.2,
         curve: 1.4,
       });
     }
-  }, [selectedEntity, mapLoaded]);
+  }, [selectedEntity, mapLoaded, geojsonData]);
 
   // Measure calculation logic
   const calculateTotalMeasurement = () => {
@@ -678,6 +729,16 @@ export function GeospatialPortMap({
       ...prev,
       [layerId]: !prev[layerId],
     }));
+  };
+
+  const fitToRoute = () => {
+    mapRef.current?.fitBounds(
+      [
+        [91.68, 22.12],
+        [91.86, 22.34],
+      ],
+      { padding: 40, duration: 1200 }
+    );
   };
 
   const resetToPortExtent = () => {
@@ -721,11 +782,18 @@ export function GeospatialPortMap({
           {/* Quick Extent Jump Buttons */}
           <div className="hidden sm:flex items-center gap-1 bg-portos-navy-secondary/60 p-0.5 rounded border border-portos-navy-secondary text-[10px]">
             <button
+              onClick={fitToRoute}
+              className="px-2 py-0.5 rounded hover:bg-portos-navy hover:text-white transition-colors text-slate-300"
+              title="Fit to complete fairway navigation route"
+            >
+              Fit to Route
+            </button>
+            <button
               onClick={resetToPortExtent}
               className="px-2 py-0.5 rounded hover:bg-portos-navy hover:text-white transition-colors text-slate-300"
-              title="Fit Karnaphuli regional port extent"
+              title="Reset to port default extent"
             >
-              Port Extent
+              Reset
             </button>
             <button
               onClick={focusPatengaPCT}
@@ -1093,7 +1161,9 @@ export function GeospatialPortMap({
         {/* Right: Operational Environment Badge */}
         <div className="flex items-center gap-2 text-[10px]">
           <span className="w-1.5 h-1.5 rounded-full bg-portos-teal animate-pulse" />
-          <span className="text-slate-400">Karnaphuli Channel Datum: CD +0.00m</span>
+          <span className="text-slate-400">
+            MapLibre GL | PORTOS Maritime Spatial Model · Karnaphuli Fairway (CD +0.0m) · SIMULATED
+          </span>
         </div>
       </div>
     </div>

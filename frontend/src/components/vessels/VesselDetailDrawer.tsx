@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { VesselCallRead, VesselTrackResponse } from "@/types/api";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
@@ -15,6 +16,7 @@ import {
   ArrowRight,
   ShieldCheck,
   AlertTriangle,
+  Box,
 } from "lucide-react";
 
 interface VesselDetailDrawerProps {
@@ -30,6 +32,7 @@ export function VesselDetailDrawer({
   isTrackLoading = false,
   onClose,
 }: VesselDetailDrawerProps) {
+  const router = useRouter();
   const repDate = new Date(call.reported_eta);
   const predDate = call.predicted_eta ? new Date(call.predicted_eta) : null;
 
@@ -252,6 +255,15 @@ export function VesselDetailDrawer({
             </div>
           )}
         </div>
+
+        {/* Quick Launch in 3D Terminal Twin */}
+        <button
+          onClick={() => router.push(`/digital-twin?vessel=${call.id}`)}
+          className="w-full py-2 px-3 bg-portos-navy hover:bg-portos-navy-secondary text-white rounded font-medium text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
+        >
+          <Box className="h-4 w-4 text-portos-teal" />
+          <span>Inspect in 3D Terminal Twin</span>
+        </button>
 
         {/* Operational Grounding Disclaimer */}
         <div className="p-2.5 bg-portos-teal-light/20 rounded border border-portos-teal/30 text-[10px] text-portos-muted space-y-1">
