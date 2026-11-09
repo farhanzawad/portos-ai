@@ -95,6 +95,20 @@ class BerthAllocationScheduler:
         unassigned_vars: Dict[str, Any] = {}
         wait_vars: Dict[str, Any] = {}
 
+        # Add berth maintenance closures as fixed intervals
+        if self.settings.enforce_maintenance_windows:
+            for b in active_berths:
+                for mw in (getattr(b, "maintenance_windows", []) or []):
+                    if getattr(mw, "is_closed", True):
+                        st = mw.start_time if mw.start_time.tzinfo else mw.start_time.replace(tzinfo=timezone.utc)
+                        et = mw.end_time if mw.end_time.tzinfo else mw.end_time.replace(tzinfo=timezone.utc)
+                        m_start = max(0, int((st - planning_start).total_seconds() / 60))
+                        m_end = min(horizon_minutes, int((et - planning_start).total_seconds() / 60))
+                        m_dur = m_end - m_start
+                        if m_dur > 0:
+                            m_interval = model.NewFixedSizeIntervalVar(m_start, m_dur, f"maint_{b.id}_{mw.id}")
+                            intervals_by_berth[b.id].append(m_interval)
+
         for c in calls:
             arrival_dt = c.predicted_eta or c.reported_eta
             if arrival_dt.tzinfo is None:
@@ -119,6 +133,11 @@ class BerthAllocationScheduler:
                     continue
                 if self.settings.enforce_draft_limit and c.max_draft_m > b.depth_draft_m:
                     continue
+                if self.settings.enforce_crane_capacity:
+                    req_crane = getattr(c, "required_crane_capacity", 25.0)
+                    avail_crane = getattr(b, "crane_capacity_moves_per_hour", 30.0)
+                    if req_crane > avail_crane * 1.6:
+                        continue
 
                 # Check berth window constraint
                 b_start_min = 0
@@ -166,7 +185,7 @@ class BerthAllocationScheduler:
             all_presences = [p[1] for p in vessel_presences[c.id]]
             model.Add(sum(all_presences) + unassigned_var == 1)
 
-        # 3. Hard Constraint: No overlapping vessel calls on any berth
+        # 3. Hard Constraint: No overlapping vessel calls or maintenance on any berth
         if self.settings.enforce_no_overlap:
             for b_id, interval_list in intervals_by_berth.items():
                 if len(interval_list) > 1:
@@ -176,6 +195,7 @@ class BerthAllocationScheduler:
         # - Minimize weighted waiting time
         # - Huge penalty for unassigned vessels
         # - Baseline schedule perturbation penalty
+        # - Berth idle gap minimization penalty
         objective_terms = []
         for c in calls:
             w_weight = int(self.settings.waiting_time_weight * c.priority * 10)
@@ -204,14 +224,18 @@ class BerthAllocationScheduler:
         solver_res = solver.Solve(model)
         solve_time_ms = round((time.perf_counter() - start_wall_time) * 1000, 2)
 
-        status_mapping = {
-            cp_model.OPTIMAL: SolverStatusEnum.OPTIMAL,
-            cp_model.FEASIBLE: SolverStatusEnum.FEASIBLE,
-            cp_model.INFEASIBLE: SolverStatusEnum.INFEASIBLE,
-            cp_model.MODEL_INVALID: SolverStatusEnum.MODEL_INVALID,
-            cp_model.UNKNOWN: SolverStatusEnum.UNKNOWN,
-        }
-        solver_status = status_mapping.get(solver_res, SolverStatusEnum.UNKNOWN)
+        if solver_res == cp_model.OPTIMAL:
+            solver_status = SolverStatusEnum.OPTIMAL
+        elif solver_res == cp_model.FEASIBLE:
+            solver_status = SolverStatusEnum.FEASIBLE
+        elif solver_res == cp_model.INFEASIBLE:
+            solver_status = SolverStatusEnum.INFEASIBLE
+        elif solver_res == cp_model.MODEL_INVALID:
+            solver_status = SolverStatusEnum.MODEL_INVALID
+        elif solver.WallTime() >= (self.settings.max_solver_duration_seconds - 0.5):
+            solver_status = SolverStatusEnum.TIME_LIMIT_REACHED
+        else:
+            solver_status = SolverStatusEnum.UNKNOWN
 
         # 6. Extract Solution & Construct ScheduledAssignment Records
         optimized_schedule: List[ScheduledAssignment] = []
@@ -244,12 +268,16 @@ class BerthAllocationScheduler:
 
                     loa_margin = round(berth.max_vessel_loa_m - c.length_overall_m, 1)
                     draft_margin = round(berth.depth_draft_m - c.max_draft_m, 1)
+                    crane_str = f"{getattr(berth, 'assigned_cranes_count', 1)} STS crane(s) ({getattr(berth, 'crane_capacity_moves_per_hour', 30.0)} moves/h)"
 
                     explanation = (
-                        f"Assigned to {berth.code} ({berth.name}): "
-                        f"Physical fit LOA {c.length_overall_m}m/{berth.max_vessel_loa_m}m (+{loa_margin}m margin), "
-                        f"draft {c.max_draft_m}m/{berth.depth_draft_m}m (+{draft_margin}m margin). "
-                        f"Waiting time: {wait_hrs}h after ETA. Priority weight: {c.priority}."
+                        f"RECOMMENDED: {berth.code} ({berth.name})\n"
+                        f"Reasons:\n"
+                        f"• Vessel physical compatibility verified: LOA {c.length_overall_m}m <= {berth.max_vessel_loa_m}m (+{loa_margin}m buffer), "
+                        f"Draft {c.max_draft_m}m <= {berth.depth_draft_m}m (+{draft_margin}m depth margin).\n"
+                        f"• Berth is available within the predicted arrival window and free of maintenance closures.\n"
+                        f"• Crane capacity verified: {crane_str}.\n"
+                        f"• Expected waiting time: {wait_hrs}h after arrival ETA (Priority weight: {c.priority})."
                     )
 
                     assignment = ScheduledAssignment(

@@ -50,31 +50,31 @@ export function ScenarioEmissionsComparePanel({
   const isNeutral = comp.delta_co2e_kg === 0;
 
   return (
-    <div className="bg-white rounded-lg border border-portos-border shadow-xs overflow-hidden flex flex-col">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col font-sans">
       {/* Header with Selector */}
-      <div className="p-4 bg-slate-50 border-b border-portos-border flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <GitCompare className="h-4 w-4 text-portos-navy" />
-            <h2 className="text-sm font-bold text-portos-navy">
+            <GitCompare className="h-4 w-4 text-sky-600" />
+            <h2 className="text-sm font-bold text-slate-900">
               Baseline vs. Disruption Scenario Emissions Variance
             </h2>
           </div>
-          <p className="text-xs text-portos-muted mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5 font-medium">
             Evaluate secondary carbon impact caused by queuing delays and equipment operational shifts.
           </p>
         </div>
 
         {/* Scenario Dropdown */}
         <div className="flex items-center gap-2">
-          <label htmlFor="scenario-select" className="text-xs text-portos-muted font-medium shrink-0">
+          <label htmlFor="scenario-select" className="text-xs text-slate-500 font-medium shrink-0">
             Compare Against:
           </label>
           <select
             id="scenario-select"
             value={selectedScenario}
             onChange={(e) => setSelectedScenario(e.target.value)}
-            className="text-xs font-medium bg-white border border-portos-border rounded-md px-2.5 py-1.5 text-portos-navy focus:outline-none focus:ring-1 focus:ring-portos-teal"
+            className="text-xs font-semibold bg-white border border-slate-200 rounded-full px-3 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
           >
             {AVAILABLE_SCENARIOS.map((s) => (
               <option key={s.code} value={s.code}>
@@ -85,7 +85,7 @@ export function ScenarioEmissionsComparePanel({
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="p-1.5 text-portos-muted hover:text-portos-navy rounded border border-portos-border bg-white transition-colors"
+            className="p-1.5 text-slate-500 hover:text-slate-900 rounded-full border border-slate-200 bg-white transition-colors shadow-2xs"
             title="Refresh comparison"
           >
             <RotateCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
@@ -97,12 +97,12 @@ export function ScenarioEmissionsComparePanel({
       <div className="px-4 py-2.5 bg-sky-50/50 border-b border-sky-100 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2">
           {comp.comparison_integrity_verified ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded border border-emerald-300">
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/70 px-2.5 py-0.5 rounded-full border border-emerald-300">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
               Scope Equality Verified
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-300">
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-100/70 px-2.5 py-0.5 rounded-full border border-amber-300">
               <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
               Scope Mismatch Warning
             </span>
@@ -111,48 +111,48 @@ export function ScenarioEmissionsComparePanel({
             {comp.factor_count} identical emission factors applied ({comp.factor_set_id})
           </span>
         </div>
-        <span className="text-[11px] text-portos-muted font-mono">
+        <span className="text-[11px] text-slate-500 font-semibold tabular-nums">
           Horizon: {comp.duration_hours}h
         </span>
       </div>
 
       {/* High-Level Comparison Summary Cards */}
-      <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3 border-b border-portos-border bg-white">
+      <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3 border-b border-slate-200 bg-white">
         {/* Baseline Total */}
-        <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-          <span className="text-[10px] uppercase font-semibold text-portos-muted block">
+        <div className="p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200/80">
+          <span className="text-[10px] uppercase font-semibold text-slate-500 block">
             Baseline Normal
           </span>
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-xl font-bold font-mono text-slate-800">
+            <span className="text-xl font-bold text-slate-900 tabular-nums">
               {comp.baseline_total_co2e_mt.toFixed(2)}
             </span>
             <span className="text-xs font-semibold text-slate-600">MT CO2e</span>
           </div>
-          <span className="text-[10px] text-portos-muted font-mono block mt-0.5">
+          <span className="text-[10px] text-slate-500 font-medium tabular-nums block mt-0.5">
             {comp.baseline_total_co2e_kg.toLocaleString()} kg
           </span>
         </div>
 
         {/* Scenario Total */}
-        <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-          <span className="text-[10px] uppercase font-semibold text-portos-muted block">
+        <div className="p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200/80">
+          <span className="text-[10px] uppercase font-semibold text-slate-500 block">
             {comp.comparison_scenario_name}
           </span>
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-xl font-bold font-mono text-portos-navy">
+            <span className="text-xl font-bold text-slate-900 tabular-nums">
               {comp.comparison_total_co2e_mt.toFixed(2)}
             </span>
-            <span className="text-xs font-semibold text-portos-navy">MT CO2e</span>
+            <span className="text-xs font-semibold text-slate-600">MT CO2e</span>
           </div>
-          <span className="text-[10px] text-portos-muted font-mono block mt-0.5">
+          <span className="text-[10px] text-slate-500 font-medium tabular-nums block mt-0.5">
             {comp.comparison_total_co2e_kg.toLocaleString()} kg
           </span>
         </div>
 
         {/* Net Delta */}
         <div
-          className={`p-3 rounded-lg border flex flex-col justify-between ${
+          className={`p-3.5 rounded-2xl border flex flex-col justify-between ${
             isIncrease
               ? "bg-amber-50/50 border-amber-200"
               : isNeutral
@@ -180,11 +180,11 @@ export function ScenarioEmissionsComparePanel({
           </div>
           <div className="flex items-baseline gap-1 mt-1">
             <span
-              className={`text-xl font-bold font-mono ${
+              className={`text-xl font-bold tabular-nums ${
                 isIncrease
                   ? "text-amber-800"
                   : isNeutral
-                  ? "text-slate-800"
+                  ? "text-slate-900"
                   : "text-emerald-800"
               }`}
             >
@@ -193,7 +193,7 @@ export function ScenarioEmissionsComparePanel({
             </span>
             <span className="text-xs font-semibold text-slate-600">MT CO2e</span>
           </div>
-          <span className="text-[10px] text-slate-500 font-mono block mt-0.5">
+          <span className="text-[10px] text-slate-500 font-medium tabular-nums block mt-0.5">
             {isIncrease ? "+" : ""}
             {comp.delta_co2e_kg.toLocaleString()} kg net variance
           </span>
@@ -204,16 +204,16 @@ export function ScenarioEmissionsComparePanel({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-slate-100/75 border-b border-portos-border text-portos-muted font-semibold">
-              <th className="py-2.5 px-4">Activity Category</th>
-              <th className="py-2.5 px-3 font-mono text-right">Baseline Qty</th>
-              <th className="py-2.5 px-3 font-mono text-right">Scenario Qty</th>
-              <th className="py-2.5 px-3 font-mono text-right">Delta Activity</th>
+            <tr className="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-semibold text-[11px]">
+              <th className="py-2.5 px-4 font-bold text-slate-900">Activity Category</th>
+              <th className="py-2.5 px-3 text-right">Baseline Qty</th>
+              <th className="py-2.5 px-3 text-right">Scenario Qty</th>
+              <th className="py-2.5 px-3 text-right">Delta Activity</th>
               <th className="py-2.5 px-3 text-left">Formula & Applied Factor</th>
-              <th className="py-2.5 px-4 font-mono text-right">Delta CO2e</th>
+              <th className="py-2.5 px-4 text-right">Delta CO2e</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-portos-border/70">
+          <tbody className="divide-y divide-slate-100 tabular-nums">
             {comp.activity_deltas.map((act) => {
               const deltaQty = act.comparison_quantity - act.baseline_quantity;
               const deltaMt = act.delta_kg / 1000;
@@ -221,36 +221,36 @@ export function ScenarioEmissionsComparePanel({
               const actNeutral = act.delta_kg === 0;
 
               return (
-                <tr key={act.activity_name} className="hover:bg-slate-50/50">
-                  <td className="py-2.5 px-4 font-medium text-portos-navy">
+                <tr key={act.activity_name} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="py-2.5 px-4 font-semibold text-slate-900">
                     {act.activity_name}
                   </td>
-                  <td className="py-2.5 px-3 font-mono text-right text-slate-600">
+                  <td className="py-2.5 px-3 text-right text-slate-600 font-medium">
                     {act.baseline_quantity.toLocaleString()} {act.quantity_unit}
                   </td>
-                  <td className="py-2.5 px-3 font-mono text-right text-slate-800 font-medium">
+                  <td className="py-2.5 px-3 text-right text-slate-800 font-semibold">
                     {act.comparison_quantity.toLocaleString()} {act.quantity_unit}
                   </td>
-                  <td className="py-2.5 px-3 font-mono text-right">
+                  <td className="py-2.5 px-3 text-right font-medium">
                     <span
                       className={
                         actIncrease
-                          ? "text-amber-700 font-medium"
+                          ? "text-amber-700 font-semibold"
                           : actNeutral
                           ? "text-slate-500"
-                          : "text-emerald-700 font-medium"
+                          : "text-emerald-700 font-semibold"
                       }
                     >
                       {actIncrease ? "+" : ""}
                       {deltaQty.toFixed(1)} {act.quantity_unit}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-left text-[11px] font-mono text-slate-600">
+                  <td className="py-2.5 px-3 text-left text-[11px] text-slate-600 font-medium">
                     {act.formula_expression}
                   </td>
-                  <td className="py-2.5 px-4 font-mono text-right">
+                  <td className="py-2.5 px-4 text-right">
                     <span
-                      className={`font-semibold ${
+                      className={`font-bold ${
                         actIncrease
                           ? "text-amber-800"
                           : actNeutral
@@ -261,7 +261,7 @@ export function ScenarioEmissionsComparePanel({
                       {actIncrease ? "+" : ""}
                       {deltaMt.toFixed(3)} MT
                     </span>
-                    <span className="text-[10px] text-portos-muted block">
+                    <span className="text-[10px] text-slate-500 block font-normal">
                       ({actIncrease ? "+" : ""}
                       {act.delta_kg.toLocaleString()} kg)
                     </span>
@@ -274,8 +274,8 @@ export function ScenarioEmissionsComparePanel({
       </div>
 
       {/* Disclaimer and Methodology Footer */}
-      <div className="p-3 bg-slate-50 border-t border-portos-border text-[11px] text-portos-muted flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <span className="leading-relaxed">
+      <div className="p-3 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <span className="leading-relaxed font-medium">
           <strong className="text-slate-700">Calculation Method:</strong> {comp.calculation_method}. {comp.disclaimer}
         </span>
       </div>

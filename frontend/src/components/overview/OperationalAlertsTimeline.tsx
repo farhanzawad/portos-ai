@@ -31,19 +31,26 @@ export function OperationalAlertsTimeline() {
   };
 
   return (
-    <div className="rounded-lg border border-portos-border bg-portos-surface shadow-sm overflow-hidden flex flex-col">
-      <div className="px-5 py-3.5 border-b border-portos-border flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-portos-amber" />
-          <h3 className="text-sm font-bold text-portos-navy">
-            Operational Alerts & Disruption Timeline
-          </h3>
+    <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden flex flex-col font-sans">
+      <div className="px-6 py-4 border-b border-slate-200/80 flex items-center justify-between gap-3 bg-white">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-amber-50 text-amber-600 rounded-xl border border-amber-100">
+            <AlertTriangle className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Operational Alerts & Disruption Timeline
+            </h3>
+            <p className="text-[11px] text-slate-500 font-medium">
+              Real-time bottleneck telemetry & channel advisories
+            </p>
+          </div>
           <DataStatusBadge status="SIMULATED" size="sm" />
         </div>
 
         <Link
           href="/scenario-lab"
-          className="text-xs font-medium text-portos-navy hover:text-portos-teal flex items-center gap-1 transition-colors"
+          className="text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-3 py-1 rounded-full hover:bg-sky-100 flex items-center gap-1 transition-all"
         >
           <span>Scenario Lab</span>
           <ArrowRight className="h-3 w-3" />
@@ -93,4 +100,3 @@ export function OperationalAlertsTimeline() {
     </div>
   );
 }
-

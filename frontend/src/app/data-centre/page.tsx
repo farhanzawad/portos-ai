@@ -27,40 +27,40 @@ export default function DataCentrePage() {
         </div>
 
         {/* Tab Switcher Controls */}
-        <div className="flex items-center bg-portos-bg p-1 rounded-lg border border-portos-border text-xs font-medium">
+        <div className="flex items-center bg-slate-100 p-1 rounded-full border border-slate-200 text-xs font-medium">
           <button
             onClick={() => setActiveTab("models")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-colors ${
               activeTab === "models"
-                ? "bg-white text-portos-navy font-bold shadow-xs"
-                : "text-portos-muted hover:text-portos-navy"
+                ? "bg-white text-slate-900 font-bold shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <BrainCircuit className="h-3.5 w-3.5 text-portos-teal" />
+            <BrainCircuit className="h-3.5 w-3.5 text-sky-600" />
             <span>Model Centre (M08)</span>
           </button>
 
           <button
             onClick={() => setActiveTab("ingestion")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-colors ${
               activeTab === "ingestion"
-                ? "bg-white text-portos-navy font-bold shadow-xs"
-                : "text-portos-muted hover:text-portos-navy"
+                ? "bg-white text-slate-900 font-bold shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <UploadCloud className="h-3.5 w-3.5 text-portos-navy-secondary" />
+            <UploadCloud className="h-3.5 w-3.5 text-slate-700" />
             <span>Data Ingestion (M13)</span>
           </button>
 
           <button
             onClick={() => setActiveTab("gov")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-colors ${
               activeTab === "gov"
-                ? "bg-white text-portos-navy font-bold shadow-xs"
-                : "text-portos-muted hover:text-portos-navy"
+                ? "bg-white text-slate-900 font-bold shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+            <ShieldCheck className="h-3.5 w-3.5 text-sky-600" />
             <span>Official Govt Data (CPA/BMD)</span>
           </button>
         </div>

@@ -24,10 +24,10 @@ export function DataStatusBadge({
       dot: "bg-slate-500",
     },
     OBSERVED: {
-      bg: "bg-teal-50",
-      text: "text-teal-800",
-      border: "border-teal-300",
-      dot: "bg-teal-600",
+      bg: "bg-sky-50",
+      text: "text-sky-800",
+      border: "border-sky-300",
+      dot: "bg-sky-600",
     },
     FORECAST: {
       bg: "bg-sky-50",
@@ -54,11 +54,11 @@ export function DataStatusBadge({
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 font-mono font-semibold uppercase tracking-wider rounded border transition-colors",
+        "inline-flex items-center gap-1.5 font-bold uppercase tracking-wider rounded-full border transition-colors",
         current.bg,
         current.text,
         current.border,
-        size === "sm" ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-xs",
+        size === "sm" ? "px-2.5 py-0.5 text-[10px]" : "px-3 py-1 text-xs",
         className
       )}
       title={`Data Classification: ${status}`}

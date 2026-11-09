@@ -8,7 +8,17 @@ import {
   EquipmentRead,
   YardBlockRead,
 } from "@/types/api";
-import { Ship, Anchor, Cpu, Grid3X3, Waves, Compass } from "lucide-react";
+import {
+  Ship,
+  Anchor,
+  Cpu,
+  Grid3X3,
+  Waves,
+  Compass,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+} from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
 
@@ -22,6 +32,10 @@ interface TerminalSchematic2DProps {
   onSelectEntity: (entity: SelectedEntity) => void;
 }
 
+const MIN_2D_SCALE = 0.75; // 75% overview boundary (max zoom-out height ceiling)
+const MAX_2D_SCALE = 1.35; // 135% close-up boundary (max zoom-in depth floor)
+const STEP_2D_SCALE = 0.15;
+
 export function TerminalSchematic2D({
   berths,
   vesselCalls,
@@ -33,6 +47,7 @@ export function TerminalSchematic2D({
 }: TerminalSchematic2DProps) {
   const berthedCalls = vesselCalls.filter((c) => c.status === "BERTHED");
   const queueCalls = vesselCalls.filter((c) => c.status !== "BERTHED");
+  const [zoomScale, setZoomScale] = React.useState<number>(1.0);
 
   return (
     <div className="w-full h-full min-h-[640px] bg-slate-900 p-6 rounded-b-lg border border-portos-border text-slate-100 flex flex-col gap-6 overflow-y-auto">
@@ -45,12 +60,60 @@ export function TerminalSchematic2D({
           </span>
           <span className="font-mono text-slate-400">· 2D Plan View</span>
         </div>
-        <div className="flex items-center gap-3 text-slate-400 font-mono text-[11px]">
-          <span>Quay Orientation: 140° SE</span>
-          <span>·</span>
-          <span>Datum: CD +0.0m</span>
+        <div className="flex items-center gap-4 text-slate-400 font-mono text-[11px]">
+          <div className="hidden sm:flex items-center gap-2">
+            <span>Quay: 140° SE</span>
+            <span>·</span>
+            <span>Datum: CD +0.0m</span>
+          </div>
+
+          {/* 2D Zoom Ceiling & Floor Controls */}
+          <div className="flex items-center gap-1.5 bg-slate-950/80 border border-slate-800 rounded-md px-2 py-1 shadow-sm">
+            <span className="text-[10px] text-slate-400 font-mono mr-0.5">Scale</span>
+            <button
+              onClick={() => setZoomScale((s) => Math.max(MIN_2D_SCALE, Number((s - STEP_2D_SCALE).toFixed(2))))}
+              disabled={zoomScale <= MIN_2D_SCALE}
+              title={zoomScale <= MIN_2D_SCALE ? "Maximum zoom-out limit reached (75%)" : "Zoom Out 2D Plan"}
+              aria-label="Zoom Out"
+              className="p-1 rounded hover:bg-slate-800 text-slate-300 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </button>
+            <span className="font-mono text-[11px] font-bold text-portos-teal w-11 text-center select-none">
+              {Math.round(zoomScale * 100)}%
+            </span>
+            <button
+              onClick={() => setZoomScale((s) => Math.min(MAX_2D_SCALE, Number((s + STEP_2D_SCALE).toFixed(2))))}
+              disabled={zoomScale >= MAX_2D_SCALE}
+              title={zoomScale >= MAX_2D_SCALE ? "Maximum zoom-in limit reached (135%)" : "Zoom In 2D Plan"}
+              aria-label="Zoom In"
+              className="p-1 rounded hover:bg-slate-800 text-slate-300 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+            {zoomScale !== 1.0 && (
+              <button
+                onClick={() => setZoomScale(1.0)}
+                title="Reset scale to 100%"
+                aria-label="Reset Scale"
+                className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors ml-0.5"
+              >
+                <RotateCcw className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Scaled 2D Schematic Content Wrapper */}
+      <div
+        style={{
+          transform: `scale(${zoomScale})`,
+          transformOrigin: "top center",
+          transition: "transform 180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+        className="flex flex-col gap-6"
+      >
 
       {/* 1. Water Channel & Outer Anchorage Zone */}
       {layers.vessels && (
@@ -308,6 +371,7 @@ export function TerminalSchematic2D({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -19,7 +19,7 @@ export function BerthUtilizationChart() {
 
   if (isLoading || !berths || !Array.isArray(berths)) {
     return (
-      <div className="rounded-lg border border-portos-border bg-portos-surface p-5 shadow-sm space-y-3">
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-3">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-48 w-full" />
       </div>
@@ -35,9 +35,9 @@ export function BerthUtilizationChart() {
       trigger: "axis",
       axisPointer: { type: "shadow" },
       formatter: (params: any[]) => {
-        let text = `<div style="font-size:11px; font-weight:bold; margin-bottom:4px;">${params[0].name}</div>`;
+        let text = `<div style="font-size:11px; font-weight:bold; margin-bottom:4px; font-family:sans-serif;">${params[0].name}</div>`;
         params.forEach((p) => {
-          text += `<div style="font-size:11px; display:flex; justify-content:space-between; gap:12px;">
+          text += `<div style="font-size:11px; display:flex; justify-content:space-between; gap:12px; font-family:sans-serif;">
             <span>${p.seriesName}:</span>
             <strong>${p.value} ${p.seriesName === "Quay Length" ? "m" : "m draft"}</strong>
           </div>`;
@@ -47,7 +47,7 @@ export function BerthUtilizationChart() {
     },
     legend: {
       data: ["Quay Length", "Depth Draft"],
-      textStyle: { color: "#667085", fontSize: 11 },
+      textStyle: { color: "#64748B", fontSize: 11, fontFamily: "sans-serif" },
       top: 0,
       right: 0,
     },
@@ -60,24 +60,24 @@ export function BerthUtilizationChart() {
     xAxis: {
       type: "category",
       data: berthCodes,
-      axisLine: { lineStyle: { color: "#DCE3EA" } },
-      axisLabel: { color: "#102A43", fontSize: 11, fontWeight: 500 },
+      axisLine: { lineStyle: { color: "#E2E8F0" } },
+      axisLabel: { color: "#0F172A", fontSize: 11, fontWeight: 600, fontFamily: "sans-serif" },
     },
     yAxis: [
       {
         type: "value",
         name: "Length (m)",
-        nameTextStyle: { color: "#667085", fontSize: 10 },
-        splitLine: { lineStyle: { color: "#F4F6F8" } },
-        axisLabel: { color: "#667085", fontSize: 10 },
+        nameTextStyle: { color: "#64748B", fontSize: 10, fontFamily: "sans-serif" },
+        splitLine: { lineStyle: { color: "#F1F5F9" } },
+        axisLabel: { color: "#64748B", fontSize: 10, fontFamily: "sans-serif" },
       },
       {
         type: "value",
         name: "Draft (m)",
         max: 15,
-        nameTextStyle: { color: "#667085", fontSize: 10 },
+        nameTextStyle: { color: "#64748B", fontSize: 10, fontFamily: "sans-serif" },
         splitLine: { show: false },
-        axisLabel: { color: "#667085", fontSize: 10 },
+        axisLabel: { color: "#64748B", fontSize: 10, fontFamily: "sans-serif" },
       },
     ],
     series: [
@@ -85,30 +85,37 @@ export function BerthUtilizationChart() {
         name: "Quay Length",
         type: "bar",
         data: lengths,
-        itemStyle: { color: "#102A43", borderRadius: [2, 2, 0, 0] },
-        barWidth: 16,
+        itemStyle: { color: "#0F172A", borderRadius: [6, 6, 0, 0] },
+        barWidth: 20,
       },
       {
         name: "Depth Draft",
         type: "line",
         yAxisIndex: 1,
         data: drafts,
-        itemStyle: { color: "#16A394" },
-        lineStyle: { width: 2.5, color: "#16A394" },
+        itemStyle: { color: "#0284C7" },
+        lineStyle: { width: 3, color: "#0284C7" },
         symbol: "circle",
-        symbolSize: 6,
+        symbolSize: 8,
       },
     ],
   };
 
   return (
-    <div className="rounded-lg border border-portos-border bg-portos-surface shadow-sm p-5 space-y-3">
-      <div className="flex items-center justify-between pb-2 border-b border-portos-border">
-        <div className="flex items-center gap-2">
-          <Anchor className="h-4 w-4 text-portos-navy-secondary" />
-          <h3 className="text-sm font-bold text-portos-navy">
-            Berth Physical Capacity & Draft Constraints
-          </h3>
+    <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs p-5 space-y-3 font-sans">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-sky-50 text-sky-600 rounded-xl border border-sky-100">
+            <Anchor className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Berth Physical Capacity & Draft Constraints
+            </h3>
+            <p className="text-[11px] text-slate-500 font-medium">
+              Operational LOA boundaries along Karnaphuli River
+            </p>
+          </div>
         </div>
         <DataStatusBadge status="SIMULATED" size="sm" />
       </div>
@@ -117,11 +124,12 @@ export function BerthUtilizationChart() {
         <ReactECharts option={option} style={{ height: "100%", width: "100%" }} />
       </div>
 
-      <div className="pt-2 border-t border-portos-border/60 flex items-center justify-between text-[11px] text-portos-muted">
+      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
         <span>Units: Length Overall & Depth in metres (m)</span>
-        <span className="font-mono text-portos-teal-dark font-semibold">6 Berths Operational</span>
+        <span className="font-semibold text-sky-800 bg-sky-50 px-2.5 py-1 rounded-full border border-sky-200/80 tabular-nums text-[11px]">
+          6 Berths Operational
+        </span>
       </div>
     </div>
   );
 }
-

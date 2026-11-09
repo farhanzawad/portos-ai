@@ -113,21 +113,29 @@ export function MaritimeMapLegend({
                 <div className="space-y-1.5 text-[11px] bg-slate-900/60 p-2 rounded border border-portos-navy-secondary/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-[#16a394] border-2 border-white flex-shrink-0" />
+                      <div className="w-3.5 h-3.5 rounded-xs bg-emerald-600 border border-white flex items-center justify-center text-[7px] text-white font-bold shrink-0">
+                        ||
+                      </div>
                       <span>Berthed Alongside Quay</span>
                     </div>
                     <span className="text-[9px] text-slate-400 font-mono">CCT/NCT/PCT</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-[#38bdf8] border-2 border-white flex-shrink-0" />
+                      <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
+                        <svg width="12" height="15" viewBox="0 0 24 32" fill="none">
+                          <path d="M12 2 L22 10 L20 29 L12 27 L4 29 L2 10 Z" fill="#0284C7" stroke="#ffffff" stroke-width="2"/>
+                        </svg>
+                      </div>
                       <span>Inbound / Fairway Transit</span>
                     </div>
                     <span className="text-[9px] text-slate-400 font-mono">Underway</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-[#f59e0b] border-2 border-white flex-shrink-0" />
+                      <div className="w-3.5 h-3.5 rounded-full bg-amber-500 border border-white flex items-center justify-center text-[8px] text-white font-bold shrink-0">
+                        ⚓
+                      </div>
                       <span>Outer Anchorage Waiting</span>
                     </div>
                     <span className="text-[9px] text-slate-400 font-mono">At Anchor</span>

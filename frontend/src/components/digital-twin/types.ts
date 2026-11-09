@@ -39,6 +39,8 @@ export interface LayerVisibility {
 
 export type ViewMode = "3d" | "map" | "2d" | "split";
 
+export type SplitLayoutMode = "balanced" | "gis-focus" | "twin-focus" | "pip";
+
 export type CameraPreset = "isometric" | "topdown" | "operational" | "free";
 
 export type NavActionType =
@@ -62,9 +64,10 @@ export type NavActionType =
 export type MouseInteractionMode = "pan" | "orbit";
 
 export interface CameraMetrics {
-  bearing: number; // 0° = North, 90° = East, 180° = South, 270° = West
-  pitch: number;   // 0° = top-down 2D plan, ~50° = 3D perspective
-  distance: number;
+  bearing: number;  // 0° = North, 90° = East, 180° = South, 270° = West
+  pitch: number;    // 0° = top-down 2D plan, ~50° = 3D perspective
+  distance: number; // Distance to orbit target in meters
+  altitude?: number; // Camera elevation (Y) above ground level in meters
 }
 
 export interface NavSignal {

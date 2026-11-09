@@ -166,7 +166,49 @@ class ScheduleFeasibilityValidator:
                         )
                     )
 
-        # 2. Pairwise Berth Overlap Checks
+                # Check 7: Berth maintenance window collision
+                if berth.maintenance_windows:
+                    for mw in berth.maintenance_windows:
+                        if mw.is_closed:
+                            m_start = _to_utc(mw.start_time)
+                            m_end = _to_utc(mw.end_time)
+                            if m_start and m_end:
+                                latest_s = max(s_start, m_start)
+                                earliest_e = min(s_end, m_end)
+                                if latest_s < earliest_e:
+                                    violations.append(
+                                        ConstraintViolation(
+                                            violation_type="MAINTENANCE_COLLISION",
+                                            vessel_call_id=assign.vessel_call_id,
+                                            berth_id=assign.berth_id,
+                                            description=(
+                                                f"Berth '{berth.code}' has scheduled maintenance '{mw.title}' "
+                                                f"[{m_start.strftime('%d/%m %H:%M')}-{m_end.strftime('%d/%m %H:%M')}] "
+                                                f"colliding with assignment '{assign.vessel_name}'."
+                                            ),
+                                        )
+                                    )
+
+        # 2. Pairwise Vessel Duplicate Checks (A vessel cannot occupy multiple berths)
+        call_assignments: Dict[str, List[ScheduledAssignment]] = {}
+        for a in assignments:
+            call_assignments.setdefault(a.vessel_call_id, []).append(a)
+
+        for c_id, v_assigns in call_assignments.items():
+            if len(v_assigns) > 1:
+                violations.append(
+                    ConstraintViolation(
+                        violation_type="DUPLICATE_VESSEL_ASSIGNMENT",
+                        vessel_call_id=c_id,
+                        berth_id=v_assigns[0].berth_id,
+                        description=(
+                            f"Vessel call '{c_id}' is assigned to multiple berths ({len(v_assigns)} assignments). "
+                            f"A vessel cannot occupy multiple berths simultaneously."
+                        ),
+                    )
+                )
+
+        # 3. Pairwise Berth Overlap Checks
         # Group assignments by berth
         berth_grouped: Dict[str, List[ScheduledAssignment]] = {}
         for a in assignments:

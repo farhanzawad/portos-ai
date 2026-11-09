@@ -28,23 +28,23 @@ export function AssignmentReviewDrawer({
   const draftMargin = Math.round((depthDraft - draft) * 10) / 10;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-white border-l border-portos-border shadow-2xl z-50 flex flex-col">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-white border-l border-slate-200/90 shadow-2xl z-50 flex flex-col font-sans">
       {/* Drawer Header */}
-      <div className="p-4 border-b border-portos-border flex items-center justify-between bg-slate-50">
+      <div className="p-4 border-b border-slate-200/80 flex items-center justify-between bg-white">
         <div className="flex items-center gap-2">
-          <Ship className="h-5 w-5 text-portos-teal" />
+          <Ship className="h-5 w-5 text-sky-600" />
           <div>
-            <h3 className="text-sm font-bold text-portos-navy leading-tight">
+            <h3 className="text-sm font-bold text-slate-900 leading-tight">
               {assignment.vessel_name.replace("DEMO ", "")}
             </h3>
-            <span className="text-xs text-portos-muted font-mono">
+            <span className="text-xs text-slate-500 font-medium">
               Call ID: {assignment.call_number} • Assigned to {assignment.berth_code}
             </span>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-1 rounded-md text-portos-muted hover:text-portos-navy hover:bg-slate-200/60 transition-colors"
+          className="p-1 rounded-md text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           title="Close drawer"
         >
           <X className="h-4 w-4" />
@@ -54,21 +54,21 @@ export function AssignmentReviewDrawer({
       {/* Drawer Body */}
       <div className="flex-1 p-4 space-y-4 overflow-y-auto text-xs">
         {/* Scheduling Timetable Card */}
-        <div className="bg-slate-50/70 border border-portos-border rounded-lg p-3 space-y-2">
-          <div className="flex items-center justify-between text-portos-navy font-bold">
+        <div className="bg-slate-50/90 border border-slate-200/90 rounded-xl p-3.5 space-y-2">
+          <div className="flex items-center justify-between text-slate-900 font-bold">
             <span className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-portos-teal" />
+              <Clock className="h-4 w-4 text-sky-600" />
               Operational Time Window
             </span>
-            <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono font-bold px-2 py-0.5 rounded">
+            <span className="text-[10px] bg-sky-50 text-sky-700 font-bold px-2 py-0.5 rounded border border-sky-200">
               FEASIBLE
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-[11px] pt-1 font-mono">
+          <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
             <div>
-              <span className="text-portos-muted block text-[10px]">Scheduled Berthing:</span>
-              <span className="font-semibold text-portos-navy">
+              <span className="text-slate-500 block text-[10px] font-medium">Scheduled Berthing:</span>
+              <span className="font-semibold text-slate-900 tabular-nums">
                 {new Date(assignment.scheduled_start).toLocaleDateString("en-GB", {
                   month: "short",
                   day: "numeric",
@@ -79,8 +79,8 @@ export function AssignmentReviewDrawer({
               </span>
             </div>
             <div>
-              <span className="text-portos-muted block text-[10px]">Scheduled Departure:</span>
-              <span className="font-semibold text-portos-navy">
+              <span className="text-slate-500 block text-[10px] font-medium">Scheduled Departure:</span>
+              <span className="font-semibold text-slate-900 tabular-nums">
                 {new Date(assignment.scheduled_end).toLocaleDateString("en-GB", {
                   month: "short",
                   day: "numeric",
@@ -91,14 +91,14 @@ export function AssignmentReviewDrawer({
               </span>
             </div>
             <div>
-              <span className="text-portos-muted block text-[10px]">Service Duration:</span>
-              <span className="font-semibold text-portos-navy">
+              <span className="text-slate-500 block text-[10px] font-medium">Service Duration:</span>
+              <span className="font-semibold text-slate-900 tabular-nums">
                 {assignment.service_duration_hours} hours
               </span>
             </div>
             <div>
-              <span className="text-portos-muted block text-[10px]">Queue Wait Delay:</span>
-              <span className="font-semibold text-emerald-700">
+              <span className="text-slate-500 block text-[10px] font-medium">Queue Wait Delay:</span>
+              <span className="font-semibold text-sky-700 tabular-nums">
                 {assignment.waiting_time_hours} hours
               </span>
             </div>
@@ -106,28 +106,28 @@ export function AssignmentReviewDrawer({
         </div>
 
         {/* Physical Compatibility & Clearance Margins */}
-        <div className="bg-slate-50/70 border border-portos-border rounded-lg p-3 space-y-2.5">
-          <div className="flex items-center justify-between text-portos-navy font-bold">
+        <div className="bg-slate-50/90 border border-slate-200/90 rounded-xl p-3.5 space-y-2.5">
+          <div className="flex items-center justify-between text-slate-900 font-bold">
             <span className="flex items-center gap-1.5">
-              <Ruler className="h-4 w-4 text-portos-navy-secondary" />
+              <Ruler className="h-4 w-4 text-slate-700" />
               Physical Vessel-Berth Clearance
             </span>
-            <span className="text-[10px] bg-teal-50 text-teal-800 font-mono font-bold px-2 py-0.5 rounded">
+            <span className="text-[10px] bg-sky-50 text-sky-800 font-bold px-2 py-0.5 rounded border border-sky-200">
               {berth?.code || assignment.berth_code}
             </span>
           </div>
 
-          <div className="space-y-2 pt-1 font-mono text-[11px]">
+          <div className="space-y-2 pt-1 text-[11px]">
             <div>
               <div className="flex justify-between mb-1">
-                <span className="text-portos-muted">Vessel LOA vs Max Berth LOA:</span>
-                <span className="font-semibold text-portos-navy">
+                <span className="text-slate-500 font-medium">Vessel LOA vs Max Berth LOA:</span>
+                <span className="font-semibold text-slate-900 tabular-nums">
                   {loa}m / {maxLoa}m (+{loaMargin}m clearance)
                 </span>
               </div>
               <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                 <div
-                  className="bg-portos-teal h-full rounded-full"
+                  className="bg-sky-600 h-full rounded-full"
                   style={{ width: `${Math.min(100, (loa / maxLoa) * 100)}%` }}
                 />
               </div>
@@ -151,40 +151,40 @@ export function AssignmentReviewDrawer({
         </div>
 
         {/* Independent Hard Constraints Verification Checklist */}
-        <div className="border border-emerald-200 bg-emerald-50/50 rounded-lg p-3 space-y-2">
-          <div className="flex items-center gap-1.5 font-bold text-emerald-900">
-            <ShieldCheck className="h-4 w-4 text-emerald-700" />
+        <div className="border border-slate-200/90 bg-slate-50/90 rounded-xl p-3.5 space-y-2.5 font-sans">
+          <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs">
+            <ShieldCheck className="h-4 w-4 text-sky-600" />
             Independent Constraint Audit
           </div>
 
-          <div className="space-y-1.5 pt-1 text-[11px] text-emerald-950 font-mono">
+          <div className="space-y-2 pt-1 text-[11px] text-slate-700 font-medium">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-sky-600" />
                 Zero Berth Temporal Overlap:
               </span>
-              <span className="font-bold text-emerald-700">PASS</span>
+              <span className="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 text-[10px]">PASS</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-sky-600" />
                 Vessel Length (LOA) Compliance:
               </span>
-              <span className="font-bold text-emerald-700">PASS</span>
+              <span className="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 text-[10px]">PASS</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-sky-600" />
                 Vessel Draft Waterline Clearance:
               </span>
-              <span className="font-bold text-emerald-700">PASS</span>
+              <span className="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 text-[10px]">PASS</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-sky-600" />
                 Berth Status & Availability Window:
               </span>
-              <span className="font-bold text-emerald-700">PASS</span>
+              <span className="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 text-[10px]">PASS</span>
             </div>
           </div>
         </div>
@@ -201,10 +201,17 @@ export function AssignmentReviewDrawer({
       </div>
 
       {/* Drawer Footer */}
-      <div className="p-3 border-t border-portos-border bg-slate-50 flex items-center justify-end">
+      <div className="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+        <a
+          href="/digital-twin"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-800 hover:bg-slate-50 hover:border-sky-500 transition-colors"
+        >
+          <Anchor className="h-3.5 w-3.5 text-sky-600" />
+          <span>Inspect in 3D Twin</span>
+        </a>
         <button
           onClick={onClose}
-          className="px-4 py-1.5 rounded bg-portos-navy text-white text-xs font-medium hover:bg-portos-navy-secondary transition-colors"
+          className="px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
         >
           Close Inspection
         </button>

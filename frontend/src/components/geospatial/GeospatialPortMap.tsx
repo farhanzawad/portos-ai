@@ -20,6 +20,7 @@ import {
   ChevronDown,
   X,
   ExternalLink,
+  Radio,
 } from "lucide-react";
 import {
   getPortGeoJSON,
@@ -46,6 +47,7 @@ import {
 import { SelectedEntity } from "../digital-twin/types";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
 import { MaritimeMapLegend } from "./MaritimeMapLegend";
+import { createVesselTrackerElement } from "./VesselTrackerMarker";
 
 interface GeospatialPortMapProps {
   selectedEntity?: SelectedEntity | null;
@@ -57,11 +59,54 @@ interface GeospatialPortMapProps {
   height?: string;
 }
 
-type BaseMapStyle = "nautical-dark" | "maritime-standard" | "topographic" | "offline-vector";
+type BaseMapStyle =
+  | "nautical-dark"
+  | "maritime-standard"
+  | "satellite-hybrid"
+  | "bathymetric-thermal"
+  | "tactical-radar"
+  | "topographic"
+  | "offline-vector";
 
 interface MeasurementPoint {
   lat: number;
   lon: number;
+}
+
+// Generate concentric nautical range rings around Patenga VTS Station (1 NM = 1.852 km)
+function createRangeRingGeoJSON(centerLon: number, centerLat: number, radiiNM: number[]) {
+  const features = radiiNM.map((nm) => {
+    const points: [number, number][] = [];
+    const steps = 64;
+    const latRad = (centerLat * Math.PI) / 180;
+    const rLat = (nm * 1.852) / 111.32;
+    const rLon = (nm * 1.852) / (111.32 * Math.cos(latRad));
+
+    for (let i = 0; i <= steps; i++) {
+      const theta = (i / steps) * 2 * Math.PI;
+      const x = centerLon + rLon * Math.cos(theta);
+      const y = centerLat + rLat * Math.sin(theta);
+      points.push([x, y]);
+    }
+
+    return {
+      type: "Feature" as const,
+      id: `range-ring-${nm}nm`,
+      properties: {
+        radius_nm: nm,
+        label: `${nm} NM (${(nm * 1.852).toFixed(1)} km)`,
+      },
+      geometry: {
+        type: "LineString" as const,
+        coordinates: points,
+      },
+    };
+  });
+
+  return {
+    type: "FeatureCollection" as const,
+    features,
+  };
 }
 
 // Offline Vector Fallback Style - 100% self-contained, zero external network dependency
@@ -82,14 +127,50 @@ const OFFLINE_VECTOR_STYLE: maplibregl.StyleSpecification = {
 
 const BASEMAP_STYLES: Record<BaseMapStyle, { name: string; url: string | maplibregl.StyleSpecification; description: string }> = {
   "nautical-dark": {
-    name: "Nautical Dark",
+    name: "Tactical Nautical Dark",
     url: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
     description: "High-contrast dark hydrographic theme for bridge night-watch and monitoring",
   },
   "maritime-standard": {
-    name: "Maritime Standard",
+    name: "ECDIS Maritime Standard",
     url: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
     description: "Crisp neutral GIS cartography matching Port Authority hydrographic charts",
+  },
+  "satellite-hybrid": {
+    name: "Coastal Satellite Hybrid",
+    url: {
+      version: 8,
+      sources: {
+        "esri-satellite": {
+          type: "raster",
+          tiles: [
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          ],
+          tileSize: 256,
+          attribution: "&copy; Esri, Maxar, Earthstar Geographics",
+        },
+      },
+      layers: [
+        {
+          id: "satellite-layer",
+          type: "raster",
+          source: "esri-satellite",
+          minzoom: 0,
+          maxzoom: 19,
+        },
+      ],
+    },
+    description: "High-resolution coastal satellite orthophoto overlaid with fairway hydrography",
+  },
+  "bathymetric-thermal": {
+    name: "Bathymetric Soundings",
+    url: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    description: "Thermal depth gradient highlighting dredged fairway channels and shoal banks",
+  },
+  "tactical-radar": {
+    name: "Tactical Radar (Phosphor Green)",
+    url: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    description: "Authentic phosphor green night sweep radar with nautical range rings and VTS tracking",
   },
   "topographic": {
     name: "Coastal Topographic",
@@ -136,11 +217,12 @@ export function GeospatialPortMap({
 
   const [mapLoaded, setMapLoaded] = useState(false);
   const [activeBaseMap, setActiveBaseMap] = useState<BaseMapStyle>("nautical-dark");
-  const [showOverlaysPanel, setShowOverlaysPanel] = useState(true);
-  const [showLegend, setShowLegend] = useState(true);
+  const [showOverlaysPanel, setShowOverlaysPanel] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
   const [showBaseMapModal, setShowBaseMapModal] = useState(false);
   const [cursorCoords, setCursorCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(12.5);
+  const [showRadarRings, setShowRadarRings] = useState(true);
 
   // Measurement Tool State
   const [isMeasuring, setIsMeasuring] = useState(false);
@@ -183,6 +265,20 @@ export function GeospatialPortMap({
         speedKnots: number;
         status: string;
         isOutbound: boolean;
+      }
+    >
+  >(new Map());
+
+  // High-fidelity HTML Vessel Trackers (IMO directional chevrons & tactical reticles)
+  const vesselMarkersRef = useRef<
+    Map<
+      string,
+      {
+        marker: maplibregl.Marker;
+        el: HTMLElement;
+        rotatorEl: HTMLElement | null;
+        reticleEl: HTMLElement | null;
+        labelEl: HTMLElement | null;
       }
     >
   >(new Map());
@@ -253,6 +349,8 @@ export function GeospatialPortMap({
       style: baseStyle,
       center: [DEFAULT_PORT_ORIGIN.lon, DEFAULT_PORT_ORIGIN.lat],
       zoom: 12.2,
+      minZoom: 10.5,
+      maxZoom: 17.5,
       bearing: 0,
       pitch: 0,
       attributionControl: false,
@@ -276,7 +374,10 @@ export function GeospatialPortMap({
       setZoomLevel(Number(map.getZoom().toFixed(1)));
     });
 
+    const markers = vesselMarkersRef.current;
     return () => {
+      markers.forEach((item) => item.marker.remove());
+      markers.clear();
       map.remove();
       mapRef.current = null;
     };
@@ -535,63 +636,7 @@ export function GeospatialPortMap({
       },
     });
 
-    // 11. Vessels (AIS Directional Points)
-    map.addLayer({
-      id: "layer-vessels-circle",
-      type: "circle",
-      source: "portos-features",
-      filter: ["==", ["get", "entity_type"], "Vessel"],
-      paint: {
-        "circle-radius": 7,
-        "circle-color": [
-          "match",
-          ["get", "status"],
-          "BERTHED", "#16a394",
-          "EN_ROUTE", "#38bdf8",
-          "OUTER_ANCHORAGE", "#f59e0b",
-          "#64748b",
-        ],
-        "circle-stroke-color": "#ffffff",
-        "circle-stroke-width": 2,
-      },
-    });
-
-    // 11b. Vessel Name Labels
-    map.addLayer({
-      id: "layer-vessels-label",
-      type: "symbol",
-      source: "portos-features",
-      filter: ["==", ["get", "entity_type"], "Vessel"],
-      layout: {
-        "text-field": ["get", "name"],
-        "text-size": 10,
-        "text-offset": [0, 1.2],
-        "text-anchor": "top",
-        "text-allow-overlap": false,
-      },
-      paint: {
-        "text-color": "#ffffff",
-        "text-halo-color": "#0d1b2a",
-        "text-halo-width": 1.5,
-      },
-    });
-
-    // 11c. Selected Entity Highlight Target Ring
-    map.addLayer({
-      id: "layer-selected-entity-ring",
-      type: "circle",
-      source: "portos-features",
-      filter: ["==", ["get", "id"], ""],
-      paint: {
-        "circle-radius": 15,
-        "circle-color": "transparent",
-        "circle-stroke-color": "#38bdf8",
-        "circle-stroke-width": 2.5,
-        "circle-opacity": 0.9,
-      },
-    });
-
-    // 12. Operational Incidents / Weather Alerts
+    // 11. Operational Incidents / Weather Alerts
     map.addLayer({
       id: "layer-incidents-circle",
       type: "circle",
@@ -605,6 +650,33 @@ export function GeospatialPortMap({
         "circle-opacity": 0.9,
       },
     });
+
+    // 12. Tactical Radar Range Rings (1, 2, 4, 8, 12 Nautical Miles from Patenga VTS Station)
+    const rangeRingData = createRangeRingGeoJSON(DEFAULT_PORT_ORIGIN.lon, DEFAULT_PORT_ORIGIN.lat, [1, 2, 4, 8, 12]);
+    const existingRangeSource = map.getSource("portos-range-rings") as GeoJSONSource;
+    if (existingRangeSource) {
+      existingRangeSource.setData(rangeRingData as any);
+    } else {
+      map.addSource("portos-range-rings", {
+        type: "geojson",
+        data: rangeRingData as any,
+      });
+
+      map.addLayer({
+        id: "layer-radar-range-rings",
+        type: "line",
+        source: "portos-range-rings",
+        layout: {
+          visibility: showRadarRings ? "visible" : "none",
+        },
+        paint: {
+          "line-color": activeBaseMap === "tactical-radar" ? "#22c55e" : "#38bdf8",
+          "line-width": 1.4,
+          "line-dasharray": [4, 4],
+          "line-opacity": activeBaseMap === "tactical-radar" ? 0.85 : 0.45,
+        },
+      });
+    }
 
     // Attach Click Handler for Feature Inspection & Selection
     map.on("click", (e) => {
@@ -621,7 +693,6 @@ export function GeospatialPortMap({
 
       const features = map.queryRenderedFeatures(bbox, {
         layers: [
-          "layer-vessels-circle",
           "layer-berths-line",
           "layer-container-yards-fill",
           "layer-facilities-fill",
@@ -668,7 +739,6 @@ export function GeospatialPortMap({
 
     // Cursor pointer on hoverable interactive features
     const interactiveLayers = [
-      "layer-vessels-circle",
       "layer-berths-line",
       "layer-container-yards-fill",
       "layer-facilities-fill",
@@ -748,6 +818,15 @@ export function GeospatialPortMap({
               }
               idx++;
 
+              // Update HTML Vessel Tracker marker position & directional rotation
+              const markerItem = vesselMarkersRef.current.get(key);
+              if (markerItem) {
+                markerItem.marker.setLngLat([nextLon, nextLat]);
+                if (markerItem.rotatorEl) {
+                  markerItem.rotatorEl.style.transform = `rotate(${nextHeading}deg)`;
+                }
+              }
+
               return {
                 ...feat,
                 geometry: {
@@ -799,7 +878,7 @@ export function GeospatialPortMap({
     };
   }, [mapLoaded, geojsonData, isLiveActive, simulationSpeed]);
 
-  // Synchronize Layer Visibility Checkboxes
+  // Synchronize Layer Visibility Checkboxes & HTML Vessel Markers
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
@@ -818,7 +897,7 @@ export function GeospatialPortMap({
       container_yards: ["layer-container-yards-fill", "layer-container-yards-line"],
       port_facilities: ["layer-facilities-fill", "layer-facilities-line"],
       road_rail_network: ["layer-road-rail-line"],
-      vessels: ["layer-vessels-circle", "layer-vessels-label"],
+      vessels: [],
       vessel_tracks: ["layer-vessel-tracks-line"],
       incidents: ["layer-incidents-circle"],
     };
@@ -833,35 +912,147 @@ export function GeospatialPortMap({
         });
       }
     });
+
+    // Toggle HTML Vessel Trackers
+    vesselMarkersRef.current.forEach((item) => {
+      item.marker.getElement().style.display = layerVisibility.vessels ? "block" : "none";
+    });
   }, [layerVisibility, mapLoaded]);
 
-  // Synchronize Selected Entity focus and target highlight ring
+  // Synchronize High-Fidelity Directional Vessel Trackers
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded || !geojsonData) return;
+
+    const vesselFeatures = geojsonData.features.filter(
+      (f) => f.properties?.entity_type === "Vessel" && f.geometry?.type === "Point"
+    );
+
+    const currentKeys = new Set<string>();
+
+    vesselFeatures.forEach((feat) => {
+      const coords = feat.geometry.coordinates as [number, number];
+      const props = feat.properties || {};
+      const key = String(feat.id || props.id || props.vessel_call_id);
+      currentKeys.add(key);
+
+      const isSelected = Boolean(
+        selectedEntity?.id && (
+          selectedEntity.id === key ||
+          (props.id && selectedEntity.id === props.id) ||
+          (props.id && selectedEntity.id === `feat_vessel_${props.id}`) ||
+          `feat_vessel_${selectedEntity.id}` === key ||
+          ((selectedEntity.data as any)?.id && props.id && (selectedEntity.data as any)?.id === props.id) ||
+          ((selectedEntity.data as any)?.id && (selectedEntity.data as any)?.id === key)
+        )
+      );
+
+      if (vesselMarkersRef.current.has(key)) {
+        const item = vesselMarkersRef.current.get(key)!;
+        item.marker.setLngLat(coords);
+        if (item.reticleEl) {
+          item.reticleEl.style.display = isSelected ? "block" : "none";
+        }
+        item.marker.getElement().style.display = layerVisibility.vessels ? "block" : "none";
+      } else {
+        const markerEl = createVesselTrackerElement({
+          vesselProps: {
+            id: String(props.id || feat.id),
+            name: props.vessel_name || props.name || "Vessel",
+            status: props.status || "EN_ROUTE",
+            speedKnots: Number(props.speed_knots) || (props.status === "BERTHED" ? 0 : 8.5),
+            headingDegrees: Number(props.heading_degrees) || 45,
+            delayRisk: props.delay_risk,
+            draftM: props.draft_m,
+            loaM: props.length_overall_m,
+            callSign: props.id || props.vessel_call_id,
+            imoNumber: props.imo_number,
+            berthAssigned: props.berth_assigned,
+            dataStatus: props.data_status,
+          },
+          isSelected,
+          onSelect: () => {
+            setInspectedFeature({
+              id: props.id || feat.id,
+              name: props.vessel_name || props.name || "Vessel",
+              entityType: "Vessel",
+              dataStatus: props.data_status || "SIMULATED",
+              properties: props,
+              coordinates: { lat: coords[1], lon: coords[0] },
+            });
+            if (onSelectEntity) {
+              onSelectEntity({
+                type: "vessel",
+                id: props.id || String(feat.id),
+                data: props,
+                sourceEnvironment: "2D",
+                coordinates: { lat: coords[1], lon: coords[0] },
+              });
+            }
+          },
+        });
+
+        markerEl.style.display = layerVisibility.vessels ? "block" : "none";
+
+        const marker = new maplibregl.Marker({
+          element: markerEl,
+          anchor: "center",
+        })
+          .setLngLat(coords)
+          .addTo(map);
+
+        vesselMarkersRef.current.set(key, {
+          marker,
+          el: markerEl,
+          rotatorEl: markerEl.querySelector(".tracker-symbol-rotator"),
+          reticleEl: markerEl.querySelector(".tracker-reticle"),
+          labelEl: markerEl.querySelector(".tracker-label"),
+        });
+      }
+    });
+
+    // Remove any stale markers
+    vesselMarkersRef.current.forEach((item, key) => {
+      if (!currentKeys.has(key)) {
+        item.marker.remove();
+        vesselMarkersRef.current.delete(key);
+      }
+    });
+  }, [mapLoaded, geojsonData, layerVisibility.vessels, onSelectEntity, selectedEntity]);
+
+  // Synchronize Selected Entity focus and target highlight reticle
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
 
-    if (!selectedEntity) {
-      if (map.getLayer("layer-selected-entity-ring")) {
-        map.setFilter("layer-selected-entity-ring", ["==", ["get", "id"], "__none__"]);
+    vesselMarkersRef.current.forEach((item, key) => {
+      const isSelected = Boolean(
+        selectedEntity?.id && (
+          selectedEntity.id === key ||
+          selectedEntity.id === key.replace(/^feat_vessel_/, "") ||
+          `feat_vessel_${selectedEntity.id}` === key ||
+          ((selectedEntity.data as any)?.id && (selectedEntity.data as any)?.id === key) ||
+          ((selectedEntity.data as any)?.id && (selectedEntity.data as any)?.id === key.replace(/^feat_vessel_/, ""))
+        )
+      );
+
+      if (item.reticleEl) {
+        item.reticleEl.style.display = isSelected ? "block" : "none";
       }
-      return;
-    }
+      if (item.labelEl) {
+        if (isSelected) {
+          item.labelEl.className =
+            "tracker-label mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold font-sans tracking-tight whitespace-nowrap shadow-lg flex items-center gap-1.5 bg-sky-600 text-white border-2 border-white ring-2 ring-sky-400";
+        } else {
+          item.labelEl.className =
+            "tracker-label mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold font-sans tracking-tight whitespace-nowrap shadow-md flex items-center gap-1.5 bg-slate-900/90 text-slate-100 border border-slate-700/80 group-hover:border-slate-500";
+        }
+      }
+    });
+
+    if (!selectedEntity) return;
 
     const entityId = selectedEntity.id;
-    // Update target highlight ring filter
-    if (map.getLayer("layer-selected-entity-ring")) {
-      map.setFilter("layer-selected-entity-ring", [
-        "any",
-        ["==", ["get", "id"], entityId],
-        ["==", ["get", "id"], `feat_vessel_${entityId}`],
-        ["==", ["get", "id"], `feat_berth_${entityId}`],
-        ["==", ["get", "id"], `feat_yard_${entityId}`],
-        ["==", ["get", "id"], `feat_${entityId}`],
-        ["==", ["get", "vessel_call_id"], entityId],
-        ["==", ["get", "vessel_id"], entityId],
-        ["==", ["get", "code"], entityId],
-      ]);
-    }
 
     // Resolve coordinates if explicitly attached or find matching feature in GeoJSON
     let lat = selectedEntity.coordinates?.lat || (selectedEntity.data as any)?.latitude;
@@ -893,6 +1084,19 @@ export function GeospatialPortMap({
       });
     }
   }, [selectedEntity, mapLoaded, geojsonData]);
+
+  // Synchronize Radar Range Rings visibility
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+    if (map.getLayer("layer-radar-range-rings")) {
+      map.setLayoutProperty(
+        "layer-radar-range-rings",
+        "visibility",
+        showRadarRings ? "visible" : "none"
+      );
+    }
+  }, [showRadarRings, mapLoaded]);
 
   // Measure calculation logic
   const calculateTotalMeasurement = () => {
@@ -1036,7 +1240,21 @@ export function GeospatialPortMap({
             }`}
           >
             <Layers className="h-3 w-3 text-portos-teal" />
-            <span>Base: {BASEMAP_STYLES[activeBaseMap].name}</span>
+            <span>Theme: {BASEMAP_STYLES[activeBaseMap].name}</span>
+          </button>
+
+          {/* Corridor Radar Range Rings Toggle */}
+          <button
+            onClick={() => setShowRadarRings(!showRadarRings)}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded border text-[11px] font-medium transition-colors ${
+              showRadarRings
+                ? "bg-emerald-950/70 text-emerald-300 border-emerald-600/70 shadow-2xs"
+                : "bg-portos-navy-secondary/40 text-slate-300 border-portos-navy-secondary hover:text-white"
+            }`}
+            title="Toggle 1-12 NM Corridor Radar Range Rings"
+          >
+            <Radio className={`h-3 w-3 ${showRadarRings ? "text-emerald-400 animate-pulse" : "text-slate-400"}`} />
+            <span>Range Rings: {showRadarRings ? "1-12 NM" : "Off"}</span>
           </button>
 
           {/* Measurement Tool Toggle */}

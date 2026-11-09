@@ -9,8 +9,21 @@ class SolverStatusEnum(str, enum.Enum):
     OPTIMAL = "OPTIMAL"
     FEASIBLE = "FEASIBLE"
     INFEASIBLE = "INFEASIBLE"
+    TIME_LIMIT_REACHED = "TIME_LIMIT_REACHED"
     MODEL_INVALID = "MODEL_INVALID"
     UNKNOWN = "UNKNOWN"
+
+
+class BerthMaintenanceSpec(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    berth_id: str
+    title: str
+    reason: Optional[str] = None
+    start_time: datetime
+    end_time: datetime
+    is_closed: bool = True
 
 
 class BerthSpec(BaseModel):
@@ -26,6 +39,9 @@ class BerthSpec(BaseModel):
     status: str = "AVAILABLE"
     available_from: Optional[datetime] = None
     available_to: Optional[datetime] = None
+    assigned_cranes_count: int = 1
+    crane_capacity_moves_per_hour: float = 30.0
+    maintenance_windows: List[BerthMaintenanceSpec] = []
 
 
 class VesselCallSpec(BaseModel):
@@ -43,6 +59,10 @@ class VesselCallSpec(BaseModel):
     priority: int = Field(default=1, ge=1, le=5, description="1=Standard, 5=Urgent Express")
     current_berth_id: Optional[str] = None
     delay_risk_status: Optional[str] = "NORMAL"
+    inbound_teu: int = 0
+    outbound_teu: int = 0
+    required_crane_capacity: float = 25.0
+    assignment_status: str = "WAITING"
 
 
 class OptimizerConstraintSettings(BaseModel):
@@ -50,8 +70,12 @@ class OptimizerConstraintSettings(BaseModel):
     enforce_draft_limit: bool = True
     enforce_no_overlap: bool = True
     enforce_berth_availability: bool = True
+    enforce_crane_capacity: bool = True
+    enforce_maintenance_windows: bool = True
     waiting_time_weight: float = 1.0
+    idle_gap_weight: float = 0.2
     schedule_deviation_weight: float = 0.5
+    crane_imbalance_weight: float = 0.3
     max_solver_duration_seconds: float = 10.0
 
 
@@ -146,4 +170,61 @@ class ProposeScheduleResponse(BaseModel):
     records_created: int
     message: str
     data_status: DataStatusEnum = DataStatusEnum.SIMULATED
+
+
+class BerthPlannerSummaryResponse(BaseModel):
+    total_berths: int
+    occupied_berths: int
+    available_berths: int
+    vessels_at_anchorage: int
+    average_waiting_time_hours: float
+    berth_utilization_pct: float
+    scheduling_conflicts_count: int
+    pending_allocation_decisions: int
+    operational_notice: str = "Simulated operational data for evaluation."
+    data_status: DataStatusEnum = DataStatusEnum.SIMULATED
+
+
+class ScheduleVersionRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    version_number: int
+    name: str
+    status: str
+    planning_start: datetime
+    planning_horizon_hours: int
+    confirmed_by: Optional[str] = None
+    confirmed_at: Optional[datetime] = None
+    notes: Optional[str] = None
+    assignments_count: int = 0
+    metrics: Dict[str, Any] = {}
+    data_status: DataStatusEnum = DataStatusEnum.SIMULATED
+
+
+class ConfirmScheduleRequest(BaseModel):
+    name: str = "Confirmed Berth Schedule"
+    confirmed_by: str = "Duty Berth Planner (Demo)"
+    notes: Optional[str] = None
+    assignments: List[ScheduledAssignment]
+    planning_horizon_hours: int = 72
+
+
+class ManualAssignmentRequest(BaseModel):
+    vessel_call_id: str
+    berth_id: str
+    scheduled_start: datetime
+    service_duration_hours: float = 18.0
+    assigned_quay_start_m: Optional[float] = 10.0
+    assigned_quay_end_m: Optional[float] = None
+    advisory_notes: Optional[str] = None
+
+
+class BerthMaintenanceCreate(BaseModel):
+    berth_id: str
+    title: str
+    reason: Optional[str] = None
+    start_time: datetime
+    end_time: datetime
+    is_closed: bool = True
 

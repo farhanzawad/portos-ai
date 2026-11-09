@@ -72,6 +72,8 @@ Thumbs.db
 # Local runtime data & uploads
 tmp/
 uploads/
+scratch/
+*.png
 *.sqlite
 *.db
 

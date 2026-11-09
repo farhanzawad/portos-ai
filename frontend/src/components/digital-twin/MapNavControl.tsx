@@ -136,27 +136,35 @@ export function MapNavControl({
           </button>
         </div>
 
-        {/* Bearing readout badge */}
-        <div className="text-[10px] font-mono text-slate-300 bg-portos-navy-secondary/40 px-2 py-0.5 rounded border border-portos-navy-secondary">
-          {bearingStr}
+        {/* Bearing & Altitude readout badge */}
+        <div className="text-[10px] font-mono text-slate-300 bg-portos-navy-secondary/40 px-2 py-0.5 rounded border border-portos-navy-secondary flex items-center gap-1.5">
+          <span>{bearingStr}</span>
+          {cameraMetrics.altitude !== undefined && (
+            <>
+              <span className="text-slate-500">·</span>
+              <span className="text-sky-300 font-semibold tabular-nums">{cameraMetrics.altitude}m</span>
+            </>
+          )}
         </div>
 
         {/* Bottom Bar: Zoom Controls, 2D/3D Pitch Switch, and Center Button */}
         <div className="w-full flex items-center justify-between gap-1 pt-1 border-t border-portos-navy-secondary/60">
-          {/* Zoom Buttons */}
+          {/* Zoom Buttons with Altitude/Distance Ceiling & Floor Boundaries */}
           <div className="flex items-center bg-portos-navy-secondary/50 rounded-lg p-0.5 border border-portos-navy-secondary">
             <button
               onClick={() => onNavigate("zoomIn")}
-              className="p-1.5 rounded hover:bg-portos-teal hover:text-white text-slate-200 transition-colors"
-              title="Zoom In (+ or Scroll Up)"
+              disabled={cameraMetrics.distance <= 9 || (cameraMetrics.altitude !== undefined && cameraMetrics.altitude <= 4)}
+              className="p-1.5 rounded hover:bg-portos-teal hover:text-white text-slate-200 transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+              title="Zoom In (Limit: 3.5m ground clearance)"
               aria-label="Zoom in"
             >
               <Plus className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => onNavigate("zoomOut")}
-              className="p-1.5 rounded hover:bg-portos-teal hover:text-white text-slate-200 transition-colors"
-              title="Zoom Out (- or Scroll Down)"
+              disabled={cameraMetrics.distance >= 112 || (cameraMetrics.altitude !== undefined && cameraMetrics.altitude >= 83)}
+              className="p-1.5 rounded hover:bg-portos-teal hover:text-white text-slate-200 transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+              title="Zoom Out (Ceiling: 85m altitude)"
               aria-label="Zoom out"
             >
               <Minus className="h-3.5 w-3.5" />
@@ -239,3 +247,4 @@ export function MapNavControl({
     </div>
   );
 }
+

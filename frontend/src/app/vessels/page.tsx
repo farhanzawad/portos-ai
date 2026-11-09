@@ -10,6 +10,7 @@ import { VesselFilterState } from "@/components/vessels/types";
 import { AnchorageQueueSummary } from "@/components/vessels/AnchorageQueueSummary";
 import { VesselListPanel } from "@/components/vessels/VesselListPanel";
 import { VesselDetailDrawer } from "@/components/vessels/VesselDetailDrawer";
+import { FleetDirectoryTable } from "@/components/vessels/FleetDirectoryTable";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
 import {
   Ship,
@@ -23,6 +24,14 @@ import {
   Minimize2,
   ExternalLink,
   Radio,
+  Waves,
+  Wind,
+  ShieldCheck,
+  Calendar,
+  LayoutGrid,
+  Table as TableIcon,
+  Columns3,
+  X,
 } from "lucide-react";
 import { AISDiagnosticsModal } from "@/components/vessels/AISDiagnosticsModal";
 
@@ -35,9 +44,9 @@ const GeospatialPortMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full min-h-[640px] bg-slate-950 rounded-lg border border-portos-border flex items-center justify-center text-slate-400 text-xs">
+      <div className="w-full h-full min-h-[640px] bg-slate-900 rounded-2xl border border-slate-200/80 flex items-center justify-center text-slate-400 text-xs">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-portos-teal animate-ping" />
+          <span className="w-2.5 h-2.5 rounded-full bg-sky-500 animate-ping" />
           <span>Loading MapLibre Geographic Engine & Maritime Layers...</span>
         </div>
       </div>
@@ -48,9 +57,9 @@ const GeospatialPortMap = dynamic(
 export default function VesselsPage() {
   const router = useRouter();
   const [selectedCall, setSelectedCall] = useState<VesselCallRead | null>(null);
-  const [mobileTab, setMobileTab] = useState<"list" | "map" | "detail">("list");
-  const [isQueueCollapsed, setIsQueueCollapsed] = useState(false);
-  const [isMaximizedMap, setIsMaximizedMap] = useState(false);
+  const [viewMode, setViewMode] = useState<"split" | "table">("split");
+  const [isQueueOpen, setIsQueueOpen] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAISModalOpen, setIsAISModalOpen] = useState(false);
 
   const [filters, setFilters] = useState<VesselFilterState>({
@@ -93,10 +102,7 @@ export default function VesselsPage() {
 
   const handleSelectCall = (call: VesselCallRead) => {
     setSelectedCall(call);
-    // On mobile, automatically show the map when selecting
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setMobileTab("map");
-    }
+    setIsDrawerOpen(true);
   };
 
   // Convert selectedCall to Geospatial SelectedEntity for 2D Map synchronization
@@ -124,9 +130,7 @@ export default function VesselsPage() {
     );
     if (match) {
       setSelectedCall(match);
-      if (typeof window !== "undefined" && window.innerWidth < 1024) {
-        setMobileTab("detail");
-      }
+      setIsDrawerOpen(true);
     }
   };
 
@@ -137,207 +141,215 @@ export default function VesselsPage() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-portos-border">
+    <div className="space-y-4 font-sans">
+      {/* Executive Header Section */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-portos-navy">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
               Vessel Intelligence & Fairway Track
             </h1>
             <DataStatusBadge status="SIMULATED" />
-            <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] bg-slate-100 text-slate-600 rounded border border-slate-300 font-mono">
+            <span className="hidden sm:inline-block px-2.5 py-0.5 text-[10px] bg-slate-100 text-slate-700 rounded-full border border-slate-300 font-bold">
               DEMO ENVIRONMENT
             </span>
           </div>
-          <p className="text-xs text-portos-muted mt-0.5">
-            Geographic track tracking, bathymetric fairway corridors, and predictive delay analysis along the
-            Karnaphuli River approach.
+          <p className="text-xs text-slate-500 mt-0.5 font-medium">
+            Geographic radar tracking, bathymetric fairway corridors, and predictive delay analysis along the Karnaphuli River approach.
           </p>
         </div>
 
-        {/* Operational Context Badges & Quick Action Controls */}
+        {/* Operational Context Badges & Controls */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          {/* AIS Provider Diagnostics Button (Optional B) */}
+          {/* Hydrographic Tide Gate Pill */}
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-slate-200 text-slate-700 font-medium shadow-2xs">
+            <Waves className="h-3.5 w-3.5 text-sky-600" />
+            <span>Tide Gate: <strong className="text-slate-900 font-bold">+3.8m @ 14:30 BST</strong></span>
+          </div>
+
+          {/* Meteorological Conditions Pill */}
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-slate-200 text-slate-700 font-medium shadow-2xs">
+            <Wind className="h-3.5 w-3.5 text-amber-500" />
+            <span>12 kts SW · Sea State 2</span>
+          </div>
+
+          {/* View Mode Switcher */}
+          <div className="flex items-center p-0.5 bg-slate-100 rounded-full border border-slate-200 text-xs font-semibold">
+            <button
+              onClick={() => setViewMode("split")}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
+                viewMode === "split"
+                  ? "bg-white text-slate-900 font-bold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <Columns3 className="h-3.5 w-3.5 text-sky-600" />
+              <span>Radar & Map</span>
+            </button>
+            <button
+              onClick={() => setViewMode("table")}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
+                viewMode === "table"
+                  ? "bg-white text-slate-900 font-bold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <TableIcon className="h-3.5 w-3.5 text-slate-700" />
+              <span>Fleet Directory</span>
+            </button>
+          </div>
+
+          {/* Quick Overlay Toggles in Header */}
+          {viewMode === "split" && (
+            <div className="hidden xl:flex items-center gap-1.5">
+              <button
+                onClick={() => setIsQueueOpen(!isQueueOpen)}
+                className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 shadow-2xs transition-colors ${
+                  isQueueOpen
+                    ? "bg-sky-50 text-sky-700 border-sky-300"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                }`}
+                title="Toggle vessel radar overlay"
+              >
+                <Ship className="h-3.5 w-3.5 text-sky-600" />
+                <span>Radar Queue</span>
+              </button>
+
+              {selectedCall && (
+                <button
+                  onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+                  className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 shadow-2xs transition-colors ${
+                    isDrawerOpen
+                      ? "bg-sky-50 text-sky-700 border-sky-300"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                  }`}
+                  title="Toggle vessel dossier overlay"
+                >
+                  <FileText className="h-3.5 w-3.5 text-sky-600" />
+                  <span>Dossier</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* AIS Diagnostics Modal Button */}
           <button
             onClick={() => setIsAISModalOpen(true)}
-            className="px-2.5 py-1 bg-white hover:bg-slate-50 text-portos-navy rounded border border-portos-border font-medium flex items-center gap-1.5 shadow-xs transition-colors"
+            className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-800 rounded-full border border-slate-200 font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
             title="Inspect commercial AIS provider connection & transponder stream"
           >
             <Radio className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-            <span>AIS Provider Diagnostics</span>
+            <span>AIS Diagnostics</span>
           </button>
 
           {/* Quick 3D Digital Twin Button */}
           <button
             onClick={() => handleOpen3DView()}
-            className="px-2.5 py-1 bg-white hover:bg-slate-50 text-portos-navy rounded border border-portos-border font-medium flex items-center gap-1.5 shadow-xs transition-colors"
+            className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-800 rounded-full border border-slate-200 font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
             title="Inspect terminal and vessels in 3D Digital Twin"
           >
-            <Box className="h-3.5 w-3.5 text-portos-teal" />
+            <Box className="h-3.5 w-3.5 text-sky-600" />
             <span>3D Terminal Twin</span>
           </button>
-
-          {/* Map Layout Toggle */}
-          <button
-            onClick={() => setIsMaximizedMap(!isMaximizedMap)}
-            className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded border font-medium transition-colors shadow-xs ${
-              isMaximizedMap
-                ? "bg-portos-teal text-white border-portos-teal"
-                : "bg-white hover:bg-slate-50 text-portos-navy border-portos-border"
-            }`}
-            title={isMaximizedMap ? "Restore split layout" : "Maximize GIS map"}
-          >
-            {isMaximizedMap ? (
-              <>
-                <Minimize2 className="h-3.5 w-3.5" />
-                <span>Split View</span>
-              </>
-            ) : (
-              <>
-                <Maximize2 className="h-3.5 w-3.5" />
-                <span>Max Map</span>
-              </>
-            )}
-          </button>
-
-          <div className="px-2.5 py-1 bg-white rounded border border-portos-border text-portos-navy font-medium flex items-center gap-1.5 shadow-xs">
-            <Ship className="h-3.5 w-3.5 text-portos-teal" />
-            <span>Chattogram Port Approach</span>
-          </div>
-          <div className="px-2.5 py-1 bg-portos-teal-light text-portos-teal rounded border border-portos-teal/30 font-medium font-mono text-[11px]">
-            Datum: CD +0.0m
-          </div>
         </div>
       </div>
 
-      {/* Top Anchorage Queue & Warning Notice */}
-      <AnchorageQueueSummary calls={calls} />
+      {/* Top Anchorage Queue & Fasto SaaS Metric Cards */}
+      <AnchorageQueueSummary
+        calls={calls}
+        selectedStatus={filters.status}
+        onSelectStatus={(status) => setFilters((prev) => ({ ...prev, status }))}
+        selectedRisk={filters.delayRisk}
+        onSelectRisk={(delayRisk) => setFilters((prev) => ({ ...prev, delayRisk }))}
+        onOpenAISDiagnostics={() => setIsAISModalOpen(true)}
+      />
 
-      {/* Mobile View Switcher Tabs (Prompt 07 Requirement) */}
-      <div className="flex lg:hidden bg-portos-bg p-1 rounded-lg border border-portos-border text-xs font-medium">
-        <button
-          onClick={() => setMobileTab("list")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded transition-colors ${
-            mobileTab === "list"
-              ? "bg-white text-portos-navy font-bold shadow-xs"
-              : "text-portos-muted"
-          }`}
-        >
-          <ListFilter className="h-3.5 w-3.5" />
-          <span>Vessel List ({calls.length})</span>
-        </button>
-        <button
-          onClick={() => setMobileTab("map")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded transition-colors ${
-            mobileTab === "map"
-              ? "bg-white text-portos-navy font-bold shadow-xs"
-              : "text-portos-muted"
-          }`}
-        >
-          <Map className="h-3.5 w-3.5" />
-          <span>Geographic Map</span>
-        </button>
-        <button
-          onClick={() => setMobileTab("detail")}
-          disabled={!selectedCall}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded transition-colors ${
-            mobileTab === "detail"
-              ? "bg-white text-portos-navy font-bold shadow-xs"
-              : "text-portos-muted disabled:opacity-40"
-          }`}
-        >
-          <FileText className="h-3.5 w-3.5" />
-          <span>Vessel Detail</span>
-        </button>
-      </div>
+      {/* Main Operational Body */}
+      {viewMode === "table" ? (
+        <div className="space-y-4">
+          <FleetDirectoryTable
+            calls={calls}
+            onSelectCall={handleSelectCall}
+            selectedCallId={selectedCall?.id || null}
+          />
 
-      {/* Main Geographic & Operational Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[740px]">
-        {/* Left: Vessel Queue Table / List */}
-        {!isMaximizedMap && (
-          <div
-            className={`transition-all duration-300 h-full ${
-              isQueueCollapsed
-                ? "hidden"
-                : selectedCall
-                ? "lg:col-span-3 xl:col-span-3"
-                : "lg:col-span-4 xl:col-span-4"
-            } ${mobileTab !== "list" ? "hidden lg:block" : "block"}`}
-          >
-            <div className="relative h-full">
+          {/* Slide-over Detail Drawer when in table view */}
+          {selectedCall && isDrawerOpen && (
+            <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg p-4 bg-black/40 backdrop-blur-xs flex justify-end animate-in fade-in duration-150">
+              <div className="w-full h-full max-w-md shadow-2xl">
+                <VesselDetailDrawer
+                  call={selectedCall}
+                  trackData={trackData}
+                  isTrackLoading={trackLoading}
+                  onClose={() => setIsDrawerOpen(false)}
+                  onOpenAISDiagnostics={() => setIsAISModalOpen(true)}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Full GIS Workspace with Dual Floating Overlays (Both Left & Right are Overlays!) */
+        <div className="relative w-full h-[760px] rounded-2xl overflow-hidden border border-slate-200/90 shadow-xs bg-slate-900">
+          {/* Full Container GIS Map (occupies 100% of container) */}
+          <GeospatialPortMap
+            selectedEntity={selectedEntity}
+            onSelectEntity={handleMapEntitySelect}
+            onOpen3DView={handleOpen3DView}
+            className="w-full h-full"
+            height="h-full"
+          />
+
+          {/* Left Overlay: Vessel Radar Queue */}
+          {isQueueOpen ? (
+            <div className="absolute top-12 left-3 bottom-3 z-30 w-full max-w-[400px] xl:max-w-[420px] shadow-2xl animate-in slide-in-from-left duration-200">
               <VesselListPanel
                 calls={calls}
                 selectedCallId={selectedCall?.id || null}
                 onSelectCall={handleSelectCall}
                 filters={filters}
                 onFiltersChange={setFilters}
+                onClose={() => setIsQueueOpen(false)}
               />
-              {/* Collapse Queue Sidebar Toggle Button */}
-              <button
-                onClick={() => setIsQueueCollapsed(true)}
-                className="hidden lg:flex absolute top-3 right-3 p-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors z-10"
-                title="Collapse vessel list to expand map"
-              >
-                <PanelLeftClose className="h-3.5 w-3.5" />
-              </button>
             </div>
-          </div>
-        )}
-
-        {/* Center: Integrated MapLibre GL Regional Port Geospatial Map */}
-        <div
-          className={`relative h-full transition-all duration-300 ${
-            isMaximizedMap
-              ? "lg:col-span-12"
-              : isQueueCollapsed
-              ? selectedCall
-                ? "lg:col-span-9 xl:col-span-9"
-                : "lg:col-span-12"
-              : selectedCall
-              ? "lg:col-span-6 xl:col-span-6"
-              : "lg:col-span-8 xl:col-span-8"
-          } ${mobileTab !== "map" ? "hidden lg:block" : "block"}`}
-        >
-          {/* Quick Floating Restore Queue Button when collapsed */}
-          {!isMaximizedMap && isQueueCollapsed && (
+          ) : (
             <button
-              onClick={() => setIsQueueCollapsed(false)}
-              className="hidden lg:flex absolute top-3 left-3 z-30 items-center gap-1.5 px-2.5 py-1.5 bg-portos-navy/90 hover:bg-portos-navy text-white text-xs font-medium rounded-md shadow-lg border border-portos-navy-secondary backdrop-blur-xs transition-colors"
-              title="Show vessel list"
+              onClick={() => setIsQueueOpen(true)}
+              className="absolute top-12 left-3 z-30 flex items-center gap-2 px-3.5 py-2 bg-white/95 hover:bg-white text-slate-800 text-xs font-bold rounded-xl shadow-lg border border-slate-200 backdrop-blur-xs transition-all hover:scale-102"
+              title="Open vessel radar queue"
             >
-              <PanelLeftOpen className="h-3.5 w-3.5 text-portos-teal" />
-              <span>Vessel Queue ({calls.length})</span>
+              <Ship className="h-4 w-4 text-sky-600" />
+              <span>Vessel Radar ({calls.length})</span>
             </button>
           )}
 
-          <GeospatialPortMap
-            selectedEntity={selectedEntity}
-            onSelectEntity={handleMapEntitySelect}
-            onOpen3DView={handleOpen3DView}
-            className="w-full h-full shadow-sm"
-            height="h-full"
-          />
+          {/* Right Overlay: Vessel Detail Dossier Drawer */}
+          {selectedCall && isDrawerOpen ? (
+            <div className="absolute top-12 right-3 bottom-3 z-30 w-full max-w-[470px] xl:max-w-[490px] shadow-2xl animate-in slide-in-from-right duration-200">
+              <VesselDetailDrawer
+                call={selectedCall}
+                trackData={trackData}
+                isTrackLoading={trackLoading}
+                onClose={() => setIsDrawerOpen(false)}
+                onOpenAISDiagnostics={() => setIsAISModalOpen(true)}
+              />
+            </div>
+          ) : (
+            selectedCall && (
+              <button
+                onClick={() => setIsDrawerOpen(true)}
+                className="absolute top-12 right-3 z-30 flex items-center gap-2 px-3.5 py-2 bg-white/95 hover:bg-white text-slate-800 text-xs font-bold rounded-xl shadow-lg border border-slate-200 backdrop-blur-xs transition-all hover:scale-102"
+                title="Open vessel telemetry dossier"
+              >
+                <FileText className="h-4 w-4 text-sky-600" />
+                <span>Dossier: {selectedCall.vessel?.name}</span>
+              </button>
+            )
+          )}
         </div>
+      )}
 
-        {/* Right: Selected Vessel Detail & Track Timeline */}
-        {selectedCall && !isMaximizedMap && (
-          <div
-            className={`transition-all duration-300 h-full ${
-              isQueueCollapsed ? "lg:col-span-3 xl:col-span-3" : "lg:col-span-3 xl:col-span-3"
-            } ${mobileTab !== "detail" ? "hidden lg:block" : "block"}`}
-          >
-            <VesselDetailDrawer
-              call={selectedCall}
-              trackData={trackData}
-              isTrackLoading={trackLoading}
-              onClose={() => setSelectedCall(null)}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Commercial AIS Provider Diagnostics Modal (Optional B) */}
+      {/* Commercial AIS Provider Diagnostics Modal */}
       <AISDiagnosticsModal
         isOpen={isAISModalOpen}
         onClose={() => setIsAISModalOpen(false)}

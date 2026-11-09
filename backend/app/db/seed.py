@@ -12,8 +12,11 @@ from app.models import (
     Terminal,
     Berth,
     BerthAssignment,
+    BerthMaintenanceWindow,
+    BerthScheduleVersion,
     BerthStatusEnum,
     AssignmentStatusEnum,
+    ScheduleVersionStatusEnum,
     Vessel,
     VesselCall,
     VesselPosition,
@@ -291,6 +294,49 @@ def seed_database(db: Session, force_reset: bool = False) -> Dict[str, int]:
                             source_name="PORTOS Seed Engine",
                         )
                     )
+
+    # 5b. Illustrative Berth Maintenance Windows
+    maint_id = "mw_berth_05_fender"
+    if not db.query(BerthMaintenanceWindow).filter_by(id=maint_id).first():
+        db.add(
+            BerthMaintenanceWindow(
+                id=maint_id,
+                berth_id="berth_05",
+                title="Fender Maintenance & Dredge Survey",
+                reason="Scheduled quayside rubber fender replacement and channel sounding depth verification.",
+                start_time=ref_time - timedelta(hours=12),
+                end_time=ref_time + timedelta(hours=36),
+                is_closed=True,
+                data_status=DataStatusEnum.SIMULATED,
+                source_name="PORTOS Seed Engine",
+            )
+        )
+
+    # 5c. Initial Confirmed Operational Schedule Version
+    ver_id = "ver_bap_initial_v1"
+    if not db.query(BerthScheduleVersion).filter_by(id=ver_id).first():
+        db.add(
+            BerthScheduleVersion(
+                id=ver_id,
+                terminal_id=SEED_TERMINAL_ID,
+                version_number=1,
+                name="Chattogram Corridor Confirmed Schedule v1.0",
+                status=ScheduleVersionStatusEnum.CONFIRMED,
+                planning_start=ref_time,
+                planning_horizon_hours=72,
+                confirmed_by="Capt. A. Rahman (Harbour Master)",
+                confirmed_at=ref_time - timedelta(hours=2),
+                notes="Baseline operational berth schedule established under standard monsoon guidelines.",
+                metrics_json={
+                    "total_assignments": 3,
+                    "total_waiting_hours": 2.5,
+                    "berth_utilization_pct": 50.0,
+                },
+                assignments_json=[],
+                data_status=DataStatusEnum.SIMULATED,
+                source_name="PORTOS Seed Engine",
+            )
+        )
 
     # 6. Yard Occupancy Observations (Historical 24h Telemetry + Current)
     obs_intervals = [24, 20, 16, 12, 8, 6, 4, 2, 0]

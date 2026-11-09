@@ -524,6 +524,47 @@ export interface ProposeScheduleResponse {
   data_status: DataStatus;
 }
 
+export interface BerthPlannerSummaryResponse {
+  total_berths: number;
+  occupied_berths: number;
+  available_berths: number;
+  vessels_at_anchorage: number;
+  average_waiting_time_hours: number;
+  berth_utilization_pct: number;
+  scheduling_conflicts_count: number;
+  pending_allocation_decisions: number;
+  operational_notice: string;
+  data_status: DataStatus;
+}
+
+export type BerthOperationalSummary = BerthPlannerSummaryResponse;
+
+export interface BerthMaintenanceRead {
+  id: string;
+  berth_id: string;
+  title: string;
+  reason: string;
+  start_time: string;
+  end_time: string;
+  is_closed: boolean;
+}
+
+export interface ScheduleVersionRead {
+  id: string;
+  version_number: number;
+  status: "DRAFT" | "PROPOSED" | "CONFIRMED" | "SUPERSEDED" | "ARCHIVED";
+  created_at: string;
+  planning_start: string;
+  planning_horizon_hours: number;
+  solver_status: string;
+  total_waiting_time_hours: number;
+  scheduled_vessel_count: number;
+  unassigned_vessel_count: number;
+  operator_notes?: string;
+  changelog?: string;
+  data_status: DataStatus;
+}
+
 // SimPy Scenario Simulation & Decision Lab
 export interface TimeSeriesSample {
   hour: number;
@@ -540,7 +581,34 @@ export interface VesselSimulationLog {
   departure_hour?: number;
   waiting_time_hours: number;
   service_duration_hours: number;
+  assigned_berth?: string;
+  assigned_cranes?: number;
+  cargo_moves?: number;
   status: string;
+}
+
+export interface VesselPositionSnapshot {
+  vessel_id: string;
+  vessel_name: string;
+  state: "ANCHORAGE_WAITING" | "INWARD_TRANSIT" | "BERTHED_WORKING" | "OUTWARD_TRANSIT";
+  lat: number;
+  lon: number;
+  heading: number;
+  speed_knots: number;
+  berth_code?: string | null;
+  waiting_hours: number;
+  cargo_progress_pct: number;
+}
+
+export interface SimulationTimelineFrame {
+  hour: number;
+  timestamp_iso: string;
+  vessels: VesselPositionSnapshot[];
+  active_berths: number;
+  occupied_berths: number;
+  active_cranes: number;
+  anchorage_queue_count: number;
+  yard_occupancy_pct: number;
 }
 
 export interface SimulationMetrics {
@@ -548,11 +616,23 @@ export interface SimulationMetrics {
   median_waiting_time_hours: number;
   p90_waiting_time_hours: number;
   total_waiting_hours: number;
+  average_turnaround_hours: number;
   berth_utilization_pct: number;
   crane_utilization_pct: number;
+  peak_yard_occupancy_pct: number;
   vessels_served_count: number;
   vessels_remaining_queue: number;
+  total_teus_handled: number;
+  reliability_compliance_pct: number;
+  scheduling_conflicts_count: number;
+  primary_bottleneck: string;
+  bottleneck_severity: string;
   estimated_secondary_co2_tonnes: number;
+  idle_fuel_burn_liters?: number;
+  crane_power_kwh?: number;
+  total_co2e_tonnes?: number;
+  nox_emissions_kg?: number;
+  sox_emissions_kg?: number;
 }
 
 export interface ScenarioParameters {
@@ -562,12 +642,45 @@ export interface ScenarioParameters {
   is_baseline: boolean;
   random_seed: number;
   duration_hours: number;
+  target_reliability_pct?: number;
+  delay_threshold_hours?: number;
+
+  // Scenario A: Vessel Arrival Surge
   vessel_arrival_multiplier: number;
+  arrival_surge_pct?: number;
+  arrival_concentration?: "UNIFORM" | "MORNING_PEAK" | "TIDAL_WINDOW";
+
+  // Scenario B: Berth Unavailability
   berth_outage_count: number;
+  closed_berth_ids?: string[];
+  berth_closure_start_hour?: number;
+  berth_closure_duration_hours?: number;
+  berth_closure_reason?: string;
+
+  // Scenario C: Crane Failure
   crane_outage_count: number;
+  failed_crane_ids?: string[];
+  crane_failure_start_hour?: number;
+  crane_repair_duration_hours?: number;
   crane_service_rate_multiplier: number;
+
+  // Scenario D: Weather Disruption
   weather_disruption_factor: number;
+  wind_speed_knots?: number;
+  wave_height_meters?: number;
+  visibility_km?: number;
+  weather_start_hour?: number;
+  weather_duration_hours?: number;
+
+  // Scenario E: Yard Congestion
+  yard_initial_occupancy_pct?: number;
+  yard_dwell_time_multiplier?: number;
+  gate_throughput_reduction_pct?: number;
   yard_congestion_threshold_pct: number;
+
+  // Scenario F: Cargo Handling Demand
+  cargo_moves_multiplier?: number;
+  reefer_container_pct?: number;
 }
 
 export interface SimulationRunResponse {
@@ -581,7 +694,9 @@ export interface SimulationRunResponse {
   metrics: SimulationMetrics;
   queue_length_series: TimeSeriesSample[];
   berth_occupancy_series: TimeSeriesSample[];
+  yard_occupancy_series?: TimeSeriesSample[];
   vessel_logs: VesselSimulationLog[];
+  timeline_frames?: SimulationTimelineFrame[];
   methodology_notes: string[];
   data_status: DataStatus;
   operational_notice: string;
@@ -600,6 +715,50 @@ export interface ScenarioComparisonResponse {
   comparisons: Record<string, Record<string, MetricDelta>>;
   trade_off_summary: string[];
   operational_notice: string;
+  data_status: DataStatus;
+}
+
+export interface ScenarioRead {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  is_baseline: boolean;
+  parameters: ScenarioParameters;
+  created_at: string;
+  data_status: DataStatus;
+}
+
+export interface ScenarioCreateRequest {
+  code: string;
+  name: string;
+  description: string;
+  parameters: ScenarioParameters;
+}
+
+export interface ScenarioUpdateRequest {
+  name?: string;
+  description?: string;
+  parameters?: ScenarioParameters;
+}
+
+export interface ScenarioAnalystRequest {
+  scenario_code: string;
+  baseline_run: SimulationRunResponse;
+  scenario_run: SimulationRunResponse;
+  operator_query?: string;
+}
+
+export interface ScenarioAnalystResponse {
+  scenario_code: string;
+  executive_summary: string;
+  bottleneck_diagnosis: string;
+  optimal_path_recommendation: string;
+  cascading_benefits: string[];
+  identified_trade_offs: string[];
+  suggested_action_items: string[];
+  model_name: string;
+  is_demo_mode: boolean;
   data_status: DataStatus;
 }
 

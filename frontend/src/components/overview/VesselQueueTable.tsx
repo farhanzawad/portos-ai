@@ -31,26 +31,33 @@ export function VesselQueueTable() {
   ];
 
   return (
-    <div className="rounded-lg border border-portos-border bg-portos-surface shadow-sm overflow-hidden flex flex-col">
+    <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden flex flex-col font-sans">
       {/* Header & Filter Controls */}
-      <div className="px-5 py-3.5 border-b border-portos-border flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Ship className="h-4 w-4 text-portos-navy-secondary" />
-          <h3 className="text-sm font-bold text-portos-navy">
-            Incoming Vessel Queue & Outer Anchorage Arrivals
-          </h3>
+      <div className="px-6 py-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 bg-white">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-sky-50 text-sky-600 rounded-xl border border-sky-100">
+            <Ship className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Incoming Vessel Queue & Outer Anchorage Arrivals
+            </h3>
+            <p className="text-[11px] text-slate-500 font-medium">
+              Chittagong pilotage scheduling and outer anchorage telemetry
+            </p>
+          </div>
           <DataStatusBadge status="SIMULATED" size="sm" />
         </div>
 
-        <div className="flex items-center gap-1.5 bg-portos-bg p-0.5 rounded border border-portos-border text-xs">
+        <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-full border border-slate-200 text-xs">
           {filterButtons.map((fb) => (
             <button
               key={fb.value}
               onClick={() => setStatusFilter(fb.value)}
-              className={`px-2.5 py-1 rounded transition-colors text-[11px] font-medium ${
+              className={`px-3 py-1 rounded-full transition-all text-xs font-semibold ${
                 statusFilter === fb.value
-                  ? "bg-white text-portos-navy font-semibold shadow-xs"
-                  : "text-portos-muted hover:text-portos-navy"
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               {fb.label}
@@ -63,17 +70,17 @@ export function VesselQueueTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-portos-border bg-portos-bg/60 text-[11px] font-semibold text-portos-muted uppercase tracking-wider">
-              <th className="py-2.5 px-4">Vessel & Call</th>
-              <th className="py-2.5 px-4">Dimensions</th>
-              <th className="py-2.5 px-4">Reported ETA</th>
-              <th className="py-2.5 px-4">Predicted Delay</th>
-              <th className="py-2.5 px-4">Status</th>
-              <th className="py-2.5 px-4">Delay Risk</th>
-              <th className="py-2.5 px-4 text-right">Data Source</th>
+            <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <th className="py-3 px-4">Vessel & Call</th>
+              <th className="py-3 px-4">Dimensions</th>
+              <th className="py-3 px-4">Reported ETA</th>
+              <th className="py-3 px-4">Predicted Delay</th>
+              <th className="py-3 px-4">Status</th>
+              <th className="py-3 px-4">Delay Risk</th>
+              <th className="py-3 px-4 text-right">Data Source</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-portos-border/60">
+          <tbody className="divide-y divide-slate-100">
             {isLoading && (
               <>
                 <TableRowSkeleton columns={7} />
@@ -115,42 +122,42 @@ export function VesselQueueTable() {
                 const hasDelay = call.predicted_delay_hours > 0;
 
                 return (
-                  <tr key={call.id} className="hover:bg-portos-bg/50 transition-colors">
+                  <tr key={call.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3 px-4">
-                      <div className="font-semibold text-portos-navy">
+                      <div className="font-semibold text-slate-900">
                         {call.vessel?.name || "DEMO Feeder Vessel"}
                       </div>
-                      <div className="text-[11px] text-portos-muted font-mono flex items-center gap-1.5">
+                      <div className="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
                         <span>{call.call_number}</span>
                         <span>·</span>
-                        <span>IMO: {call.vessel?.imo_number}</span>
+                        <span className="font-mono text-[10px]">IMO: {call.vessel?.imo_number}</span>
                       </div>
                     </td>
 
-                    <td className="py-3 px-4 font-mono tabular-nums text-[11px] text-portos-navy">
-                      <div>LOA: {call.vessel?.length_overall_m}m</div>
-                      <div className="text-portos-muted">Draft: {call.vessel?.max_draft_m}m</div>
+                    <td className="py-3 px-4 tabular-nums text-[11px] text-slate-700">
+                      <div className="font-medium">LOA: {call.vessel?.length_overall_m}m</div>
+                      <div className="text-slate-500">Draft: {call.vessel?.max_draft_m}m</div>
                     </td>
 
                     <td className="py-3 px-4">
-                      <div className="text-portos-navy font-mono tabular-nums text-[11px]">
+                      <div className="text-slate-900 tabular-nums text-[11px] font-semibold">
                         {repDate.toLocaleDateString("en-GB", { month: "short", day: "numeric" })}{" "}
                         {repDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
                       </div>
-                      <div className="text-[10px] text-portos-muted">BST (UTC+6)</div>
+                      <div className="text-[10px] text-slate-500">BST (UTC+6)</div>
                     </td>
 
                     <td className="py-3 px-4">
                       {hasDelay ? (
-                        <div className="font-semibold text-portos-red font-mono tabular-nums text-[11px]">
+                        <div className="font-bold text-rose-600 tabular-nums text-[11px]">
                           +{call.predicted_delay_hours} hrs
                         </div>
                       ) : (
-                        <div className="font-medium text-portos-teal font-mono tabular-nums text-[11px]">
+                        <div className="font-semibold text-sky-600 tabular-nums text-[11px]">
                           On Schedule
                         </div>
                       )}
-                      <div className="text-[10px] text-portos-muted">ML Forecast</div>
+                      <div className="text-[10px] text-slate-500">ML Forecast</div>
                     </td>
 
                     <td className="py-3 px-4">
@@ -193,4 +200,3 @@ export function VesselQueueTable() {
     </div>
   );
 }
-

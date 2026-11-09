@@ -147,15 +147,15 @@ export function QueueDynamicsChart({
   }, [baselineRun, alternativeRun]);
 
   return (
-    <div className="bg-white border border-portos-border rounded-lg p-4 shadow-xs space-y-3">
-      <div className="flex items-center justify-between pb-2 border-b border-portos-border">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3 font-sans">
+      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
         <div className="flex items-center gap-2">
-          <LineChart className="h-4 w-4 text-portos-teal" />
-          <h3 className="text-sm font-bold text-portos-navy">
+          <LineChart className="h-4 w-4 text-sky-600" />
+          <h3 className="text-sm font-bold text-slate-900">
             Outer Anchorage Queue Dynamics & Quayside Occupancy Over Time
           </h3>
         </div>
-        <span className="text-xs text-portos-muted font-mono">
+        <span className="text-xs text-slate-500 font-medium">
           Simulated Timeline (72h)
         </span>
       </div>

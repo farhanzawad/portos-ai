@@ -13,6 +13,7 @@ import {
   NavActionType,
   MouseInteractionMode,
   CameraMetrics,
+  SplitLayoutMode,
 } from "./types";
 import {
   BerthRead,
@@ -47,6 +48,7 @@ export function TerminalCanvas({
   initialSelectedBlockCode,
 }: TerminalCanvasProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("3d");
+  const [splitLayoutMode, setSplitLayoutMode] = useState<SplitLayoutMode>("balanced");
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>("isometric");
   const [hasWebGL, setHasWebGL] = useState(true);
   const [selectedEntity, setSelectedEntity] = useState<SelectedEntity | null>(
@@ -178,6 +180,8 @@ export function TerminalCanvas({
       <TwinHeaderControls
         viewMode={viewMode}
         onViewModeChange={(mode) => setViewMode(mode)}
+        splitLayoutMode={splitLayoutMode}
+        onSplitLayoutModeChange={setSplitLayoutMode}
         cameraPreset={cameraPreset}
         onCameraPresetChange={(preset) => setCameraPreset(preset)}
         layers={layers}
@@ -318,11 +322,154 @@ export function TerminalCanvas({
           </div>
         )}
 
-        {/* VIEW MODE 4: SYNCHRONIZED SPLIT VIEW (2D GIS MAP & 3D TWIN SIDE-BY-SIDE) */}
-        {viewMode === "split" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 w-full h-[660px] divide-y lg:divide-y-0 lg:divide-x divide-portos-navy-secondary">
+        {/* VIEW MODE 4: SYNCHRONIZED SPLIT VIEW WITH 4 VARIATIONS */}
+        {viewMode === "split" && splitLayoutMode === "pip" ? (
+          /* PiP Variation: Full 3D with Floating Synchronized GIS Radar */
+          <div className="w-full h-[660px] relative">
+            {hasWebGL ? (
+              <Canvas
+                shadows
+                dpr={[1, 1.5]}
+                camera={{ position: [42, 45, 48], fov: 38 }}
+                className={`w-full h-full ${
+                  mouseMode === "pan"
+                    ? "cursor-grab active:cursor-grabbing"
+                    : "cursor-crosshair active:cursor-grabbing"
+                }`}
+                gl={{
+                  antialias: true,
+                  alpha: false,
+                  powerPreference: "high-performance",
+                  precision: "highp",
+                }}
+                onCreated={({ gl }) => {
+                  gl.toneMapping = THREE.ACESFilmicToneMapping;
+                  gl.toneMappingExposure = 1.14;
+                }}
+              >
+                <color attach="background" args={["#0c1926"]} />
+                <TerminalScene3D
+                  berths={berths}
+                  vesselCalls={vesselCalls}
+                  equipment={equipment}
+                  yardBlocks={yardBlocks}
+                  layers={layers}
+                  selectedEntity={selectedEntity}
+                  onSelectEntity={(entity) => setSelectedEntity(entity)}
+                  onHoverEntity={(info) => setHoveredInfo(info)}
+                  isSimulating={simulation.isPlaying}
+                  simulationSpeed={simulation.speed}
+                  resetCameraSignal={resetCameraSignal}
+                  cameraPreset={cameraPreset}
+                  navSignal={navSignal}
+                  mouseMode={mouseMode}
+                  onCameraMetrics={setCameraMetrics}
+                />
+              </Canvas>
+            ) : (
+              <TerminalSchematic2D
+                berths={berths}
+                vesselCalls={vesselCalls}
+                equipment={equipment}
+                yardBlocks={yardBlocks}
+                layers={layers}
+                selectedEntity={selectedEntity}
+                onSelectEntity={(entity) => setSelectedEntity(entity)}
+              />
+            )}
+            <TwinLegend />
+            <MapNavControl
+              onNavigate={handleNavigate}
+              onResetCamera={handleResetCamera}
+              mouseMode={mouseMode}
+              onSetMouseMode={setMouseMode}
+              cameraMetrics={cameraMetrics}
+              onToggle2D3D={handleToggle2D3D}
+            />
+
+            {/* Floating Live 3D Asset Telemetry HUD */}
+            {hoveredInfo && (
+              <div className="absolute top-3 left-3 z-20 pointer-events-none bg-portos-navy/95 backdrop-blur-md border border-portos-teal/60 rounded-lg px-3.5 py-2.5 text-white shadow-2xl animate-in fade-in duration-150 max-w-sm">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-portos-teal animate-ping" />
+                  <span className="text-[10px] font-mono text-portos-teal uppercase font-bold tracking-wider">
+                    {hoveredInfo.type}
+                  </span>
+                  {hoveredInfo.status && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                      {hoveredInfo.status}
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs font-bold text-white mt-1">
+                  {hoveredInfo.title}
+                </div>
+                <div className="text-[11px] text-slate-300">
+                  {hoveredInfo.subtitle}
+                </div>
+                {hoveredInfo.metric && (
+                  <div className="text-[10px] font-mono text-emerald-400 mt-1">
+                    {hoveredInfo.metric}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Floating Synchronized GIS Radar Window (PiP) */}
+            <div className="absolute bottom-4 left-4 z-30 w-[360px] sm:w-[410px] h-[270px] rounded-2xl overflow-hidden shadow-2xl border-2 border-portos-teal/80 bg-portos-navy/95 backdrop-blur-md flex flex-col">
+              <div className="flex items-center justify-between px-3 py-1.5 bg-portos-navy border-b border-portos-navy-secondary text-white text-[11px] font-mono">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-portos-teal animate-ping" />
+                  <span className="font-bold text-portos-teal">SYNCHRONIZED GIS RADAR</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setSplitLayoutMode("balanced")}
+                    className="px-2 py-0.5 rounded bg-portos-navy-secondary text-slate-300 hover:text-white text-[10px] transition-colors"
+                  >
+                    50:50 Split
+                  </button>
+                  <button
+                    onClick={() => setSplitLayoutMode("gis-focus")}
+                    className="px-2 py-0.5 rounded bg-portos-navy-secondary text-slate-300 hover:text-white text-[10px] transition-colors"
+                  >
+                    Expand GIS
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 w-full h-[calc(100%-31px)] relative">
+                <GeospatialPortMap
+                  selectedEntity={selectedEntity}
+                  onSelectEntity={(entity) => setSelectedEntity(entity)}
+                  isSimulating={simulation.isPlaying}
+                  simulationSpeed={simulation.speed}
+                  onOpen3DView={handleOpen3DView}
+                  height="h-full"
+                />
+              </div>
+            </div>
+          </div>
+        ) : viewMode === "split" ? (
+          /* Side-by-Side Variations: Balanced (50/50), GIS Focus (65/35), or Twin Focus (35/65) */
+          <div
+            className={`w-full h-[660px] divide-y lg:divide-y-0 lg:divide-x divide-portos-navy-secondary ${
+              splitLayoutMode === "gis-focus"
+                ? "grid grid-cols-1 lg:grid-cols-12"
+                : splitLayoutMode === "twin-focus"
+                ? "grid grid-cols-1 lg:grid-cols-12"
+                : "grid grid-cols-1 lg:grid-cols-2"
+            }`}
+          >
             {/* Left Column: 2D Maritime GIS Map */}
-            <div className="relative w-full h-[330px] lg:h-[660px]">
+            <div
+              className={`relative w-full h-[330px] lg:h-[660px] ${
+                splitLayoutMode === "gis-focus"
+                  ? "lg:col-span-8"
+                  : splitLayoutMode === "twin-focus"
+                  ? "lg:col-span-4"
+                  : ""
+              }`}
+            >
               <GeospatialPortMap
                 selectedEntity={selectedEntity}
                 onSelectEntity={(entity) => setSelectedEntity(entity)}
@@ -334,7 +481,15 @@ export function TerminalCanvas({
             </div>
 
             {/* Right Column: 3D Terminal Digital Twin */}
-            <div className="relative w-full h-[330px] lg:h-[660px] bg-slate-950">
+            <div
+              className={`relative w-full h-[330px] lg:h-[660px] bg-slate-950 ${
+                splitLayoutMode === "gis-focus"
+                  ? "lg:col-span-4"
+                  : splitLayoutMode === "twin-focus"
+                  ? "lg:col-span-8"
+                  : ""
+              }`}
+            >
               {hasWebGL ? (
                 <Canvas
                   shadows
@@ -417,7 +572,7 @@ export function TerminalCanvas({
               )}
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* Floating Entity Inspector Drawer for selected entities */}
         <EntityInspectorDrawer

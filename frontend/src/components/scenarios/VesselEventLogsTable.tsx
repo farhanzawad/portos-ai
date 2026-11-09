@@ -18,27 +18,27 @@ export function VesselEventLogsTable({ logs }: VesselEventLogsTableProps) {
   );
 
   return (
-    <div className="bg-white border border-portos-border rounded-lg shadow-xs overflow-hidden">
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden font-sans">
       {/* Table Header Controls */}
-      <div className="p-3.5 border-b border-portos-border flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+      <div className="p-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
         <div className="flex items-center gap-2">
-          <Ship className="h-4 w-4 text-portos-teal" />
-          <h2 className="text-sm font-bold text-portos-navy">
+          <Ship className="h-4 w-4 text-sky-600" />
+          <h2 className="text-sm font-bold text-slate-900">
             Simulated Vessel Trajectory & Event Logs
           </h2>
-          <span className="text-xs text-portos-muted font-mono">
+          <span className="text-xs text-slate-500 font-medium tabular-nums">
             ({logs.length} calls simulated)
           </span>
         </div>
 
         <div className="relative">
-          <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-portos-muted" />
+          <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Filter vessel or call ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 pr-3 py-1 text-xs border border-portos-border rounded-md focus:outline-none focus:ring-1 focus:ring-portos-teal w-52"
+            className="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-sky-500 w-52"
           />
         </div>
       </div>
@@ -47,8 +47,8 @@ export function VesselEventLogsTable({ logs }: VesselEventLogsTableProps) {
       <div className="overflow-x-auto max-h-[340px] overflow-y-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-portos-border bg-slate-100/60 font-mono text-[11px] text-portos-muted sticky top-0">
-              <th className="p-2.5 pl-4 font-bold text-portos-navy">Vessel Call</th>
+            <tr className="border-b border-slate-200 bg-slate-100/70 text-[11px] text-slate-500 font-semibold sticky top-0">
+              <th className="p-2.5 pl-4 font-bold text-slate-900">Vessel Call</th>
               <th className="p-2.5">Arrival (T+)</th>
               <th className="p-2.5">Berth (T+)</th>
               <th className="p-2.5">Departure (T+)</th>
@@ -57,7 +57,7 @@ export function VesselEventLogsTable({ logs }: VesselEventLogsTableProps) {
               <th className="p-2.5 pr-4 text-right">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-portos-border/60 font-mono text-[11px]">
+          <tbody className="divide-y divide-slate-100 text-[11px] tabular-nums font-medium">
             {filteredLogs.map((log) => (
               <tr key={log.vessel_id} className="hover:bg-slate-50/70 transition-colors">
                 <td className="p-2.5 pl-4">

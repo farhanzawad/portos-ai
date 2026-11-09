@@ -31,21 +31,21 @@ export function AlertRow({
   const icons: Record<AlertSeverity, React.ReactNode> = {
     critical: <AlertCircle className="h-4 w-4 text-portos-red shrink-0 mt-0.5" />,
     warning: <AlertTriangle className="h-4 w-4 text-portos-amber shrink-0 mt-0.5" />,
-    info: <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />,
-    normal: <CheckCircle2 className="h-4 w-4 text-portos-teal shrink-0 mt-0.5" />,
+    info: <Info className="h-4 w-4 text-sky-600 shrink-0 mt-0.5" />,
+    normal: <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />,
   };
 
   const borderStyles: Record<AlertSeverity, string> = {
-    critical: "border-l-4 border-l-portos-red bg-portos-red-light/30 border-y-portos-border border-r-portos-border",
-    warning: "border-l-4 border-l-portos-amber bg-portos-amber-light/30 border-y-portos-border border-r-portos-border",
-    info: "border-l-4 border-l-blue-600 bg-blue-50/40 border-y-portos-border border-r-portos-border",
-    normal: "border-l-4 border-l-portos-teal bg-teal-50/30 border-y-portos-border border-r-portos-border",
+    critical: "border-l-4 border-l-rose-500 bg-rose-50/40 border-y-slate-200 border-r-slate-200",
+    warning: "border-l-4 border-l-amber-500 bg-amber-50/40 border-y-slate-200 border-r-slate-200",
+    info: "border-l-4 border-l-sky-500 bg-sky-50/40 border-y-slate-200 border-r-slate-200",
+    normal: "border-l-4 border-l-emerald-500 bg-emerald-50/40 border-y-slate-200 border-r-slate-200",
   };
 
   return (
     <div
       className={clsx(
-        "rounded border p-3 flex items-start justify-between gap-3 text-xs transition-colors hover:bg-portos-bg/70",
+        "rounded-xl border p-3 flex items-start justify-between gap-3 text-xs transition-colors hover:bg-slate-50/80 font-sans",
         borderStyles[severity],
         className
       )}
@@ -54,8 +54,8 @@ export function AlertRow({
         {icons[severity]}
         <div className="space-y-0.5 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold text-portos-navy">{title}</span>
-            <span className="text-[10px] text-portos-muted font-mono bg-portos-surface px-1.5 py-0.5 rounded border border-portos-border">
+            <span className="font-bold text-slate-900">{title}</span>
+            <span className="text-[10px] text-slate-500 font-medium bg-white px-2 py-0.5 rounded-full border border-slate-200">
               {source}
             </span>
             <DataStatusBadge status={dataStatus} size="sm" />

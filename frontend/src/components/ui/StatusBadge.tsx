@@ -20,34 +20,34 @@ export function StatusBadge({
 }: StatusBadgeProps) {
   const styles: Record<OperationalStatus, { bg: string; text: string; border: string; dot: string }> = {
     normal: {
-      bg: "bg-teal-50",
-      text: "text-portos-teal-dark",
-      border: "border-portos-teal/30",
-      dot: "bg-portos-teal",
+      bg: "bg-emerald-50",
+      text: "text-emerald-800",
+      border: "border-emerald-200",
+      dot: "bg-emerald-500",
     },
     watch: {
       bg: "bg-amber-50",
-      text: "text-portos-amber-dark",
-      border: "border-portos-amber/40",
-      dot: "bg-portos-amber",
+      text: "text-amber-800",
+      border: "border-amber-200",
+      dot: "bg-amber-500",
     },
     danger: {
       bg: "bg-red-50",
-      text: "text-portos-red-dark",
-      border: "border-portos-red/40",
-      dot: "bg-portos-red",
+      text: "text-red-800",
+      border: "border-red-200",
+      dot: "bg-red-500",
     },
     info: {
-      bg: "bg-blue-50",
-      text: "text-blue-800",
-      border: "border-blue-200",
-      dot: "bg-blue-600",
+      bg: "bg-sky-50",
+      text: "text-sky-800",
+      border: "border-sky-200",
+      dot: "bg-sky-500",
     },
     neutral: {
       bg: "bg-slate-100",
-      text: "text-portos-navy",
-      border: "border-portos-border",
-      dot: "bg-portos-muted",
+      text: "text-slate-700",
+      border: "border-slate-200",
+      dot: "bg-slate-400",
     },
   };
 
@@ -56,11 +56,11 @@ export function StatusBadge({
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 font-medium rounded border",
+        "inline-flex items-center gap-1.5 font-medium rounded-full border",
         current.bg,
         current.text,
         current.border,
-        size === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-1 text-sm",
+        size === "sm" ? "px-2.5 py-0.5 text-[11px]" : "px-3 py-1 text-xs",
         className
       )}
     >

@@ -59,6 +59,10 @@ def test_incident_injection_and_reset_workflow(db_session: Session):
     call = db_session.query(VesselCall).first()
     assert call is not None
     original_tier = call.delay_risk_status
+    original_delay = call.predicted_delay_hours
+    initial_surge_alerts = db_session.query(OperationalEvent).filter(
+        OperationalEvent.title.like("%Monsoon Surge%")
+    ).count()
 
     # 1. Inject monsoon surge delay
     req = IncidentInjectionRequest(
@@ -82,7 +86,7 @@ def test_incident_injection_and_reset_workflow(db_session: Session):
     alerts = db_session.query(OperationalEvent).filter(
         OperationalEvent.title.like("%Monsoon Surge%")
     ).all()
-    assert len(alerts) >= 1
+    assert len(alerts) > initial_surge_alerts
 
     # 2. Reset back to baseline
     reset_resp = incident_manager.reset_to_baseline(db_session)
@@ -92,13 +96,13 @@ def test_incident_injection_and_reset_workflow(db_session: Session):
     # Verify DB restored
     db_session.refresh(call)
     assert call.delay_risk_status == original_tier
-    assert call.predicted_delay_hours == 0.0
+    assert call.predicted_delay_hours == original_delay
 
-    # Injected alerts cleaned up
+    # Injected alerts cleaned up back to baseline count
     alerts_after = db_session.query(OperationalEvent).filter(
         OperationalEvent.title.like("%Monsoon Surge%")
-    ).all()
-    assert len(alerts_after) == 0
+    ).count()
+    assert alerts_after == initial_surge_alerts
 
 
 def test_crane_outage_incident(db_session: Session):

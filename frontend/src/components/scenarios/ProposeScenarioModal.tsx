@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { SimulationRunResponse, ProposeScenarioResponse } from "@/types/api";
-import { AlertCircle, ShieldAlert, Send } from "lucide-react";
+import { AlertCircle, Send, Zap, CheckCircle2, ArrowRight, CalendarRange } from "lucide-react";
 
 interface ProposeScenarioModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export function ProposeScenarioModal({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submittedData, setSubmittedData] = useState<ProposeScenarioResponse | null>(null);
 
   if (!isOpen) return null;
 
@@ -47,6 +49,7 @@ export function ProposeScenarioModal({
       }
 
       const data: ProposeScenarioResponse = await res.json();
+      setSubmittedData(data);
       onSuccess(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to record scenario proposal");
@@ -56,79 +59,126 @@ export function ProposeScenarioModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-      <div className="bg-white border border-portos-border rounded-xl shadow-2xl max-w-lg w-full overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 font-sans">
+      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden text-slate-100 animate-in fade-in zoom-in-95">
         {/* Modal Header */}
-        <div className="p-4 border-b border-portos-border bg-slate-50 flex items-center gap-2.5">
-          <ShieldAlert className="h-5 w-5 text-portos-teal" />
-          <div>
-            <h3 className="text-sm font-bold text-portos-navy">
-              Propose Scenario Recovery Plan for Harbour Master Review
-            </h3>
-            <span className="text-xs text-portos-muted font-mono">
-              Decision Lab Advisory Protocol
-            </span>
+        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400">
+              <Zap className="h-5 w-5 fill-current" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">
+                Human Review & Decision Authorization
+              </h3>
+              <span className="text-[11px] text-slate-400 font-medium">
+                Gemini Advisory Proposal → Harbour Master Sign-off
+              </span>
+            </div>
           </div>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-white text-lg leading-none p-1"
+          >
+            &times;
+          </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 space-y-3.5 text-xs">
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-900 space-y-1">
-            <span className="font-bold flex items-center gap-1.5">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              Operational Protocol & Governance Notice
-            </span>
-            <p className="text-[11px] leading-relaxed">
-              This action records an internal recovery recommendation proposal in the system audit database with status <span className="font-mono font-bold">PROPOSED</span>.
-              In accordance with PORTOS AI core safety rules, <strong>no real-world navigational clearances, tug mobilizations, crane sensor overrides, or vessel orders are issued</strong>.
-            </p>
-          </div>
+        <div className="p-5 space-y-3.5 text-xs">
+          {submittedData ? (
+            <div className="space-y-4 text-center py-2">
+              <div className="h-12 w-12 rounded-full bg-sky-500/20 border border-sky-500/40 text-sky-400 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-white">
+                  Advisory Proposal Authorized
+                </h4>
+                <p className="text-[11px] text-slate-300 mt-1">
+                  Proposal record <span className="font-semibold text-sky-400 tabular-nums">{submittedData.proposal_id}</span> logged in audit database.
+                </p>
+              </div>
 
-          <div>
-            <label className="block font-semibold text-portos-navy mb-1">
-              Advisory Operational Notes & Mitigation Strategy:
-            </label>
-            <textarea
-              value={advisoryNotes}
-              onChange={(e) => setAdvisoryNotes(e.target.value)}
-              rows={3}
-              className="w-full text-xs font-mono p-2 border border-portos-border rounded-md focus:outline-none focus:ring-1 focus:ring-portos-teal"
-              placeholder="Enter operational rationale for harbour master evaluation..."
-            />
-          </div>
-
-          <div className="p-2.5 bg-slate-50 border border-portos-border rounded-lg flex items-center justify-between text-portos-muted font-mono text-[11px]">
-            <span>Scenario Evaluated:</span>
-            <span className="font-bold text-portos-navy">{simulationRun.scenario_name}</span>
-          </div>
-
-          {error && (
-            <div className="p-2 bg-rose-50 border border-rose-200 rounded text-rose-700 text-xs font-mono">
-              {error}
+              {/* Closed Loop Action: Apply to Berth Schedule */}
+              <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 text-left space-y-2">
+                <span className="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+                  <CalendarRange className="h-4 w-4 text-sky-400" />
+                  <span>Next Step: Update Berth Schedule</span>
+                </span>
+                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                  Apply the authorized recovery allocation directly to the Berth Planner Gantt Matrix to resolve simulated queuing delays.
+                </p>
+                <Link
+                  href="/berth-planner"
+                  className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition-all shadow-md"
+                >
+                  <span>Apply to Berth Schedule (Berth Planner)</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="bg-amber-950/30 border border-amber-800/50 rounded-xl p-3.5 text-amber-200 space-y-1">
+                <span className="font-bold flex items-center gap-1.5 text-amber-300">
+                  <AlertCircle className="h-4 w-4 text-amber-400" />
+                  Operational Protocol & Governance Notice
+                </span>
+                <p className="text-[11px] leading-relaxed text-amber-200/90 font-medium">
+                  This action records an internal recovery recommendation proposal in the system audit database with status <span className="font-bold text-amber-300">PROPOSED</span>.
+                  In accordance with PORTOS AI core safety rules, <strong>no real-world navigational clearances, tug mobilizations, crane sensor overrides, or vessel orders are issued</strong>.
+                </p>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-200 mb-1">
+                  Advisory Operational Notes & Mitigation Strategy:
+                </label>
+                <textarea
+                  value={advisoryNotes}
+                  onChange={(e) => setAdvisoryNotes(e.target.value)}
+                  rows={3}
+                  className="w-full text-xs p-3 bg-slate-800 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-sky-500 font-sans leading-relaxed"
+                  placeholder="Enter operational rationale for harbour master evaluation..."
+                />
+              </div>
+
+              <div className="p-3 bg-slate-800/80 border border-slate-700 rounded-xl flex items-center justify-between text-slate-300 text-[11px]">
+                <span className="text-slate-400">Scenario Evaluated:</span>
+                <span className="font-bold text-sky-200">{simulationRun.scenario_name}</span>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-rose-950/50 border border-rose-900/60 rounded-xl text-rose-300 text-xs font-medium">
+                  {error}
+                </div>
+              )}
+            </>
           )}
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3 border-t border-portos-border bg-slate-50 flex items-center justify-end gap-2">
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="px-3.5 py-1.5 rounded border border-portos-border text-portos-navy text-xs font-medium hover:bg-slate-100 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handlePropose}
-            disabled={isSubmitting}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded bg-portos-teal text-white text-xs font-medium hover:bg-teal-700 transition-colors disabled:opacity-50"
-          >
-            <Send className="h-3.5 w-3.5" />
-            <span>{isSubmitting ? "Submitting..." : "Submit Proposal"}</span>
-          </button>
-        </div>
+        {!submittedData && (
+          <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-end gap-2">
+            <button
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 text-xs font-semibold hover:bg-slate-850 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handlePropose}
+              disabled={isSubmitting}
+              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md transition-all disabled:opacity-50 active:scale-95"
+            >
+              <Send className="h-3.5 w-3.5" />
+              <span>{isSubmitting ? "Submitting..." : "Authorize Advisory Proposal"}</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-

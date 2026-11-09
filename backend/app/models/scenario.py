@@ -78,6 +78,7 @@ class ScenarioRun(Base, ProvenanceMixin):
     run_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     random_seed: Mapped[int] = mapped_column(Integer, default=42, nullable=False)
     duration_hours: Mapped[float] = mapped_column(Float, default=72.0, nullable=False)
+    summary_metrics_json: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     status: Mapped[ScenarioRunStatusEnum] = mapped_column(
         SQLEnum(ScenarioRunStatusEnum, name="scenario_run_status_enum", native_enum=False),
         default=ScenarioRunStatusEnum.PENDING,

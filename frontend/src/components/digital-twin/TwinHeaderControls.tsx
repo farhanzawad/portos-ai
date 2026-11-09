@@ -1,7 +1,13 @@
 "use client";
 
 import React from "react";
-import { LayerVisibility, SimulationState, ViewMode, CameraPreset } from "./types";
+import {
+  LayerVisibility,
+  SimulationState,
+  ViewMode,
+  CameraPreset,
+  SplitLayoutMode,
+} from "./types";
 import {
   Play,
   Pause,
@@ -15,12 +21,18 @@ import {
   Grid3X3,
   Compass,
   Video,
+  PanelLeft,
+  PanelRight,
+  PictureInPicture2,
+  Link2,
 } from "lucide-react";
 import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
 
 interface TwinHeaderControlsProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
+  splitLayoutMode?: SplitLayoutMode;
+  onSplitLayoutModeChange?: (mode: SplitLayoutMode) => void;
   cameraPreset?: CameraPreset;
   onCameraPresetChange?: (preset: CameraPreset) => void;
   layers: LayerVisibility;
@@ -34,6 +46,8 @@ interface TwinHeaderControlsProps {
 export function TwinHeaderControls({
   viewMode,
   onViewModeChange,
+  splitLayoutMode = "balanced",
+  onSplitLayoutModeChange,
   cameraPreset = "isometric",
   onCameraPresetChange,
   layers,
@@ -115,6 +129,70 @@ export function TwinHeaderControls({
             <span>Split View</span>
           </button>
         </div>
+
+        {/* Synchronized Split View Variations & Link Indicator */}
+        {viewMode === "split" && (
+          <div className="hidden md:flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-portos-teal/20 text-portos-teal border border-portos-teal/40 font-mono text-[10px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-portos-teal animate-ping" />
+              <Link2 className="h-3 w-3" />
+              <span>SYNC LINK: ACTIVE</span>
+            </div>
+
+            {onSplitLayoutModeChange && (
+              <div className="flex items-center bg-portos-navy-secondary/60 p-0.5 rounded border border-portos-navy-secondary text-[10px]">
+                <button
+                  onClick={() => onSplitLayoutModeChange("balanced")}
+                  className={`px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors ${
+                    splitLayoutMode === "balanced"
+                      ? "bg-portos-teal text-white font-bold"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                  title="Balanced 50/50 Dual Layout"
+                >
+                  <Columns2 className="h-3 w-3" />
+                  <span>50:50</span>
+                </button>
+                <button
+                  onClick={() => onSplitLayoutModeChange("gis-focus")}
+                  className={`px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors ${
+                    splitLayoutMode === "gis-focus"
+                      ? "bg-portos-teal text-white font-bold"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                  title="Fairway GIS Focus (65% GIS / 35% 3D)"
+                >
+                  <PanelLeft className="h-3 w-3" />
+                  <span>65:35 GIS</span>
+                </button>
+                <button
+                  onClick={() => onSplitLayoutModeChange("twin-focus")}
+                  className={`px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors ${
+                    splitLayoutMode === "twin-focus"
+                      ? "bg-portos-teal text-white font-bold"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                  title="Terminal Twin Focus (35% GIS / 65% 3D)"
+                >
+                  <PanelRight className="h-3 w-3" />
+                  <span>35:65 3D</span>
+                </button>
+                <button
+                  onClick={() => onSplitLayoutModeChange("pip")}
+                  className={`px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors ${
+                    splitLayoutMode === "pip"
+                      ? "bg-portos-teal text-white font-bold"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                  title="Picture-in-Picture Floating GIS Mini-Radar"
+                >
+                  <PictureInPicture2 className="h-3 w-3" />
+                  <span>PiP Radar</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Middle: Simulation Controls */}

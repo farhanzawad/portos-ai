@@ -4,8 +4,11 @@ from app.models.terminal import (
     Terminal,
     Berth,
     BerthAssignment,
+    BerthMaintenanceWindow,
+    BerthScheduleVersion,
     BerthStatusEnum,
     AssignmentStatusEnum,
+    ScheduleVersionStatusEnum,
 )
 from app.models.vessel import (
     Vessel,

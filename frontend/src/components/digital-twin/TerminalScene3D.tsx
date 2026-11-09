@@ -41,6 +41,14 @@ export interface HoverEntityInfo {
   metric?: string;
 }
 
+// 3D Terminal Scene Camera Altitude Ceilings & Zoom Extent Boundaries
+export const MIN_CAMERA_HEIGHT = 3.5;   // Ground clearance floor in meters (prevents subsurface / water clipping)
+export const MAX_CAMERA_HEIGHT = 85.0;  // Maximum zoom-out atmospheric altitude ceiling in meters
+export const MIN_ZOOM_DISTANCE = 8.0;   // Minimum distance to orbit target (maximum zoom in)
+export const MAX_ZOOM_DISTANCE = 115.0; // Maximum distance to orbit target (maximum zoom out)
+export const MIN_TARGET_HEIGHT = 0.0;   // Target ground level floor
+export const MAX_TARGET_HEIGHT = 18.0;  // Target maximum crane/mast elevation in meters
+
 // RSGT PCT Layout: 580m continuous quay with Berths 1, 2, 3 + Berth 4 Tanker
 // X positions along quay edge (Z = -2.8):
 const BERTH_POSITIONS = [-34, -18, -2, 14, 30, 48];
@@ -120,17 +128,19 @@ export function TerminalScene3D({
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 8));
   const isAnimatingCamera = useRef(false);
 
-  // Smoothly trigger a camera flight
+  // Smoothly trigger a camera flight with altitude ceiling and floor boundary clamps
   const flyToTarget = (camX: number, camY: number, camZ: number, lookX: number, lookY: number, lookZ: number) => {
-    targetCamPos.current.set(camX, camY, camZ);
-    targetLookAt.current.set(lookX, lookY, lookZ);
+    const clampedCamY = Math.max(MIN_CAMERA_HEIGHT, Math.min(MAX_CAMERA_HEIGHT, camY));
+    const clampedLookY = Math.max(MIN_TARGET_HEIGHT, Math.min(MAX_TARGET_HEIGHT, lookY));
+    targetCamPos.current.set(camX, clampedCamY, camZ);
+    targetLookAt.current.set(lookX, clampedLookY, lookZ);
     isAnimatingCamera.current = true;
   };
 
   // Camera Presets handler with smooth gliding transition
   useEffect(() => {
     if (cameraPreset === "topdown") {
-      flyToTarget(0, 95, 14, 0, 0, 14);
+      flyToTarget(0, 80, 14, 0, 0, 14);
     } else if (cameraPreset === "operational") {
       flyToTarget(-26, 12, 12, 0, 4, -4);
     } else if (cameraPreset === "free") {
@@ -256,25 +266,35 @@ export function TerminalScene3D({
         break;
       }
       case "up": {
-        camera.position.y += 4.5;
-        controls.target.y += 4.5;
+        if (camera.position.y < MAX_CAMERA_HEIGHT) {
+          camera.position.y = Math.min(MAX_CAMERA_HEIGHT, camera.position.y + 4.5);
+          controls.target.y = Math.min(MAX_TARGET_HEIGHT, controls.target.y + 2.0);
+        }
         break;
       }
       case "down": {
-        camera.position.y = Math.max(1.5, camera.position.y - 4.5);
-        controls.target.y = Math.max(0.5, controls.target.y - 4.5);
+        if (camera.position.y > MIN_CAMERA_HEIGHT) {
+          camera.position.y = Math.max(MIN_CAMERA_HEIGHT, camera.position.y - 4.5);
+          controls.target.y = Math.max(MIN_TARGET_HEIGHT, controls.target.y - 2.0);
+        }
         break;
       }
       case "zoomIn": {
         const dir = new THREE.Vector3().subVectors(controls.target, camera.position);
-        if (dir.length() > 2.0) {
-          camera.position.addScaledVector(dir, 0.22);
+        const dist = dir.length();
+        if (dist > MIN_ZOOM_DISTANCE && camera.position.y > MIN_CAMERA_HEIGHT + 0.5) {
+          const step = Math.min(dist * 0.22, dist - MIN_ZOOM_DISTANCE);
+          camera.position.addScaledVector(dir.normalize(), step);
         }
         break;
       }
       case "zoomOut": {
         const dir = new THREE.Vector3().subVectors(camera.position, controls.target);
-        camera.position.addScaledVector(dir, 0.25);
+        const dist = dir.length();
+        if (dist < MAX_ZOOM_DISTANCE && camera.position.y < MAX_CAMERA_HEIGHT - 0.5) {
+          const step = Math.min(18.0, MAX_ZOOM_DISTANCE - dist);
+          camera.position.addScaledVector(dir.normalize(), step);
+        }
         break;
       }
       case "rotateLeft": {
@@ -426,7 +446,8 @@ export function TerminalScene3D({
       if (bearing < 0) bearing += 360;
       const pitch = Math.round(Math.acos(Math.max(-1, Math.min(1, -dir.y))) * (180 / Math.PI));
       const distance = Math.round(camera.position.distanceTo(controlsRef.current.target));
-      onCameraMetrics({ bearing, pitch, distance });
+      const altitude = Math.round(camera.position.y);
+      onCameraMetrics({ bearing, pitch, distance, altitude });
     }
 
     // 0b. Continuous Free Roam Keyboard Navigation (WASD / Arrows / QE / Space / Shift)
@@ -462,6 +483,21 @@ export function TerminalScene3D({
         camera.position.add(moveVec);
         controlsRef.current.target.add(moveVec);
         controlsRef.current.update();
+      }
+    }
+
+    // Enforce hard altitude ceiling & floor limits (bounds camera height in all modes)
+    if (camera.position.y < MIN_CAMERA_HEIGHT) {
+      camera.position.y = MIN_CAMERA_HEIGHT;
+    } else if (camera.position.y > MAX_CAMERA_HEIGHT) {
+      camera.position.y = MAX_CAMERA_HEIGHT;
+    }
+
+    if (controlsRef.current) {
+      if (controlsRef.current.target.y < MIN_TARGET_HEIGHT) {
+        controlsRef.current.target.y = MIN_TARGET_HEIGHT;
+      } else if (controlsRef.current.target.y > MAX_TARGET_HEIGHT) {
+        controlsRef.current.target.y = MAX_TARGET_HEIGHT;
       }
     }
 
@@ -616,10 +652,10 @@ export function TerminalScene3D({
       <OrbitControls
         ref={controlsRef}
         makeDefault
-        minDistance={1.2}
-        maxDistance={350}
-        maxPolarAngle={Math.PI / 2.005}
-        minPolarAngle={0.01}
+        minDistance={MIN_ZOOM_DISTANCE}
+        maxDistance={MAX_ZOOM_DISTANCE}
+        maxPolarAngle={Math.PI / 2.05}
+        minPolarAngle={0.08}
         enablePan={true}
         panSpeed={1.5}
         screenSpacePanning={true}

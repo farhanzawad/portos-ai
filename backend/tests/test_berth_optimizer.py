@@ -417,3 +417,102 @@ async def test_api_propose_advisory_endpoint(async_client):
     assert p_data["status"] == "PROPOSED"
     assert p_data["records_created"] > 0
     assert "Advisory proposal recorded successfully" in p_data["message"]
+
+
+@pytest.mark.asyncio
+async def test_api_summary_endpoint(async_client):
+    """Verify GET /api/v1/berth-planner/summary returns all 8 required operational KPIs."""
+    res = await async_client.get("/api/v1/berth-planner/summary")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_berths"] == 6
+    assert data["occupied_berths"] >= 1
+    assert data["available_berths"] >= 1
+    assert data["vessels_at_anchorage"] >= 1
+    assert "average_waiting_time_hours" in data
+    assert "berth_utilization_pct" in data
+    assert "scheduling_conflicts_count" in data
+    assert "pending_allocation_decisions" in data
+    assert data["data_status"] == "SIMULATED"
+
+
+@pytest.mark.asyncio
+async def test_api_schedule_and_versioning(async_client):
+    """Verify schedule retrieval and confirm versioning workflow."""
+    # 1. Get current schedule
+    res = await async_client.get("/api/v1/berth-planner/schedule")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["berths"]) == 6
+    assert len(data["calls"]) == 12
+    assert "assignments" in data
+    assert "maintenance_windows" in data
+    assert data["active_version"] is not None
+
+    # 2. Confirm a new schedule version
+    opt_res = await async_client.post(
+        "/api/v1/berth-planner/optimize",
+        json={"planning_horizon_hours": 72},
+    )
+    schedule = opt_res.json()["optimized_schedule"]
+    conf_res = await async_client.post(
+        "/api/v1/berth-planner/schedules/confirm",
+        json={
+            "name": "Harbour Master Approved Schedule v2",
+            "confirmed_by": "Capt. A. Rahman",
+            "notes": "Optimal schedule confirmed with all constraints checked.",
+            "assignments": schedule,
+            "planning_horizon_hours": 72,
+        },
+    )
+    assert conf_res.status_code == 200
+    c_data = conf_res.json()
+    assert c_data["status"] == "CONFIRMED"
+    assert c_data["version_number"] >= 2
+
+    # 3. List schedule versions
+    v_res = await async_client.get("/api/v1/berth-planner/schedules/versions")
+    assert v_res.status_code == 200
+    v_list = v_res.json()
+    assert len(v_list) >= 2
+
+
+@pytest.mark.asyncio
+async def test_api_maintenance_window_and_manual_assignment(async_client):
+    """Verify berth maintenance window creation and manual assignment validation."""
+    # 1. Create maintenance window on Berth 3
+    start_dt = datetime.now(timezone.utc) + timedelta(hours=10)
+    end_dt = start_dt + timedelta(hours=24)
+    m_res = await async_client.post(
+        "/api/v1/berth-planner/berths/berth_03/maintenance",
+        json={
+            "berth_id": "berth_03",
+            "title": "Quayside Crane Track Resurfacing",
+            "reason": "Routine rail alignment.",
+            "start_time": start_dt.isoformat(),
+            "end_time": end_dt.isoformat(),
+            "is_closed": True,
+        },
+    )
+    assert m_res.status_code == 200
+    m_data = m_res.json()
+    assert m_data["status"] == "CREATED"
+    mw_id = m_data["maintenance_id"]
+
+    # 2. Attempt manual assignment on Berth 3 colliding with maintenance -> Should fail validation
+    col_res = await async_client.post(
+        "/api/v1/berth-planner/assignments",
+        json={
+            "vessel_call_id": "call_vsl_05",
+            "berth_id": "berth_03",
+            "scheduled_start": (start_dt + timedelta(hours=2)).isoformat(),
+            "service_duration_hours": 18.0,
+        },
+    )
+    assert col_res.status_code == 400
+    assert "hard constraint violation" in col_res.json()["detail"].lower()
+
+    # 3. Clean up maintenance window
+    del_res = await async_client.delete(f"/api/v1/berth-planner/berths/maintenance/{mw_id}")
+    assert del_res.status_code == 200
+    assert del_res.json()["status"] == "DELETED"
