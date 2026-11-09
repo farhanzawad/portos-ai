@@ -3,11 +3,60 @@
 [![Prototype Status](https://img.shields.io/badge/status-complete-16A394.svg)](docs/roadmap.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Design System](https://img.shields.io/badge/design-Minimal_Industrial_Futurism-102A43.svg)](docs/design/design-system.md)
-[![Tests Passed](https://img.shields.io/badge/tests-85%20backend%20%7C%2070%20E2E%20passed-success.svg)](docs/quality/test-results.md)
+[![Tests Passed](https://img.shields.io/badge/tests-120%20backend%20%7C%20passed-success.svg)](docs/quality/test-results.md)
+[![Next.js](https://img.shields.io/badge/Next.js-14_App_Router-black?logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 
 **Prototype Version:** 0.1.0  
 **Competition:** Blue AI Challenge 2026–27 (Bangladesh Blue Economy & Maritime Logistics)  
 **Target Environment:** Chattogram-Inspired Container Terminal Corridor (Karnaphuli Approach)
+
+---
+
+<p align="center">
+  <img src="docs/assets/hero_berth_planner.png" alt="PORTOS AI Operational Workspace — Intelligent Berth Allocation Gantt Matrix & Synchronized Port GIS Map" width="100%" />
+</p>
+
+## Visual Operational Workspace
+
+<table>
+  <tr>
+    <td width="50%">
+      <h3 align="center">3D Terminal Digital Twin</h3>
+      <img src="docs/assets/digital_twin_3d.png" alt="3D Terminal Digital Twin" width="100%" />
+      <p align="center"><sub>Interactive procedural 3D scene, dynamic water wave shaders, STS gantry cranes, and pan-orbit camera controls.</sub></p>
+    </td>
+    <td width="50%">
+      <h3 align="center">Vessel Intelligence & Fairway Radar</h3>
+      <img src="docs/assets/vessels_fairway.png" alt="Vessel Intelligence & Fairway Radar" width="100%" />
+      <p align="center"><sub>Karnaphuli corridor radar queue, high-tide tidal window gate, and AIS telemetry dossier.</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3 align="center">Manageable Berth Gantt Matrix</h3>
+      <img src="docs/assets/berth_gantt_manageable.png" alt="Manageable Berth Allocation Gantt Matrix" width="100%" />
+      <p align="center"><sub>Google OR-Tools CP-SAT scheduler with in-line arrival shifts (±1h), berth reassignments, and conflict warnings.</sub></p>
+    </td>
+    <td width="50%">
+      <h3 align="center">Scenario Decision Lab (SimPy)</h3>
+      <img src="docs/assets/scenario_decision_lab.png" alt="Scenario Decision Lab" width="100%" />
+      <p align="center"><sub>Discrete-event disruption injection (monsoon surge, crane faults), queue trade-offs, and delta KPIs.</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3 align="center">Tactical Radar Quayside GIS</h3>
+      <img src="docs/assets/gis_radar_quayside.png" alt="Tactical Radar Quayside GIS" width="100%" />
+      <p align="center"><sub>High-contrast vector fairway chart with STS outreach zones, mooring lines, and lateral navigation buoys.</sub></p>
+    </td>
+    <td width="50%">
+      <h3 align="center">High-Res Satellite Quayside GIS</h3>
+      <img src="docs/assets/gis_satellite_quayside.png" alt="Satellite Quayside GIS" width="100%" />
+      <p align="center"><sub>Satellite orthophoto overlay of CCT & NCT container terminals and Karnaphuli river approach.</sub></p>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -64,7 +113,7 @@ The fastest way to experience PORTOS AI is using Docker Compose:
 
 ```bash
 # 1. Clone and copy environment variables
-git clone https://github.com/your-org/portos-ai.git
+git clone https://github.com/farhanzawad/portos-ai.git
 cd portos-ai
 cp .env.example .env
 

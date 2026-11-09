@@ -74,6 +74,7 @@ tmp/
 uploads/
 scratch/
 *.png
+!docs/assets/*.png
 *.sqlite
 *.db
 
