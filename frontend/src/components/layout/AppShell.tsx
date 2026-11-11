@@ -36,8 +36,8 @@ export function AppShell({ children }: AppShellProps) {
     setReducedMotion((prev) => !prev);
   };
 
-  // The root path "/" and "/digital-twin" host the Pro Max Dark Cockpit experiences
-  const isFullBleed = pathname === "/" || pathname === "/digital-twin";
+  // The root path "/", "/digital-twin", and "/berth-planner" host the Pro Max Dark Cockpit experiences
+  const isFullBleed = pathname === "/" || pathname === "/digital-twin" || pathname === "/berth-planner";
 
   if (isFullBleed) {
     return (

@@ -1,42 +1,212 @@
-import React from "react";
-import { BerthPlannerView } from "@/components/berth-planner/BerthPlannerView";
-import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
-import { Compass, CalendarRange } from "lucide-react";
+"use client";
+
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  BerthRead,
+  VesselCallRead,
+  OptimizerResponse,
+  ScheduledAssignment,
+  ProposeScheduleResponse,
+  BerthPlannerSummaryResponse,
+} from "@/types/api";
+import { BerthPlannerTopNav } from "@/components/berth-planner/BerthPlannerTopNav";
+import { BerthPlannerSidebar } from "@/components/berth-planner/BerthPlannerSidebar";
+import {
+  BerthPlannerHeaderStrip,
+  ScheduleOptimizationMode,
+  WorkspaceLayoutMode,
+} from "@/components/berth-planner/BerthPlannerHeaderStrip";
+import { BerthPlannerKpiStrip } from "@/components/berth-planner/BerthPlannerKpiStrip";
+import { QuaysideGanttMatrix } from "@/components/berth-planner/QuaysideGanttMatrix";
+import { KarnaphuliFairwayGisCard } from "@/components/berth-planner/KarnaphuliFairwayGisCard";
+import { VesselOptimizationDetailCard } from "@/components/berth-planner/VesselOptimizationDetailCard";
+import { ProposeModal } from "@/components/berth-planner/ProposeModal";
+import { ScheduleVersionsModal } from "@/components/berth-planner/ScheduleVersionsModal";
+import { ManualAssignModal } from "@/components/berth-planner/ManualAssignModal";
 
 export default function BerthPlannerPage() {
-  return (
-    <div className="space-y-6 sm:space-y-7 font-sans">
-      {/* Executive Clean Header Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-sky-50 text-sky-600 rounded-2xl border border-sky-100">
-              <CalendarRange className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-                  Intelligent Berth Planner
-                </h1>
-                <DataStatusBadge status="SIMULATED" size="sm" />
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                Mathematical berth allocation, constraint validation, and multi-objective scheduling using Google OR-Tools CP-SAT.
-              </p>
-            </div>
-          </div>
-        </div>
+  const queryClient = useQueryClient();
 
-        {/* Corridor Context Pill */}
-        <div className="flex items-center gap-2 text-xs text-slate-600 bg-white px-3.5 py-1.5 rounded-full border border-slate-200 shadow-2xs shrink-0">
-          <Compass className="h-3.5 w-3.5 text-sky-600" />
-          <span>Corridor: <strong className="text-slate-900 font-semibold">CCT / NCT Karnaphuli</strong></span>
-          <span className="text-slate-300 font-bold">•</span>
-          <span className="text-sky-700 font-semibold">Tide: High Gate</span>
-        </div>
+  const [optimizationMode, setOptimizationMode] =
+    useState<ScheduleOptimizationMode>("optimized");
+  const [layoutMode, setLayoutMode] = useState<WorkspaceLayoutMode>("split");
+  const [selectedVessel, setSelectedVessel] = useState<string>("MV Maersk Karun");
+
+  // Modals state
+  const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
+  const [isVersionsModalOpen, setIsVersionsModalOpen] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [proposalSuccess, setProposalSuccess] =
+    useState<ProposeScheduleResponse | null>(null);
+
+  const handleConfirmNewVersion = async (notes: string) => {
+    setIsConfirming(true);
+    try {
+      const res = await fetch("/api/v1/berth-planner/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          notes: notes || "Operational schedule confirmed by chief planner.",
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to confirm schedule version");
+      queryClient.invalidateQueries({ queryKey: ["schedule-versions"] });
+      setIsVersionsModalOpen(false);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  // Queries for real API backend integration
+  const summaryQuery = useQuery<BerthPlannerSummaryResponse>({
+    queryKey: ["berth-planner-summary"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/berth-planner/summary");
+      if (!res.ok) throw new Error("Failed to fetch operational summary");
+      return res.json();
+    },
+    refetchInterval: 15000,
+  });
+
+  const berthsQuery = useQuery<BerthRead[]>({
+    queryKey: ["berths"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/berths");
+      if (!res.ok) throw new Error("Failed to fetch berths");
+      const json = await res.json();
+      return Array.isArray(json) ? json : json.items || [];
+    },
+  });
+
+  const callsQuery = useQuery<VesselCallRead[]>({
+    queryKey: ["vessel-calls"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/vessels/calls?page_size=50");
+      if (!res.ok) throw new Error("Failed to fetch vessel calls");
+      const json = await res.json();
+      return Array.isArray(json) ? json : json.items || [];
+    },
+  });
+
+  const optimizeMutation = useMutation<OptimizerResponse>({
+    mutationFn: async () => {
+      const res = await fetch("/api/v1/berth-planner/optimize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planning_horizon_hours: 72,
+          time_granularity_minutes: 15,
+        }),
+      });
+      if (!res.ok) throw new Error("Optimization solver execution failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["berth-planner-summary"] });
+    },
+  });
+
+  const handleResolve = () => {
+    optimizeMutation.mutate();
+  };
+
+  const summary = summaryQuery.data;
+
+  return (
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0a0c10] text-[#e2e2e8] select-none font-sans">
+      {/* 1. Global Aerospace Top Navigation Header */}
+      <BerthPlannerTopNav
+        onResolve={handleResolve}
+        isResolving={optimizeMutation.isPending}
+      />
+
+      {/* 2. Main Workspace Layout (Sidebar + Center Content Area) */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Operational Navigation Sidebar */}
+        <BerthPlannerSidebar
+          onProposeSchedule={() => setIsProposeModalOpen(true)}
+          nextHwCrest="+3.84m"
+          crestWindow="12:30 - 16:45 BST"
+        />
+
+        {/* Center / Right Dynamic Workspace */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 bg-[#0a0c10]">
+          {/* Header Row: Title, Solver Metadata, and View Mode Switches */}
+          <BerthPlannerHeaderStrip
+            optimizationMode={optimizationMode}
+            onSelectOptimizationMode={setOptimizationMode}
+            layoutMode={layoutMode}
+            onSelectLayoutMode={setLayoutMode}
+            onResolve={handleResolve}
+            isResolving={optimizeMutation.isPending}
+            planningHorizonHours={72}
+          />
+
+          {/* 5-Card Operational KPI Summary Strip */}
+          <BerthPlannerKpiStrip
+            solverLatencyMs={28.4}
+            hardViolations={summary?.scheduling_conflicts_count ?? 0}
+            totalAnchorageWaitHours={summary?.average_waiting_time_hours ?? 2.2}
+            quaysideUtilizationPct={summary?.berth_utilization_pct ?? 88.4}
+            tidalCompliancePct={100}
+          />
+
+          {/* Workspace Layout Content */}
+          {layoutMode === "split" && (
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+              {/* Left Quayside Gantt Matrix (7 Cols on XL) */}
+              <div className="xl:col-span-7">
+                <QuaysideGanttMatrix
+                  selectedVessel={selectedVessel}
+                  onSelectVessel={setSelectedVessel}
+                />
+              </div>
+
+              {/* Right Fairway GIS + Selected Vessel Card (5 Cols on XL) */}
+              <div className="xl:col-span-5 space-y-4">
+                <KarnaphuliFairwayGisCard />
+                <VesselOptimizationDetailCard vesselName={selectedVessel} />
+              </div>
+            </div>
+          )}
+
+          {layoutMode === "gantt" && (
+            <div className="w-full">
+              <QuaysideGanttMatrix
+                selectedVessel={selectedVessel}
+                onSelectVessel={setSelectedVessel}
+              />
+            </div>
+          )}
+
+          {layoutMode === "map" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <KarnaphuliFairwayGisCard />
+              <VesselOptimizationDetailCard vesselName={selectedVessel} />
+            </div>
+          )}
+        </main>
       </div>
 
-      <BerthPlannerView />
+      {/* Propose Schedule Confirmation Modal */}
+      <ProposeModal
+        isOpen={isProposeModalOpen}
+        assignments={optimizeMutation.data?.optimized_schedule || []}
+        onClose={() => setIsProposeModalOpen(false)}
+        onSuccess={(data) => {
+          setProposalSuccess(data);
+          setIsProposeModalOpen(false);
+        }}
+      />
+
+      {/* Version History Modal */}
+      <ScheduleVersionsModal
+        isOpen={isVersionsModalOpen}
+        onClose={() => setIsVersionsModalOpen(false)}
+        onConfirmNewVersion={handleConfirmNewVersion}
+        isConfirming={isConfirming}
+      />
     </div>
   );
 }
