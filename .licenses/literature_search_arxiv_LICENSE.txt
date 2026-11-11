@@ -1,0 +1,3 @@
+ArXiv Terms of Use Notification:
+Users must check the terms at https://info.arxiv.org/help/api/index.html and always check the license of papers retrieved by this skill for any restrictions.
+Notified and recorded: 2026-11-12T00:34:00Z

@@ -9,6 +9,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        "primary-container": "#ff5722",
+        "primary": "#ffb5a0",
+        "secondary": "#4edea3",
+        "secondary-container": "#00a572",
+        "surface-container": "#1e2024",
+        "surface-container-high": "#282a2e",
+        "surface-container-low": "#1a1c20",
+        "surface-container-lowest": "#0c0e12",
+        "surface-variant": "#333539",
         portos: {
           // Executive Maritime Navy / Slate (Slate 900 base)
           navy: {

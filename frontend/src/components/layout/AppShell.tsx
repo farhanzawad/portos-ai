@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
@@ -10,6 +11,7 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -33,6 +35,21 @@ export function AppShell({ children }: AppShellProps) {
   const toggleReducedMotion = () => {
     setReducedMotion((prev) => !prev);
   };
+
+  // The root path "/" hosts the Pro Max Executive Operations Cockpit
+  const isCockpit = pathname === "/";
+
+  if (isCockpit) {
+    return (
+      <div
+        className={`min-h-screen bg-[#0b0d11] text-[#e2e2e8] font-sans antialiased selection:bg-primary-container selection:text-white flex flex-col ${
+          mounted && reducedMotion ? "motion-reduce" : ""
+        }`}
+      >
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div
