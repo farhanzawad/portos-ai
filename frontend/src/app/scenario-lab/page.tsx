@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ScenarioLabPage() {
   return (
-    <div className="space-y-4">
+    <div className="flex-1 p-4 sm:p-5 lg:p-6 space-y-4 bg-[#0a0c10] text-[#e2e2e8] font-sans">
       <ScenarioLabView />
     </div>
   );

@@ -11,7 +11,6 @@ import {
   BerthPlannerSummaryResponse,
 } from "@/types/api";
 import { BerthPlannerTopNav } from "@/components/berth-planner/BerthPlannerTopNav";
-import { BerthPlannerSidebar } from "@/components/berth-planner/BerthPlannerSidebar";
 import {
   BerthPlannerHeaderStrip,
   ScheduleOptimizationMode,
@@ -114,80 +113,72 @@ export default function BerthPlannerPage() {
   const summary = summaryQuery.data;
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0a0c10] text-[#e2e2e8] select-none font-sans">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#0a0c10] text-[#e2e2e8] select-none font-sans overflow-y-auto">
       {/* 1. Global Aerospace Top Navigation Header */}
       <BerthPlannerTopNav
         onResolve={handleResolve}
         isResolving={optimizeMutation.isPending}
+        onProposeSchedule={() => setIsProposeModalOpen(true)}
+        onOpenVersions={() => setIsVersionsModalOpen(true)}
       />
 
-      {/* 2. Main Workspace Layout (Sidebar + Center Content Area) */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Operational Navigation Sidebar */}
-        <BerthPlannerSidebar
-          onProposeSchedule={() => setIsProposeModalOpen(true)}
-          nextHwCrest="+3.84m"
-          crestWindow="12:30 - 16:45 BST"
+      {/* 2. Main Dynamic Workspace */}
+      <main className="p-4 sm:p-5 lg:p-6 space-y-4">
+        {/* Header Row: Title, Solver Metadata, and View Mode Switches */}
+        <BerthPlannerHeaderStrip
+          optimizationMode={optimizationMode}
+          onSelectOptimizationMode={setOptimizationMode}
+          layoutMode={layoutMode}
+          onSelectLayoutMode={setLayoutMode}
+          onResolve={handleResolve}
+          isResolving={optimizeMutation.isPending}
+          planningHorizonHours={72}
         />
 
-        {/* Center / Right Dynamic Workspace */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 bg-[#0a0c10]">
-          {/* Header Row: Title, Solver Metadata, and View Mode Switches */}
-          <BerthPlannerHeaderStrip
-            optimizationMode={optimizationMode}
-            onSelectOptimizationMode={setOptimizationMode}
-            layoutMode={layoutMode}
-            onSelectLayoutMode={setLayoutMode}
-            onResolve={handleResolve}
-            isResolving={optimizeMutation.isPending}
-            planningHorizonHours={72}
-          />
+        {/* 5-Card Operational KPI Summary Strip */}
+        <BerthPlannerKpiStrip
+          solverLatencyMs={28.4}
+          hardViolations={summary?.scheduling_conflicts_count ?? 0}
+          totalAnchorageWaitHours={summary?.average_waiting_time_hours ?? 2.2}
+          quaysideUtilizationPct={summary?.berth_utilization_pct ?? 88.4}
+          tidalCompliancePct={100}
+        />
 
-          {/* 5-Card Operational KPI Summary Strip */}
-          <BerthPlannerKpiStrip
-            solverLatencyMs={28.4}
-            hardViolations={summary?.scheduling_conflicts_count ?? 0}
-            totalAnchorageWaitHours={summary?.average_waiting_time_hours ?? 2.2}
-            quaysideUtilizationPct={summary?.berth_utilization_pct ?? 88.4}
-            tidalCompliancePct={100}
-          />
-
-          {/* Workspace Layout Content */}
-          {layoutMode === "split" && (
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
-              {/* Left Quayside Gantt Matrix (7 Cols on XL) */}
-              <div className="xl:col-span-7">
-                <QuaysideGanttMatrix
-                  selectedVessel={selectedVessel}
-                  onSelectVessel={setSelectedVessel}
-                />
-              </div>
-
-              {/* Right Fairway GIS + Selected Vessel Card (5 Cols on XL) */}
-              <div className="xl:col-span-5 space-y-4">
-                <KarnaphuliFairwayGisCard />
-                <VesselOptimizationDetailCard vesselName={selectedVessel} />
-              </div>
-            </div>
-          )}
-
-          {layoutMode === "gantt" && (
-            <div className="w-full">
+        {/* Workspace Layout Content */}
+        {layoutMode === "split" && (
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+            {/* Left Quayside Gantt Matrix (7 Cols on XL) */}
+            <div className="xl:col-span-7">
               <QuaysideGanttMatrix
                 selectedVessel={selectedVessel}
                 onSelectVessel={setSelectedVessel}
               />
             </div>
-          )}
 
-          {layoutMode === "map" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Right Fairway GIS + Selected Vessel Card (5 Cols on XL) */}
+            <div className="xl:col-span-5 space-y-4">
               <KarnaphuliFairwayGisCard />
               <VesselOptimizationDetailCard vesselName={selectedVessel} />
             </div>
-          )}
-        </main>
-      </div>
+          </div>
+        )}
+
+        {layoutMode === "gantt" && (
+          <div className="w-full">
+            <QuaysideGanttMatrix
+              selectedVessel={selectedVessel}
+              onSelectVessel={setSelectedVessel}
+            />
+          </div>
+        )}
+
+        {layoutMode === "map" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <KarnaphuliFairwayGisCard />
+            <VesselOptimizationDetailCard vesselName={selectedVessel} />
+          </div>
+        )}
+      </main>
 
       {/* Propose Schedule Confirmation Modal */}
       <ProposeModal

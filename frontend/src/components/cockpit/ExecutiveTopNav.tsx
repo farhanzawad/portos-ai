@@ -8,15 +8,11 @@ import {
   Search,
   Bell,
   ShieldCheck,
-  ChevronDown,
   Activity,
-  Layers,
   Sparkles,
   Ship,
   CalendarRange,
-  Grid3X3,
   Leaf,
-  FlaskConical,
   Database,
   X,
   CheckCircle2,
@@ -26,7 +22,6 @@ export function ExecutiveTopNav() {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showMoreModules, setShowMoreModules] = useState(false);
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -50,23 +45,6 @@ export function ExecutiveTopNav() {
       unread: false,
     },
   ]);
-
-  const navLinks = [
-    { label: "Operations", href: "/" },
-    { label: "Berth Planner", href: "/berth-planner" },
-    { label: "Vessel Traffic", href: "/vessels" },
-    { label: "Yard Telemetry", href: "/yard" },
-    { label: "Sustainability", href: "/green-port" },
-  ];
-
-  const moreModules = [
-    { label: "3D Digital Twin", href: "/digital-twin", icon: Layers },
-    { label: "Decision Lab (SimPy)", href: "/scenario-lab", icon: FlaskConical },
-    { label: "Gemini Copilot", href: "/copilot", icon: Sparkles },
-    { label: "Port Data Centre", href: "/data-centre", icon: Database },
-    { label: "Event Stream", href: "/events", icon: Activity },
-    { label: "Design System Tokens", href: "/design-system", icon: Grid3X3 },
-  ];
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
@@ -113,57 +91,14 @@ export function ExecutiveTopNav() {
           </div>
         </div>
 
-        {/* Center: High-Level Navigation Links */}
-        <nav className="hidden xl:flex items-center gap-1 text-sm font-medium text-[#8e9bae]">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-3.5 py-1.5 rounded-md transition-colors ${
-                  isActive
-                    ? "text-white bg-white/[0.08] font-semibold"
-                    : "hover:text-white hover:bg-white/[0.03]"
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-
-          {/* More Modules Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowMoreModules(!showMoreModules)}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs text-[#8e9bae] hover:text-white hover:bg-white/[0.03] rounded-md transition-colors"
-            >
-              <span>More</span>
-              <ChevronDown className="h-3.5 w-3.5" />
-            </button>
-
-            {showMoreModules && (
-              <div className="absolute top-full left-0 mt-2 w-56 bg-[#181c24] border border-white/10 rounded-xl shadow-2xl p-2 z-50 divide-y divide-white/[0.06]">
-                <div className="space-y-1 pb-1.5">
-                  {moreModules.map((m) => {
-                    const Icon = m.icon;
-                    return (
-                      <Link
-                        key={m.href}
-                        href={m.href}
-                        onClick={() => setShowMoreModules(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#cbd5e1] hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors"
-                      >
-                        <Icon className="h-4 w-4 text-primary" />
-                        <span>{m.label}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </nav>
+        {/* Center: Live Sector Status / Operational Breadcrumb */}
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#181c24] border border-white/[0.08] text-xs font-mono">
+          <span className="size-2 rounded-full bg-secondary animate-pulse" />
+          <span className="text-[#8e9bae]">SECTOR:</span>
+          <span className="text-white font-bold">KARNAPHULI ESTUARY</span>
+          <span className="text-[#64748b]">•</span>
+          <span className="text-secondary font-semibold">TIDAL INGRESS WINDOW #04</span>
+        </div>
 
         {/* Right: Live AIS Heartbeat, Notifications & Profile */}
         <div className="flex items-center gap-3 sm:gap-4">

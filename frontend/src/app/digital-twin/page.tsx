@@ -120,7 +120,7 @@ function DigitalTwinContent() {
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0A0C10] select-none text-[#e2e2e8]">
+    <div className="flex flex-1 w-full h-full flex-col overflow-hidden bg-[#0A0C10] select-none text-[#e2e2e8]">
       {/* 1. Shared Spatial Top Navigation Bar */}
       <DigitalTwinTopNav />
 

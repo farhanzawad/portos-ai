@@ -19,12 +19,12 @@ const config: Config = {
         "surface-container-lowest": "#0c0e12",
         "surface-variant": "#333539",
         portos: {
-          // Executive Maritime Navy / Slate (Slate 900 base)
+          // Universal Cockpit Dark Palette
           navy: {
-            DEFAULT: "#0F172A",
-            dark: "#090D16",
-            secondary: "#1E293B",
-            muted: "#334155",
+            DEFAULT: "#FFFFFF",
+            dark: "#0A0C10",
+            secondary: "#E2E2E8",
+            muted: "#8E9BAE",
           },
           // Electric Maritime Cyan & Action Accents
           sky: {
@@ -71,16 +71,16 @@ const config: Config = {
             600: "#E11D48",
             700: "#BE123C",
           },
-          // Standard UI Backgrounds & Borders
-          bg: "#F8FAFC",
-          surface: "#FFFFFF",
-          muted: "#64748B",
-          border: "#E2E8F0",
-          canvas: "#0F172A",
+          // Standard UI Backgrounds & Borders (Dark Cockpit Unified)
+          bg: "#0A0C10",
+          surface: "#111318",
+          muted: "#8E9BAE",
+          border: "rgba(255, 255, 255, 0.08)",
+          canvas: "#0A0C10",
           teal: {
-            DEFAULT: "#0284C7",
-            light: "#E0F2FE",
-            dark: "#0369A1",
+            DEFAULT: "#4edea3",
+            light: "#a7f3d0",
+            dark: "#059669",
           },
         },
       },

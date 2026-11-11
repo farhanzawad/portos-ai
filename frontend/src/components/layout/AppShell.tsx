@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Sidebar } from "./Sidebar";
-import { Header } from "./Header";
-import { Footer } from "./Footer";
+import { UniversalSidebar } from "./UniversalSidebar";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -12,13 +10,11 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Check system prefers-reduced-motion
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mediaQuery.matches) {
       setReducedMotion(true);
@@ -32,51 +28,19 @@ export function AppShell({ children }: AppShellProps) {
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
-  const toggleReducedMotion = () => {
-    setReducedMotion((prev) => !prev);
-  };
-
-  // The root path "/", "/digital-twin", and "/berth-planner" host the Pro Max Dark Cockpit experiences
-  const isFullBleed = pathname === "/" || pathname === "/digital-twin" || pathname === "/berth-planner";
-
-  if (isFullBleed) {
-    return (
-      <div
-        className={`min-h-screen bg-[#0A0C10] text-[#e2e2e8] font-sans antialiased selection:bg-primary-container selection:text-white flex flex-col ${
-          mounted && reducedMotion ? "motion-reduce" : ""
-        }`}
-      >
-        {children}
-      </div>
-    );
-  }
-
   return (
     <div
-      className={`min-h-screen flex bg-portos-bg ${mounted && reducedMotion ? "motion-reduce" : ""
-        }`}
+      className={`min-h-screen w-full flex bg-[#0A0C10] text-[#e2e2e8] font-sans antialiased selection:bg-primary-container selection:text-white ${
+        mounted && reducedMotion ? "motion-reduce" : ""
+      }`}
     >
-      {/* Left Persistent Navigation Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      {/* Universal Left Collapsible Sticky Sidebar */}
+      <UniversalSidebar />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Global Operational Header */}
-        <Header
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-          reducedMotion={reducedMotion}
-          onToggleReducedMotion={toggleReducedMotion}
-        />
-
-        {/* Dynamic Page Workspace */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
-          {children}
-        </main>
-
-        {/* Global Operational & AI Disclosure Footer */}
-        <Footer />
+      {/* Main Page Dynamic Workspace Canvas */}
+      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto overflow-x-hidden bg-[#0A0C10]">
+        {children}
       </div>
     </div>
   );
 }
-

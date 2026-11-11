@@ -47,7 +47,7 @@ export default function DesignSystemPage() {
   ];
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="flex-1 p-4 sm:p-5 lg:p-6 space-y-6 max-w-6xl text-[#e2e2e8]">
       {/* Header */}
       <div className="pb-4 border-b border-portos-border">
         <div className="flex items-center gap-2">
