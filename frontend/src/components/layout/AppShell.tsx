@@ -36,13 +36,13 @@ export function AppShell({ children }: AppShellProps) {
     setReducedMotion((prev) => !prev);
   };
 
-  // The root path "/" hosts the Pro Max Executive Operations Cockpit
-  const isCockpit = pathname === "/";
+  // The root path "/" and "/digital-twin" host the Pro Max Dark Cockpit experiences
+  const isFullBleed = pathname === "/" || pathname === "/digital-twin";
 
-  if (isCockpit) {
+  if (isFullBleed) {
     return (
       <div
-        className={`min-h-screen bg-[#0b0d11] text-[#e2e2e8] font-sans antialiased selection:bg-primary-container selection:text-white flex flex-col ${
+        className={`min-h-screen bg-[#0A0C10] text-[#e2e2e8] font-sans antialiased selection:bg-primary-container selection:text-white flex flex-col ${
           mounted && reducedMotion ? "motion-reduce" : ""
         }`}
       >

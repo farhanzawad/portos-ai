@@ -10,20 +10,20 @@ import {
   getEquipment,
   getYardBlocks,
 } from "@/lib/api-client";
-import { DataStatusBadge } from "@/components/ui/DataStatusBadge";
-import { CardSkeleton } from "@/components/ui/LoadingSkeleton";
+import { DigitalTwinTopNav } from "@/components/digital-twin/DigitalTwinTopNav";
 import {
-  Anchor,
-  Ship,
-  Cpu,
-  Grid3X3,
-  Clock,
-  Layers,
-  ShieldAlert,
-} from "lucide-react";
+  DigitalTwinSubheader,
+  CameraPresetType,
+  LightingModeType,
+  RenderModeType,
+} from "@/components/digital-twin/DigitalTwinSubheader";
+import { SpatialGizmoCompass } from "@/components/digital-twin/SpatialGizmoCompass";
+import { SpatialViewportPins } from "@/components/digital-twin/SpatialViewportPins";
+import { SpatialEntityInspector } from "@/components/digital-twin/SpatialEntityInspector";
+import { HydrodynamicsFloatingBar } from "@/components/digital-twin/HydrodynamicsFloatingBar";
 import { EquipmentMaintenanceModal } from "@/components/digital-twin/EquipmentMaintenanceModal";
 
-// Dynamically import Three.js Canvas to ensure zero server-side WebGL canvas errors
+// Dynamically import Three.js Canvas if WebGL 3D mode is toggled
 const TerminalCanvas = dynamic(
   () =>
     import("@/components/digital-twin/TerminalCanvas").then(
@@ -32,10 +32,10 @@ const TerminalCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[660px] bg-slate-950 rounded-lg border border-portos-border flex items-center justify-center text-slate-400 text-xs">
+      <div className="absolute inset-0 bg-[#0A0C10] flex items-center justify-center text-slate-400 text-xs">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
-          <span>Loading 3D Digital Twin Engine & Spatial Shaders...</span>
+          <span className="w-2 h-2 rounded-full bg-secondary animate-ping" />
+          <span>Initializing High-Fidelity 3D WebGL Shaders...</span>
         </div>
       </div>
     ),
@@ -45,7 +45,22 @@ const TerminalCanvas = dynamic(
 function DigitalTwinContent() {
   const searchParams = useSearchParams();
   const blockParam = searchParams.get("block");
+
   const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
+  const [selectedEntityName, setSelectedEntityName] = useState<string>("STS-02");
+  const [cameraPreset, setCameraPreset] = useState<CameraPresetType>("overview");
+  const [lightingMode, setLightingMode] = useState<LightingModeType>("daylight");
+  const [renderMode, setRenderMode] = useState<RenderModeType>("3d");
+  const [useLiveCanvas, setUseLiveCanvas] = useState(false);
+
+  // Attitude telemetry state
+  const [telemetry, setTelemetry] = useState({
+    heading: 164,
+    altitude: 45.0,
+    pitch: -24.5,
+    fov: 60.0,
+    fps: 60.0,
+  });
 
   const { data: berths = [], isLoading: berthsLoading } = useQuery({
     queryKey: ["digital-twin-berths"],
@@ -71,135 +86,127 @@ function DigitalTwinContent() {
   const isLoading =
     berthsLoading || vesselsLoading || equipmentLoading || yardLoading;
 
-  const berthedCount = vesselCalls.filter((v) => v.status === "BERTHED").length;
-  const queueCount = vesselCalls.filter((v) => v.status !== "BERTHED").length;
+  const handleResetCamera = () => {
+    setCameraPreset("overview");
+    setTelemetry({
+      heading: 164,
+      altitude: 45.0,
+      pitch: -24.5,
+      fov: 60.0,
+      fps: 60.0,
+    });
+  };
+
+  const handlePresetSelect = (preset: CameraPresetType) => {
+    setCameraPreset(preset);
+    if (preset === "berths") {
+      setTelemetry((prev) => ({ ...prev, heading: 142, altitude: 32.0, pitch: -18.0 }));
+    } else if (preset === "fairway") {
+      setTelemetry((prev) => ({ ...prev, heading: 210, altitude: 65.0, pitch: -30.0 }));
+    } else if (preset === "yard") {
+      setTelemetry((prev) => ({ ...prev, heading: 98, altitude: 28.0, pitch: -22.0 }));
+    } else if (preset === "cranes") {
+      setTelemetry((prev) => ({ ...prev, heading: 164, altitude: 22.0, pitch: -12.0 }));
+    } else {
+      setTelemetry((prev) => ({ ...prev, heading: 164, altitude: 45.0, pitch: -24.5 }));
+    }
+  };
+
+  // Lighting overlay styling filter
+  const getLightingFilter = () => {
+    if (lightingMode === "golden") return "sepia(0.35) saturate(1.4) brightness(0.95)";
+    if (lightingMode === "night") return "hue-rotate(190deg) invert(0.85) contrast(1.3) brightness(0.75)";
+    return "brightness(0.95)";
+  };
 
   return (
-    <div className="space-y-4">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-portos-border">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
-              Interactive Terminal Digital Twin
-            </h1>
-            <span className="text-slate-400 font-normal text-sm hidden md:inline">
-              | Geospatial Port GIS
-            </span>
-            <DataStatusBadge status="SIMULATED" />
-            <span className="hidden sm:inline-block px-2.5 py-0.5 text-[10px] bg-slate-100 text-slate-700 rounded-full border border-slate-300 font-semibold">
-              RSGT PCT MASTERPLAN CONCEPTUAL
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mt-0.5 font-medium">
-            Synchronized 2D regional maritime GIS tracking of Karnaphuli fairway and interactive 3D digital twin of Patenga Container Terminal (PCT).
-          </p>
-        </div>
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0A0C10] select-none text-[#e2e2e8]">
+      {/* 1. Shared Spatial Top Navigation Bar */}
+      <DigitalTwinTopNav />
 
-        {/* Operational Context Badges */}
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <button
-            onClick={() => setIsMaintenanceModalOpen(true)}
-            className="px-3 py-1 bg-white hover:bg-slate-50 text-slate-800 rounded-full border border-slate-200 font-medium flex items-center gap-1.5 shadow-xs transition-colors"
-            title="Inspect STS crane telemetry & Isolation Forest anomaly detection"
-          >
-            <Cpu className="h-3.5 w-3.5 text-sky-600" />
-            <span>Equipment Health & Anomaly Detector</span>
-          </button>
-          <div className="px-3 py-1 bg-white rounded-full border border-slate-200 text-slate-800 font-medium flex items-center gap-1.5 shadow-xs">
-            <Layers className="h-3.5 w-3.5 text-slate-600" />
-            <span>Terminal: RSGT Patenga (PCT) & CCT/NCT</span>
-          </div>
-          <div className="px-3 py-1 bg-sky-50 text-sky-700 rounded-full border border-sky-200 font-medium text-[11px]">
-            Datum: CD +0.0m
-          </div>
-        </div>
-      </div>
-
-      {/* Main Digital Twin Canvas Component */}
-      <TerminalCanvas
-        berths={berths}
-        vesselCalls={vesselCalls}
-        equipment={equipment}
-        yardBlocks={yardBlocks}
-        isLoading={isLoading}
-        initialSelectedBlockCode={blockParam}
+      {/* 2. Telemetry Controls Sub-Header */}
+      <DigitalTwinSubheader
+        currentPreset={cameraPreset}
+        onSelectPreset={handlePresetSelect}
+        lightingMode={lightingMode}
+        onSelectLighting={setLightingMode}
+        renderMode={renderMode}
+        onSelectRenderMode={(mode) => {
+          setRenderMode(mode);
+          if (mode === "2d") setUseLiveCanvas(true);
+        }}
+        onResetCamera={handleResetCamera}
       />
 
-      {/* Bottom Spatial Telemetry Quick Summary Bar (Fasto / Ref 2 Style) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 pt-1">
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-slate-50 text-slate-700 border border-slate-100">
-            <Anchor className="h-4 w-4" />
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">
-              Quayside Berths
-            </span>
-            <div className="text-sm font-bold text-slate-900 tabular-nums">
-              {berths.length || 6} Berths
-            </div>
-          </div>
-        </div>
+      {/* 3. Main Interactive Spatial Telemetry Viewport Area */}
+      <div className="relative flex-1 w-full overflow-hidden bg-[#0A0C10]">
+        {/* Subtle Telemetry Grid */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundSize: "40px 40px",
+            backgroundImage:
+              "linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
+          }}
+        />
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-sky-50 text-sky-600 border border-sky-100">
-            <Ship className="h-4 w-4" />
+        {/* Viewport Render Layer */}
+        {useLiveCanvas ? (
+          <div className="absolute inset-0 z-0">
+            <TerminalCanvas
+              berths={berths}
+              vesselCalls={vesselCalls}
+              equipment={equipment}
+              yardBlocks={yardBlocks}
+              isLoading={isLoading}
+              initialSelectedBlockCode={blockParam}
+            />
           </div>
-          <div>
-            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">
-              Berthed Vessels
-            </span>
-            <div className="text-sm font-bold text-slate-900 tabular-nums">
-              {berthedCount} Active
-            </div>
-          </div>
-        </div>
+        ) : (
+          <div className="relative w-full h-full overflow-hidden">
+            {/* High-Fidelity Photorealistic Quayside Simulation Backdrop */}
+            <div
+              className="w-full h-full bg-cover bg-center transition-all duration-700"
+              style={{
+                backgroundImage:
+                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDmNRquZLZ6Fnj_Hmv40NdNP2Sf7X6uX9wz_KSSmEmEzcl6wFpQbScIyEIsE-OYDsmt5oG3ZXW25j6q8Yv9QBkSTGH4bOGAlOd6ItpsA3-L2dAXnfYB7ewCHOGJGYs72ck4fekYTvq4bb7evqfhx1fdl_V7o1p-KreHIDqVSecbddRttVgpMwLk1TMPbSQfZTONSBNo1lv7I58mLzjARZMac33fgPckX93ha37VaBY')",
+                filter: getLightingFilter(),
+              }}
+            />
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
-            <Clock className="h-4 w-4" />
+            {/* Perspective Depth Gradient Masks */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-transparent to-black/30 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10]/60 via-transparent to-[#0A0C10]/70 pointer-events-none" />
           </div>
-          <div>
-            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">
-              Anchorage Queue
-            </span>
-            <div className="text-sm font-bold text-slate-900 tabular-nums">
-              {queueCount} Awaiting
-            </div>
-          </div>
-        </div>
+        )}
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
-            <Cpu className="h-4 w-4" />
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">
-              STS Cranes
-            </span>
-            <div className="text-sm font-bold text-slate-900 tabular-nums">
-              {equipment.length || 5} Gantry Units
-            </div>
-          </div>
-        </div>
+        {/* 4. Top-Left In-Scene Spatial Gizmo & Compass HUD */}
+        <SpatialGizmoCompass
+          heading={telemetry.heading}
+          altitude={telemetry.altitude}
+          pitch={telemetry.pitch}
+          fov={telemetry.fov}
+          fps={telemetry.fps}
+        />
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-xs col-span-2 sm:col-span-1 flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
-            <Grid3X3 className="h-4 w-4" />
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">
-              Yard Capacity
-            </span>
-            <div className="text-sm font-bold text-slate-900 tabular-nums">
-              {yardBlocks.length || 12} Storage Blocks
-            </div>
-          </div>
-        </div>
+        {/* 5. In-Canvas 3D Spatial Vector & Entity Overlays */}
+        <SpatialViewportPins
+          onSelectEntity={(entityName) => setSelectedEntityName(entityName)}
+        />
+
+        {/* 6. Right Spatial Entity Telemetry Drawer (320px Aerospace Panel) */}
+        <SpatialEntityInspector
+          onOpenMaintenanceModal={() => setIsMaintenanceModalOpen(true)}
+          onFocusEntity={() => {
+            setTelemetry((prev) => ({ ...prev, heading: 164, altitude: 22.0 }));
+          }}
+        />
+
+        {/* 7. Bottom Floating Telemetry & Hydrodynamics Bar */}
+        <HydrodynamicsFloatingBar />
       </div>
 
-      {/* Equipment Maintenance & Isolation Forest Anomaly Detection Modal */}
+      {/* Equipment Maintenance Modal for Diagnostics & Model Tuning */}
       <EquipmentMaintenanceModal
         isOpen={isMaintenanceModalOpen}
         onClose={() => setIsMaintenanceModalOpen(false)}
@@ -212,8 +219,8 @@ export default function DigitalTwinPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full h-[660px] bg-slate-950 rounded-lg flex items-center justify-center text-slate-400 text-xs">
-          Loading Digital Twin workspace...
+        <div className="w-screen h-screen bg-[#0A0C10] flex items-center justify-center text-slate-400 text-xs">
+          Loading 3D Spatial Telemetry Cockpit...
         </div>
       }
     >
