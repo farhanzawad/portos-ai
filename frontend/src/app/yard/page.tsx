@@ -1,16 +1,16 @@
 import React from "react";
-import { YardIntelligenceView } from "@/components/yard/YardIntelligenceView";
+import { YardStackingCockpitView } from "@/components/yard/YardStackingCockpitView";
 
 export const metadata = {
-  title: "Yard Intelligence & Congestion Heatmap — PORTOS AI",
+  title: "Yard Stacking & Spatial Optimization — PORTOS AI",
   description:
-    "Predictive container block density tracking, threshold alerts, and multi-horizon forecasting for port operations.",
+    "GBRT Spatial Optimization Engine v4.2 • Real-Time Yard Density, Stacking Tier Allocations & Predictive Micro-Slotting.",
 };
 
 export default function YardPage() {
   return (
-    <div className="flex-1 p-4 sm:p-5 lg:p-6 space-y-4 bg-[#0a0c10] text-[#e2e2e8] font-sans">
-      <YardIntelligenceView />
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 bg-[#0a0c10] text-[#e2e2e8] font-sans min-h-screen">
+      <YardStackingCockpitView />
     </div>
   );
 }
