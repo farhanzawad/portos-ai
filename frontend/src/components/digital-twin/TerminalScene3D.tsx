@@ -85,6 +85,7 @@ interface TerminalScene3DProps {
   navSignal?: NavSignal | null;
   mouseMode?: MouseInteractionMode;
   onCameraMetrics?: (metrics: CameraMetrics) => void;
+  lightingMode?: "daylight" | "golden" | "night";
 }
 
 export function TerminalScene3D({
@@ -103,6 +104,7 @@ export function TerminalScene3D({
   navSignal,
   mouseMode = "pan",
   onCameraMetrics,
+  lightingMode = "daylight",
 }: TerminalScene3DProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const frameCounter = useRef(0);
@@ -141,8 +143,14 @@ export function TerminalScene3D({
   useEffect(() => {
     if (cameraPreset === "topdown") {
       flyToTarget(0, 80, 14, 0, 0, 14);
-    } else if (cameraPreset === "operational") {
-      flyToTarget(-26, 12, 12, 0, 4, -4);
+    } else if (cameraPreset === "operational" || cameraPreset === "berths") {
+      flyToTarget(-15, 20, 22, -15, 2, -2);
+    } else if (cameraPreset === "fairway") {
+      flyToTarget(30, 32, -45, 0, 2, -10);
+    } else if (cameraPreset === "yard") {
+      flyToTarget(0, 35, 42, 0, 5, 18);
+    } else if (cameraPreset === "cranes") {
+      flyToTarget(-8, 18, 12, -2, 10, -2);
     } else if (cameraPreset === "free") {
       // Free Roam low-altitude inspection overview
       flyToTarget(0, 16, 26, 0, 3, 0);
@@ -630,11 +638,14 @@ export function TerminalScene3D({
       {/* ============================================================ */}
       {/* 1. PROFESSIONAL MARITIME LIGHTING RIG                        */}
       {/* ============================================================ */}
-      <ambientLight intensity={0.68} color="#e0f2fe" />
+      <ambientLight
+        intensity={lightingMode === "golden" ? 0.58 : lightingMode === "night" ? 0.28 : 0.72}
+        color={lightingMode === "golden" ? "#fed7aa" : lightingMode === "night" ? "#1e293b" : "#e0f2fe"}
+      />
       <directionalLight
-        position={[45, 62, 40]}
-        intensity={1.35}
-        color="#fffbeb"
+        position={lightingMode === "golden" ? [55, 32, 35] : lightingMode === "night" ? [-20, 48, -20] : [45, 62, 40]}
+        intensity={lightingMode === "golden" ? 1.6 : lightingMode === "night" ? 0.5 : 1.35}
+        color={lightingMode === "golden" ? "#f59e0b" : lightingMode === "night" ? "#38bdf8" : "#fffbeb"}
         castShadow
         shadow-bias={-0.0004}
         shadow-mapSize-width={1024}
@@ -646,8 +657,19 @@ export function TerminalScene3D({
         shadow-camera-top={75}
         shadow-camera-bottom={-75}
       />
-      <directionalLight position={[-40, 32, -35]} intensity={0.45} color="#38bdf8" />
-      <fog attach="fog" args={["#0c1926", 50, 155]} />
+      <directionalLight
+        position={[-40, 32, -35]}
+        intensity={lightingMode === "night" ? 0.25 : 0.45}
+        color={lightingMode === "golden" ? "#f43f5e" : "#38bdf8"}
+      />
+      <fog
+        attach="fog"
+        args={[
+          lightingMode === "golden" ? "#1c1314" : lightingMode === "night" ? "#050811" : "#0c1926",
+          lightingMode === "night" ? 35 : 50,
+          lightingMode === "night" ? 140 : 155,
+        ]}
+      />
 
       <OrbitControls
         ref={controlsRef}

@@ -41,7 +41,16 @@ export type ViewMode = "3d" | "map" | "2d" | "split";
 
 export type SplitLayoutMode = "balanced" | "gis-focus" | "twin-focus" | "pip";
 
-export type CameraPreset = "isometric" | "topdown" | "operational" | "free";
+export type CameraPreset =
+  | "isometric"
+  | "topdown"
+  | "operational"
+  | "free"
+  | "overview"
+  | "berths"
+  | "fairway"
+  | "yard"
+  | "cranes";
 
 export type NavActionType =
   | "forward"

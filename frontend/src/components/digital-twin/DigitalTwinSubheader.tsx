@@ -32,22 +32,19 @@ export function DigitalTwinSubheader({
   onSelectRenderMode,
   onResetCamera,
 }: DigitalTwinSubheaderProps) {
-  const [activePreset, setActivePreset] = useState<CameraPresetType>(currentPreset);
-  const [activeLighting, setActiveLighting] = useState<LightingModeType>(lightingMode);
-  const [activeRender, setActiveRender] = useState<RenderModeType>(renderMode);
+  const activePreset = currentPreset;
+  const activeLighting = lightingMode;
+  const activeRender = renderMode;
 
   const handlePreset = (preset: CameraPresetType) => {
-    setActivePreset(preset);
     if (onSelectPreset) onSelectPreset(preset);
   };
 
   const handleLighting = (mode: LightingModeType) => {
-    setActiveLighting(mode);
     if (onSelectLighting) onSelectLighting(mode);
   };
 
   const handleRender = (mode: RenderModeType) => {
-    setActiveRender(mode);
     if (onSelectRenderMode) onSelectRenderMode(mode);
   };
 

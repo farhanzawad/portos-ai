@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -22,20 +22,23 @@ import { SpatialViewportPins } from "@/components/digital-twin/SpatialViewportPi
 import { SpatialEntityInspector } from "@/components/digital-twin/SpatialEntityInspector";
 import { HydrodynamicsFloatingBar } from "@/components/digital-twin/HydrodynamicsFloatingBar";
 import { EquipmentMaintenanceModal } from "@/components/digital-twin/EquipmentMaintenanceModal";
+import { Terminal2DIsometricView } from "@/components/digital-twin/Terminal2DIsometricView";
+import { TerminalThermalIRView } from "@/components/digital-twin/TerminalThermalIRView";
+import { SelectedEntity, CameraMetrics } from "@/components/digital-twin/types";
 
-// Dynamically import Three.js Canvas if WebGL 3D mode is toggled
-const TerminalCanvas = dynamic(
+// Dynamically import real Three.js 3D Canvas
+const RealTerminal3DCanvas = dynamic(
   () =>
-    import("@/components/digital-twin/TerminalCanvas").then(
-      (mod) => mod.TerminalCanvas
+    import("@/components/digital-twin/RealTerminal3DCanvas").then(
+      (mod) => mod.RealTerminal3DCanvas
     ),
   {
     ssr: false,
     loading: () => (
-      <div className="absolute inset-0 bg-[#0A0C10] flex items-center justify-center text-slate-400 text-xs">
+      <div className="absolute inset-0 bg-[#0A0C10] flex items-center justify-center text-slate-400 text-xs font-mono">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-secondary animate-ping" />
-          <span>Initializing High-Fidelity 3D WebGL Shaders...</span>
+          <span className="size-2 rounded-full bg-secondary animate-ping" />
+          <span>INITIALIZING 3D WEBGL SHADERS &amp; REAL TERMINAL MESHES...</span>
         </div>
       </div>
     ),
@@ -48,17 +51,18 @@ function DigitalTwinContent() {
 
   const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
   const [selectedEntityName, setSelectedEntityName] = useState<string>("STS-02");
+  const [selectedEntity, setSelectedEntity] = useState<SelectedEntity | null>(null);
   const [cameraPreset, setCameraPreset] = useState<CameraPresetType>("overview");
   const [lightingMode, setLightingMode] = useState<LightingModeType>("daylight");
   const [renderMode, setRenderMode] = useState<RenderModeType>("3d");
-  const [useLiveCanvas, setUseLiveCanvas] = useState(false);
+  const [resetCameraSignal, setResetCameraSignal] = useState(0);
 
-  // Attitude telemetry state
+  // Attitude telemetry state (driven by live Three.js camera metrics)
   const [telemetry, setTelemetry] = useState({
     heading: 164,
     altitude: 45.0,
     pitch: -24.5,
-    fov: 60.0,
+    fov: 38.0,
     fps: 60.0,
   });
 
@@ -83,40 +87,42 @@ function DigitalTwinContent() {
   });
 
   const vesselCalls = vesselData?.items || [];
-  const isLoading =
-    berthsLoading || vesselsLoading || equipmentLoading || yardLoading;
 
   const handleResetCamera = () => {
     setCameraPreset("overview");
+    setResetCameraSignal((s) => s + 1);
     setTelemetry({
       heading: 164,
       altitude: 45.0,
       pitch: -24.5,
-      fov: 60.0,
+      fov: 38.0,
       fps: 60.0,
     });
   };
 
   const handlePresetSelect = (preset: CameraPresetType) => {
     setCameraPreset(preset);
-    if (preset === "berths") {
-      setTelemetry((prev) => ({ ...prev, heading: 142, altitude: 32.0, pitch: -18.0 }));
-    } else if (preset === "fairway") {
-      setTelemetry((prev) => ({ ...prev, heading: 210, altitude: 65.0, pitch: -30.0 }));
-    } else if (preset === "yard") {
-      setTelemetry((prev) => ({ ...prev, heading: 98, altitude: 28.0, pitch: -22.0 }));
-    } else if (preset === "cranes") {
-      setTelemetry((prev) => ({ ...prev, heading: 164, altitude: 22.0, pitch: -12.0 }));
-    } else {
-      setTelemetry((prev) => ({ ...prev, heading: 164, altitude: 45.0, pitch: -24.5 }));
-    }
   };
 
-  // Lighting overlay styling filter
-  const getLightingFilter = () => {
-    if (lightingMode === "golden") return "sepia(0.35) saturate(1.4) brightness(0.95)";
-    if (lightingMode === "night") return "hue-rotate(190deg) invert(0.85) contrast(1.3) brightness(0.75)";
-    return "brightness(0.95)";
+  const handleCameraMetrics = useCallback((metrics: CameraMetrics) => {
+    setTelemetry((prev) => ({
+      ...prev,
+      heading: Math.round(metrics.bearing),
+      pitch: Math.round(metrics.pitch),
+      altitude: Math.round(metrics.distance * 0.6),
+    }));
+  }, []);
+
+  const handleSelectEntity = (entity: SelectedEntity) => {
+    setSelectedEntity(entity);
+    const anyData = entity.data as any;
+    if (anyData?.name) {
+      setSelectedEntityName(anyData.name);
+    } else if (anyData?.vessel?.name) {
+      setSelectedEntityName(anyData.vessel.name);
+    } else if (entity.id) {
+      setSelectedEntityName(entity.id);
+    }
   };
 
   return (
@@ -131,10 +137,7 @@ function DigitalTwinContent() {
         lightingMode={lightingMode}
         onSelectLighting={setLightingMode}
         renderMode={renderMode}
-        onSelectRenderMode={(mode) => {
-          setRenderMode(mode);
-          if (mode === "2d") setUseLiveCanvas(true);
-        }}
+        onSelectRenderMode={setRenderMode}
         onResetCamera={handleResetCamera}
       />
 
@@ -150,60 +153,82 @@ function DigitalTwinContent() {
           }}
         />
 
-        {/* Viewport Render Layer */}
-        {useLiveCanvas ? (
+        {/* MODE 1: REAL 3D WEBGL THREE.JS DIGITAL TWIN */}
+        {renderMode === "3d" && (
           <div className="absolute inset-0 z-0">
-            <TerminalCanvas
+            <RealTerminal3DCanvas
               berths={berths}
               vesselCalls={vesselCalls}
               equipment={equipment}
               yardBlocks={yardBlocks}
-              isLoading={isLoading}
-              initialSelectedBlockCode={blockParam}
-            />
-          </div>
-        ) : (
-          <div className="relative w-full h-full overflow-hidden">
-            {/* High-Fidelity Photorealistic Quayside Simulation Backdrop */}
-            <div
-              className="w-full h-full bg-cover bg-center transition-all duration-700"
-              style={{
-                backgroundImage:
-                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDmNRquZLZ6Fnj_Hmv40NdNP2Sf7X6uX9wz_KSSmEmEzcl6wFpQbScIyEIsE-OYDsmt5oG3ZXW25j6q8Yv9QBkSTGH4bOGAlOd6ItpsA3-L2dAXnfYB7ewCHOGJGYs72ck4fekYTvq4bb7evqfhx1fdl_V7o1p-KreHIDqVSecbddRttVgpMwLk1TMPbSQfZTONSBNo1lv7I58mLzjARZMac33fgPckX93ha37VaBY')",
-                filter: getLightingFilter(),
-              }}
+              selectedEntity={selectedEntity}
+              onSelectEntity={handleSelectEntity}
+              cameraPreset={cameraPreset}
+              lightingMode={lightingMode}
+              resetCameraSignal={resetCameraSignal}
+              onCameraMetrics={handleCameraMetrics}
             />
 
-            {/* Perspective Depth Gradient Masks */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-transparent to-black/30 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10]/60 via-transparent to-[#0A0C10]/70 pointer-events-none" />
+            {/* In-Canvas 3D Spatial Vector & Entity Overlays (Pins) */}
+            <div className="absolute inset-0 pointer-events-none z-10">
+              <SpatialViewportPins
+                onSelectEntity={(entityName) => setSelectedEntityName(entityName)}
+              />
+            </div>
           </div>
         )}
 
-        {/* 4. Top-Left In-Scene Spatial Gizmo & Compass HUD */}
-        <SpatialGizmoCompass
-          heading={telemetry.heading}
-          altitude={telemetry.altitude}
-          pitch={telemetry.pitch}
-          fov={telemetry.fov}
-          fps={telemetry.fps}
-        />
+        {/* MODE 2: HIGH-PRECISION 2D ISOMETRIC VECTOR SCHEMATIC */}
+        {renderMode === "2d" && (
+          <div className="absolute inset-0 z-0">
+            <Terminal2DIsometricView
+              berths={berths}
+              vesselCalls={vesselCalls}
+              equipment={equipment}
+              yardBlocks={yardBlocks}
+              selectedEntity={selectedEntity}
+              onSelectEntity={handleSelectEntity}
+            />
+          </div>
+        )}
 
-        {/* 5. In-Canvas 3D Spatial Vector & Entity Overlays */}
-        <SpatialViewportPins
-          onSelectEntity={(entityName) => setSelectedEntityName(entityName)}
-        />
+        {/* MODE 3: MARITIME THERMAL INFRARED FLIR SENSOR VIEW */}
+        {renderMode === "thermal" && (
+          <div className="absolute inset-0 z-0">
+            <TerminalThermalIRView
+              selectedEntity={selectedEntity}
+              onSelectEntity={handleSelectEntity}
+            />
+          </div>
+        )}
 
-        {/* 6. Right Spatial Entity Telemetry Drawer (320px Aerospace Panel) */}
-        <SpatialEntityInspector
-          onOpenMaintenanceModal={() => setIsMaintenanceModalOpen(true)}
-          onFocusEntity={() => {
-            setTelemetry((prev) => ({ ...prev, heading: 164, altitude: 22.0 }));
-          }}
-        />
+        {/* Top-Left In-Scene Spatial Gizmo & Compass HUD (Present strictly in 3D WebGL mode) */}
+        {renderMode === "3d" && (
+          <div className="pointer-events-none z-20">
+            <SpatialGizmoCompass
+              heading={telemetry.heading}
+              altitude={telemetry.altitude}
+              pitch={telemetry.pitch}
+              fov={telemetry.fov}
+              fps={telemetry.fps}
+            />
+          </div>
+        )}
 
-        {/* 7. Bottom Floating Telemetry & Hydrodynamics Bar */}
-        <HydrodynamicsFloatingBar />
+        {/* Right Spatial Entity Telemetry Drawer (320px Aerospace Panel) */}
+        <div className="z-20">
+          <SpatialEntityInspector
+            onOpenMaintenanceModal={() => setIsMaintenanceModalOpen(true)}
+            onFocusEntity={() => {
+              setCameraPreset("cranes");
+            }}
+          />
+        </div>
+
+        {/* Bottom Floating Telemetry & Hydrodynamics Bar */}
+        <div className="pointer-events-none z-20">
+          <HydrodynamicsFloatingBar mode={renderMode} />
+        </div>
       </div>
 
       {/* Equipment Maintenance Modal for Diagnostics & Model Tuning */}
@@ -219,8 +244,11 @@ export default function DigitalTwinPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-screen h-screen bg-[#0A0C10] flex items-center justify-center text-slate-400 text-xs">
-          Loading 3D Spatial Telemetry Cockpit...
+        <div className="w-full h-full bg-[#0A0C10] flex items-center justify-center text-slate-400 text-xs font-mono">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-secondary animate-ping" />
+            <span>LOADING 3D SPATIAL TELEMETRY COCKPIT...</span>
+          </div>
         </div>
       }
     >

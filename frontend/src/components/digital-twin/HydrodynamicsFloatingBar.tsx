@@ -12,6 +12,7 @@ interface HydrodynamicsFloatingBarProps {
   windDirection?: string;
   windGusts?: string;
   ukcMargin?: string;
+  mode?: "3d" | "2d" | "thermal";
 }
 
 export function HydrodynamicsFloatingBar({
@@ -23,6 +24,7 @@ export function HydrodynamicsFloatingBar({
   windDirection = "NE",
   windGusts = "14 kts",
   ukcMargin = "+0.60m Safe",
+  mode = "3d",
 }: HydrodynamicsFloatingBarProps) {
   return (
     <div className="absolute bottom-4 left-5 right-5 sm:left-6 sm:right-6 z-20 flex flex-wrap items-center justify-between gap-4 bg-[#0c0e12]/92 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-3 shadow-2xl select-none pointer-events-auto">
@@ -86,24 +88,72 @@ export function HydrodynamicsFloatingBar({
 
       {/* Spatial Viewport Interaction Shortcuts */}
       <div className="hidden lg:flex items-center gap-4 text-[11px] font-mono text-[#8e9bae] border-l border-white/[0.08] pl-5 shrink-0">
-        <div className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
-            Right Click
-          </kbd>
-          <span>Orbit</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
-            Shift + Drag
-          </kbd>
-          <span>Pan</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
-            Scroll
-          </kbd>
-          <span>Zoom</span>
-        </div>
+        {mode === "3d" && (
+          <>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
+                Right Click
+              </kbd>
+              <span>Orbit</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
+                Shift + Drag
+              </kbd>
+              <span>Pan</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
+                Scroll
+              </kbd>
+              <span>Zoom</span>
+            </div>
+          </>
+        )}
+        {mode === "2d" && (
+          <>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
+                Drag
+              </kbd>
+              <span>Pan CAD</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
+                Scroll
+              </kbd>
+              <span>Zoom</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
+                Click Entity
+              </kbd>
+              <span>Inspect Telemetry</span>
+            </div>
+          </>
+        )}
+        {mode === "thermal" && (
+          <>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500/30 text-rose-300 font-medium text-[10px]">
+                Reticle
+              </kbd>
+              <span>FLIR Lock</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
+                Click Pin
+              </kbd>
+              <span>Sample Hotspot</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#282a2e] border border-white/10 text-white font-medium text-[10px]">
+                Top Bar
+              </kbd>
+              <span>Switch Palette</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

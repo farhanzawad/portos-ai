@@ -9,6 +9,8 @@ import {
   Gauge,
   Activity,
   AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface SpatialEntityInspectorProps {
@@ -21,6 +23,28 @@ export function SpatialEntityInspector({
   onFocusEntity,
 }: SpatialEntityInspectorProps) {
   const [selectedCrane, setSelectedCrane] = useState("STS-02");
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  if (isCollapsed) {
+    return (
+      <aside className="absolute top-5 right-5 z-20 flex items-center gap-2.5 px-3 py-2 bg-[#0c0e12]/92 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl select-none pointer-events-auto">
+        <div className="flex items-center gap-2">
+          <span className="size-2 rounded-full bg-secondary animate-pulse" />
+          <span className="text-xs font-bold text-white font-mono">STS-02</span>
+          <span className="px-1.5 py-0.5 rounded bg-secondary-container/20 text-secondary text-[10px] font-mono">
+            0 Anomalies
+          </span>
+        </div>
+        <button
+          onClick={() => setIsCollapsed(false)}
+          className="p-1 rounded-md bg-white/[0.06] hover:bg-white/[0.12] text-[#8e9bae] hover:text-white transition-colors"
+          title="Expand Entity Inspector"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
+      </aside>
+    );
+  }
 
   return (
     <aside className="absolute top-5 right-5 bottom-20 w-80 z-20 flex flex-col bg-[#0c0e12]/92 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden select-none pointer-events-auto">
@@ -30,9 +54,18 @@ export function SpatialEntityInspector({
           <span className="text-[10px] font-sans font-bold text-[#8e9bae] uppercase tracking-wider">
             Spatial Entity Inspector
           </span>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-[10px] font-mono border border-secondary-container/30">
-            <span className="size-1.5 rounded-full bg-secondary animate-pulse" />
-            <span>Online • Telemetry Live</span>
+          <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-[10px] font-mono border border-secondary-container/30">
+              <span className="size-1.5 rounded-full bg-secondary animate-pulse" />
+              <span>Online • Live</span>
+            </div>
+            <button
+              onClick={() => setIsCollapsed(true)}
+              className="p-1 rounded-md text-[#8e9bae] hover:text-white hover:bg-white/[0.08] transition-colors ml-1"
+              title="Collapse Inspector"
+            >
+              <ChevronRight className="size-4" />
+            </button>
           </div>
         </div>
         <h2 className="text-white text-base font-bold tracking-tight">STS Crane #02</h2>
