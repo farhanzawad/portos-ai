@@ -471,7 +471,26 @@ export async function getGovSampleFile(file_type: string): Promise<string> {
 
 export async function getPortGeoJSON(layer?: string): Promise<GeoJSONFeatureCollection> {
   const query = layer ? `?layer=${encodeURIComponent(layer)}` : "";
-  return fetchFromApi<GeoJSONFeatureCollection>(`/api/v1/geospatial/geojson${query}`);
+  try {
+    return await fetchFromApi<GeoJSONFeatureCollection>(`/api/v1/geospatial/geojson${query}`);
+  } catch (err) {
+    // Robust fallback to static Chattogram Port GeoJSON dataset
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch("/data/chattogram_port_features.geojson");
+        if (res.ok) {
+          const data = await res.json();
+          if (layer) {
+            data.features = data.features.filter((f: any) => f.properties?.layer === layer);
+          }
+          return data as GeoJSONFeatureCollection;
+        }
+      } catch {
+        // Continue to rethrow original error
+      }
+    }
+    throw err;
+  }
 }
 
 export async function getSpatialLayers(): Promise<SpatialLayerRead[]> {

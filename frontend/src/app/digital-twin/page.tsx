@@ -18,7 +18,6 @@ import {
   RenderModeType,
 } from "@/components/digital-twin/DigitalTwinSubheader";
 import { SpatialGizmoCompass } from "@/components/digital-twin/SpatialGizmoCompass";
-import { SpatialViewportPins } from "@/components/digital-twin/SpatialViewportPins";
 import { SpatialEntityInspector } from "@/components/digital-twin/SpatialEntityInspector";
 import { HydrodynamicsFloatingBar } from "@/components/digital-twin/HydrodynamicsFloatingBar";
 import { EquipmentMaintenanceModal } from "@/components/digital-twin/EquipmentMaintenanceModal";
@@ -168,13 +167,6 @@ function DigitalTwinContent() {
               resetCameraSignal={resetCameraSignal}
               onCameraMetrics={handleCameraMetrics}
             />
-
-            {/* In-Canvas 3D Spatial Vector & Entity Overlays (Pins) */}
-            <div className="absolute inset-0 pointer-events-none z-10">
-              <SpatialViewportPins
-                onSelectEntity={(entityName) => setSelectedEntityName(entityName)}
-              />
-            </div>
           </div>
         )}
 

@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Html } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
   SelectedEntity,
@@ -712,6 +712,16 @@ export function TerminalScene3D({
         />
       </mesh>
 
+      {/* 3D In-Scene Hydrodynamic Vector Streamline Callout */}
+      <group position={[0, 0.4, -28]}>
+        <Html position={[0, 0, 0]} center distanceFactor={45} zIndexRange={[50, 0]}>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0c0e12]/92 backdrop-blur-md border border-secondary/50 shadow-xl text-[10px] font-mono text-secondary pointer-events-none whitespace-nowrap">
+            <span className="inline-block size-2 rounded-full bg-secondary animate-ping" />
+            <span>Channel Flow: Ebb 2.8 kts • Depth 13.4m LAT</span>
+          </div>
+        </Html>
+      </group>
+
       {/* 600m Turning Basin Boundary Ring (Depth -11m) */}
       <group position={[0, -0.04, -28]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[17.5, 18.2, 48]} />
@@ -753,7 +763,7 @@ export function TerminalScene3D({
         />
       </mesh>
 
-      {/* Fairway Channel Lateral Marker Buoys */}
+      {/* Fairway Channel Lateral Marker Buoys with 3D-Anchored Labels */}
       <group position={[-32, 0.45, -38]}>
         <mesh>
           <cylinderGeometry args={[0.22, 0.38, 0.9, 12]} />
@@ -762,6 +772,11 @@ export function TerminalScene3D({
         <mesh ref={buoyGreenRef} position={[0, 0.58, 0]}>
           <sphereGeometry args={[0.1, 10, 8]} />
           <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={1.0} />
+          <Html position={[0, 1.2, 0]} center distanceFactor={45} zIndexRange={[40, 0]}>
+            <div className="bg-[#0c0e12]/90 backdrop-blur-md border border-emerald-500/50 rounded px-2 py-0.5 text-[9px] font-mono text-emerald-400 whitespace-nowrap shadow-lg pointer-events-none">
+              Buoy #3 (Patenga Cut FL.G.4s)
+            </div>
+          </Html>
         </mesh>
       </group>
 
@@ -773,6 +788,11 @@ export function TerminalScene3D({
         <mesh ref={buoyRedRef} position={[0, 0.58, 0]}>
           <sphereGeometry args={[0.1, 10, 8]} />
           <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.0} />
+          <Html position={[0, 1.2, 0]} center distanceFactor={45} zIndexRange={[40, 0]}>
+            <div className="bg-[#0c0e12]/90 backdrop-blur-md border border-rose-500/50 rounded px-2 py-0.5 text-[9px] font-mono text-rose-400 whitespace-nowrap shadow-lg pointer-events-none">
+              Buoy #4 Karnaphuli 22°14′06″N 91°49′32″E
+            </div>
+          </Html>
         </mesh>
       </group>
 
@@ -922,38 +942,81 @@ export function TerminalScene3D({
             const geoCoord = localEnuToWgs84(posX, 0, -6.8, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon);
 
             return (
-              <ProceduralVessel3D
-                key={call.id}
-                position={[posX, 0, -6.8]}
-                rotation={[0, 0, 0]}
-                scale={0.96}
-                call={call}
-                isSelected={isSelected}
-                onSelect={() =>
-                  onSelectEntity({
-                    type: "vessel",
-                    id: call.id,
-                    data: call,
-                    sourceEnvironment: "3D",
-                    coordinates: geoCoord,
-                  })
-                }
-                onHover={(isHovered) =>
-                  onHoverEntity?.(
-                    isHovered
-                      ? {
-                          type: "Container Vessel",
-                          title: call.vessel?.name || "Vessel",
-                          subtitle: `IMO ${call.vessel?.imo_number || "9123456"} · Flag: ${call.vessel?.flag_country || "Bangladesh"}`,
-                          status: call.status,
-                          metric: `LOA ${call.vessel?.length_overall_m || 172}m · Cargo: ${call.inbound_teu || 850} TEU · Draft: ${call.vessel?.max_draft_m || 8.5}m`,
-                        }
-                      : null
-                  )
-                }
-                isSimulating={isSimulating}
-                isBerthed={true}
-              />
+              <group key={call.id} position={[posX, 0, -6.8]}>
+                <ProceduralVessel3D
+                  position={[0, 0, 0]}
+                  rotation={[0, 0, 0]}
+                  scale={0.96}
+                  call={call}
+                  isSelected={isSelected}
+                  onSelect={() =>
+                    onSelectEntity({
+                      type: "vessel",
+                      id: call.id,
+                      data: call,
+                      sourceEnvironment: "3D",
+                      coordinates: geoCoord,
+                    })
+                  }
+                  onHover={(isHovered) =>
+                    onHoverEntity?.(
+                      isHovered
+                        ? {
+                            type: "Container Vessel",
+                            title: call.vessel?.name || "Vessel",
+                            subtitle: `IMO ${call.vessel?.imo_number || "9123456"} · Flag: ${call.vessel?.flag_country || "Bangladesh"}`,
+                            status: call.status,
+                            metric: `LOA ${call.vessel?.length_overall_m || 172}m · Cargo: ${call.inbound_teu || 850} TEU · Draft: ${call.vessel?.max_draft_m || 8.5}m`,
+                          }
+                        : null
+                    )
+                  }
+                  isSimulating={isSimulating}
+                  isBerthed={true}
+                />
+
+                {/* 3D In-Scene Vessel Identification Anchor */}
+                {idx === 0 && (
+                  <Html position={[0, 4.4, 0]} center distanceFactor={45} zIndexRange={[60, 0]}>
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectEntity({
+                          type: "vessel",
+                          id: call.id,
+                          data: call,
+                          sourceEnvironment: "3D",
+                          coordinates: geoCoord,
+                        });
+                      }}
+                      className="group cursor-pointer pointer-events-auto transition-transform hover:scale-105"
+                    >
+                      <div className="flex items-center gap-2 bg-[#0c0e12]/95 backdrop-blur-md border border-primary-container/90 rounded-lg px-2.5 py-1.5 shadow-2xl">
+                        <div className="size-2 rounded-full bg-primary-container animate-pulse" />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-white tracking-wide">
+                              {call.vessel?.name || "MV Maersk Karun"}
+                            </span>
+                            <span className="text-[9px] font-mono px-1.5 py-0.2 bg-primary-container/20 text-primary-fixed rounded">
+                              BERTH CCT-01
+                            </span>
+                          </div>
+                          <div className="text-[9px] font-mono text-[#8e9bae] flex items-center gap-1.5 mt-0.5">
+                            <span>Draft: 9.40m</span>
+                            <span>•</span>
+                            <span>LOA: 260m</span>
+                            <span>•</span>
+                            <span className="text-secondary font-semibold">Tide Window Clear</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-px h-8 bg-gradient-to-b from-primary-container to-transparent mx-auto" />
+                      <div className="size-1.5 rounded-full bg-primary-container mx-auto -mt-1 ring-2 ring-primary-container/40" />
+                    </div>
+                  </Html>
+                )}
+              </group>
             );
           })}
 
@@ -1006,37 +1069,76 @@ export function TerminalScene3D({
           const geoCoord = localEnuToWgs84(posX, 0, -2.1, PCT_TERMINAL_ORIGIN.lat, PCT_TERMINAL_ORIGIN.lon);
 
           return (
-            <STSCrane3D
-              key={crane.id}
-              position={[posX, 0.2, -2.1]}
-              rotation={[0, 0, 0]}
-              scale={0.96}
-              crane={crane}
-              isSelected={isSelected}
-              onSelect={() =>
-                onSelectEntity({
-                  type: "crane",
-                  id: crane.id,
-                  data: crane,
-                  sourceEnvironment: "3D",
-                  coordinates: geoCoord,
-                })
-              }
-              onHover={(isHovered) =>
-                onHoverEntity?.(
-                  isHovered
-                    ? {
-                        type: "Ship-to-Shore Gantry Crane",
-                        title: (crane as any).name || `STS Crane ${crane.code}`,
-                        subtitle: `Code: ${crane.code} · Super Post-Panamax (65m Outreach)`,
-                        status: crane.status,
-                        metric: `Cycle: 42s · Moves: 32/hr · Spreader: Dual 20ft/40ft`,
-                      }
-                    : null
-                )
-              }
-              isSimulating={isSimulating}
-            />
+            <group key={crane.id} position={[posX, 0.2, -2.1]}>
+              <STSCrane3D
+                position={[0, 0, 0]}
+                rotation={[0, 0, 0]}
+                scale={0.96}
+                crane={crane}
+                isSelected={isSelected}
+                onSelect={() =>
+                  onSelectEntity({
+                    type: "crane",
+                    id: crane.id,
+                    data: crane,
+                    sourceEnvironment: "3D",
+                    coordinates: geoCoord,
+                  })
+                }
+                onHover={(isHovered) =>
+                  onHoverEntity?.(
+                    isHovered
+                      ? {
+                          type: "Ship-to-Shore Gantry Crane",
+                          title: (crane as any).name || `STS Crane ${crane.code}`,
+                          subtitle: `Code: ${crane.code} · Super Post-Panamax (65m Outreach)`,
+                          status: crane.status,
+                          metric: `Cycle: 42s · Moves: 32/hr · Spreader: Dual 20ft/40ft`,
+                        }
+                      : null
+                  )
+                }
+                isSimulating={isSimulating}
+              />
+
+              {/* 3D In-Scene Gantry Telemetry Anchor */}
+              {idx === 1 && (
+                <Html position={[0, 12.0, 0]} center distanceFactor={40} zIndexRange={[70, 0]}>
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectEntity({
+                        type: "crane",
+                        id: crane.id,
+                        data: crane,
+                        sourceEnvironment: "3D",
+                        coordinates: geoCoord,
+                      });
+                    }}
+                    className="group cursor-pointer pointer-events-auto transition-transform hover:scale-105"
+                  >
+                    <div className="bg-[#0c0e12]/95 backdrop-blur-md border border-secondary/90 rounded-lg px-3 py-2 shadow-2xl ring-2 ring-secondary/20">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="size-2 rounded-full bg-secondary" />
+                          <span className="text-xs font-mono font-bold text-white">STS-02 (ZPMC Dual)</span>
+                        </div>
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 bg-secondary-container/20 text-secondary rounded">
+                          ACTIVE
+                        </span>
+                      </div>
+                      <div className="text-[10px] font-mono text-[#8e9bae] mt-1 flex items-center gap-2">
+                        <span>Lift: <strong className="text-white">42.1 t</strong></span>
+                        <span>•</span>
+                        <span>Moves: <strong className="text-secondary font-bold">34/hr</strong></span>
+                      </div>
+                    </div>
+                    <div className="w-px h-8 bg-gradient-to-b from-secondary to-transparent mx-auto" />
+                    <div className="size-1.5 rounded-full bg-secondary mx-auto -mt-1 ring-2 ring-secondary/40" />
+                  </div>
+                </Html>
+              )}
+            </group>
           );
         })}
 

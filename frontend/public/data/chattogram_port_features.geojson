@@ -1,0 +1,2306 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "feat_karnaphuli_river",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              91.73,
+              22.18
+            ],
+            [
+              91.77,
+              22.205
+            ],
+            [
+              91.792,
+              22.21
+            ],
+            [
+              91.802,
+              22.22
+            ],
+            [
+              91.805,
+              22.226
+            ],
+            [
+              91.812,
+              22.235
+            ],
+            [
+              91.8245,
+              22.245
+            ],
+            [
+              91.8305,
+              22.255
+            ],
+            [
+              91.8305,
+              22.265
+            ],
+            [
+              91.81,
+              22.275
+            ],
+            [
+              91.7972,
+              22.28
+            ],
+            [
+              91.794,
+              22.29
+            ],
+            [
+              91.789,
+              22.298
+            ],
+            [
+              91.799,
+              22.305
+            ],
+            [
+              91.807,
+              22.312
+            ],
+            [
+              91.814,
+              22.318
+            ],
+            [
+              91.829,
+              22.324
+            ],
+            [
+              91.855,
+              22.328
+            ],
+            [
+              91.855,
+              22.322
+            ],
+            [
+              91.8445,
+              22.324
+            ],
+            [
+              91.833,
+              22.318
+            ],
+            [
+              91.8175,
+              22.312
+            ],
+            [
+              91.81,
+              22.305
+            ],
+            [
+              91.8005,
+              22.298
+            ],
+            [
+              91.8065,
+              22.29
+            ],
+            [
+              91.8134,
+              22.28
+            ],
+            [
+              91.828,
+              22.275
+            ],
+            [
+              91.84,
+              22.265
+            ],
+            [
+              91.84,
+              22.255
+            ],
+            [
+              91.834,
+              22.245
+            ],
+            [
+              91.8235,
+              22.235
+            ],
+            [
+              91.814,
+              22.226
+            ],
+            [
+              91.808,
+              22.22
+            ],
+            [
+              91.79,
+              22.195
+            ],
+            [
+              91.745,
+              22.165
+            ],
+            [
+              91.73,
+              22.18
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Karnaphuli River Navigable Waterway",
+        "entity_type": "PortArea",
+        "layer": "base_geography",
+        "water_body": "Karnaphuli River",
+        "tidal_range_m": 4.2,
+        "datum": "Chart Datum (CD)",
+        "data_status": "OBSERVED",
+        "data_source": "CPA Hydrography Dept (SRC-CPA-TIDES-2026)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_shoal_flats",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              91.76,
+              22.2
+            ],
+            [
+              91.785,
+              22.212
+            ],
+            [
+              91.798,
+              22.22
+            ],
+            [
+              91.785,
+              22.2
+            ],
+            [
+              91.76,
+              22.2
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Patenga Shoal Bank (<5m CD)",
+        "entity_type": "Bathymetry",
+        "layer": "bathymetry",
+        "depth_range_cd_m": "< 5.0m (Shoals)",
+        "depth_range": "< 5.0m",
+        "navigational_hazard": "Shallow water grounding risk for vessels > 5m draft",
+        "data_status": "OBSERVED",
+        "data_source": "CPA Hydrography Notice to Mariners"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_channel_centerline",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.7,
+            22.13
+          ],
+          [
+            91.725,
+            22.155
+          ],
+          [
+            91.75,
+            22.175
+          ],
+          [
+            91.775,
+            22.195
+          ],
+          [
+            91.792,
+            22.208
+          ],
+          [
+            91.805,
+            22.22
+          ],
+          [
+            91.8095,
+            22.226
+          ],
+          [
+            91.818,
+            22.235
+          ],
+          [
+            91.8295,
+            22.245
+          ],
+          [
+            91.8355,
+            22.255
+          ],
+          [
+            91.8355,
+            22.265
+          ],
+          [
+            91.823,
+            22.27
+          ],
+          [
+            91.812,
+            22.275
+          ],
+          [
+            91.7998,
+            22.28
+          ],
+          [
+            91.798,
+            22.285
+          ],
+          [
+            91.796,
+            22.29
+          ],
+          [
+            91.796,
+            22.298
+          ],
+          [
+            91.804,
+            22.305
+          ],
+          [
+            91.8125,
+            22.312
+          ],
+          [
+            91.8235,
+            22.318
+          ],
+          [
+            91.837,
+            22.324
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Karnaphuli Main Navigation Fairway Channel (-11.0m CD)",
+        "entity_type": "NavigationRoute",
+        "layer": "navigation_channels",
+        "design_depth_m": 11.0,
+        "permissible_draft_m": 9.5,
+        "channel_width_m": 240.0,
+        "status": "Active Fairway",
+        "data_status": "OBSERVED",
+        "data_source": "CPA Navigational Circular 18/2026"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_channel_corridor",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              91.69947,
+              22.13046
+            ],
+            [
+              91.72449,
+              22.15548
+            ],
+            [
+              91.74952,
+              22.17551
+            ],
+            [
+              91.77453,
+              22.19551
+            ],
+            [
+              91.79151,
+              22.2085
+            ],
+            [
+              91.80446,
+              22.22045
+            ],
+            [
+              91.80893,
+              22.22642
+            ],
+            [
+              91.81748,
+              22.23547
+            ],
+            [
+              91.82893,
+              22.24542
+            ],
+            [
+              91.8348,
+              22.25518
+            ],
+            [
+              91.83492,
+              22.26459
+            ],
+            [
+              91.8227,
+              22.26939
+            ],
+            [
+              91.81182,
+              22.27463
+            ],
+            [
+              91.79953,
+              22.27968
+            ],
+            [
+              91.79759,
+              22.28487
+            ],
+            [
+              91.79557,
+              22.28994
+            ],
+            [
+              91.79561,
+              22.29818
+            ],
+            [
+              91.80351,
+              22.3055
+            ],
+            [
+              91.81207,
+              22.31255
+            ],
+            [
+              91.82316,
+              22.3186
+            ],
+            [
+              91.83668,
+              22.32461
+            ],
+            [
+              91.83732,
+              22.32339
+            ],
+            [
+              91.82384,
+              22.3174
+            ],
+            [
+              91.81293,
+              22.31145
+            ],
+            [
+              91.80449,
+              22.3045
+            ],
+            [
+              91.79639,
+              22.29782
+            ],
+            [
+              91.79643,
+              22.29006
+            ],
+            [
+              91.79841,
+              22.28513
+            ],
+            [
+              91.80007,
+              22.28032
+            ],
+            [
+              91.81218,
+              22.27537
+            ],
+            [
+              91.8233,
+              22.27061
+            ],
+            [
+              91.83608,
+              22.26541
+            ],
+            [
+              91.8362,
+              22.25482
+            ],
+            [
+              91.83007,
+              22.24458
+            ],
+            [
+              91.81852,
+              22.23453
+            ],
+            [
+              91.81007,
+              22.22558
+            ],
+            [
+              91.80554,
+              22.21955
+            ],
+            [
+              91.79249,
+              22.2075
+            ],
+            [
+              91.77547,
+              22.19449
+            ],
+            [
+              91.75048,
+              22.17449
+            ],
+            [
+              91.72551,
+              22.15452
+            ],
+            [
+              91.70053,
+              22.12954
+            ],
+            [
+              91.69947,
+              22.13046
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Karnaphuli Dredged Deep Corridor (-11m CD)",
+        "entity_type": "NavigationCorridor",
+        "layer": "navigation_channels",
+        "channel_width_m": 240.0,
+        "design_depth_m": 11.0,
+        "data_status": "OBSERVED",
+        "data_source": "RSGT PCT Hydrographic Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_turning_basin",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              91.797,
+              22.28
+            ],
+            [
+              91.7985,
+              22.2825
+            ],
+            [
+              91.8015,
+              22.2825
+            ],
+            [
+              91.8028,
+              22.28
+            ],
+            [
+              91.8015,
+              22.2775
+            ],
+            [
+              91.7985,
+              22.2775
+            ],
+            [
+              91.797,
+              22.28
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Karnaphuli Turning Basin (Ø 600m)",
+        "entity_type": "NavigationRoute",
+        "layer": "navigation_channels",
+        "diameter_m": 600.0,
+        "design_depth_m": 11.0,
+        "depth_range_cd_m": "-11.0m (PCT & NCT Basin)",
+        "remarks": "Feeder vessel turning basin up to 205m LOA with tug assistance.",
+        "data_status": "OBSERVED",
+        "data_source": "RSGT PCT Masterplan / CPA Marine Ops"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_anch_alpha",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.745,
+          22.175
+        ]
+      },
+      "properties": {
+        "name": "Anchorage Area Alpha",
+        "entity_type": "AnchorageZone",
+        "layer": "anchorage_zones",
+        "radius_m": 1800,
+        "description": "General container & cargo waiting anchorage",
+        "data_status": "OBSERVED",
+        "data_source": "Chattogram Port Authority Fairway Guide"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_anch_bravo",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.715,
+          22.15
+        ]
+      },
+      "properties": {
+        "name": "Anchorage Area Bravo",
+        "entity_type": "AnchorageZone",
+        "layer": "anchorage_zones",
+        "radius_m": 2200,
+        "description": "Tankers, oil carriers, and Kutubdia lighterage operations",
+        "data_status": "OBSERVED",
+        "data_source": "Chattogram Port Authority Fairway Guide"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_anch_charlie",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.755,
+          22.195
+        ]
+      },
+      "properties": {
+        "name": "Anchorage Area Charlie",
+        "entity_type": "AnchorageZone",
+        "layer": "anchorage_zones",
+        "radius_m": 1200,
+        "description": "Quarantine, customs inspection, and bad weather holding",
+        "data_status": "OBSERVED",
+        "data_source": "Chattogram Port Authority Fairway Guide"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_anch_deep",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.685,
+          22.12
+        ]
+      },
+      "properties": {
+        "name": "Deep Sea Holding Area",
+        "entity_type": "AnchorageZone",
+        "layer": "anchorage_zones",
+        "radius_m": 2500,
+        "description": "Deep draft container feeder holding basin",
+        "data_status": "OBSERVED",
+        "data_source": "Chattogram Port Authority Fairway Guide"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_term_cct",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.802,
+          22.304
+        ]
+      },
+      "properties": {
+        "name": "Chittagong Container Terminal (CCT)",
+        "entity_type": "Terminal",
+        "layer": "terminals",
+        "total_quay_length_m": 605.0,
+        "country": "BGD",
+        "data_status": "OBSERVED",
+        "data_source": "CPA Official Terminal Specifications (SRC-CPA-BERTH-SPEC-2026)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_term_nct",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.796,
+          22.292
+        ]
+      },
+      "properties": {
+        "name": "New Mooring Container Terminal (NCT)",
+        "entity_type": "Terminal",
+        "layer": "terminals",
+        "total_quay_length_m": 1000.0,
+        "country": "BGD",
+        "data_status": "OBSERVED",
+        "data_source": "CPA Official Terminal Specifications (SRC-CPA-BERTH-SPEC-2026)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_term_gcb",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.808,
+          22.312
+        ]
+      },
+      "properties": {
+        "name": "General Cargo Berths (GCB)",
+        "entity_type": "Terminal",
+        "layer": "terminals",
+        "total_quay_length_m": 850.0,
+        "country": "BGD",
+        "data_status": "OBSERVED",
+        "data_source": "CPA Official Terminal Specifications (SRC-CPA-BERTH-SPEC-2026)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_term_pct",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8295,
+          22.245
+        ]
+      },
+      "properties": {
+        "name": "RSGT Patenga Container Terminal (PCT)",
+        "entity_type": "Terminal",
+        "layer": "terminals",
+        "total_quay_length_m": 580.0,
+        "country": "BGD",
+        "data_status": "CONCEPTUAL",
+        "data_source": "CPA Official Terminal Specifications (SRC-CPA-BERTH-SPEC-2026)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C01",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.81,
+          22.244
+        ]
+      },
+      "properties": {
+        "code": "C01",
+        "name": "Yard Block C01 (Import)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Import",
+        "capacity_teu": 1200,
+        "occupancy_pct": 78.4,
+        "dwell_time_avg_hours": 24,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C02",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8105,
+          22.2435
+        ]
+      },
+      "properties": {
+        "code": "C02",
+        "name": "Yard Block C02 (Import)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Import",
+        "capacity_teu": 1200,
+        "occupancy_pct": 82.1,
+        "dwell_time_avg_hours": 26,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C03",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.811,
+          22.243
+        ]
+      },
+      "properties": {
+        "code": "C03",
+        "name": "Yard Block C03 (Export)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Export",
+        "capacity_teu": 1400,
+        "occupancy_pct": 68.5,
+        "dwell_time_avg_hours": 20,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C04",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8115,
+          22.2425
+        ]
+      },
+      "properties": {
+        "code": "C04",
+        "name": "Yard Block C04 (Export)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Export",
+        "capacity_teu": 1400,
+        "occupancy_pct": 71.0,
+        "dwell_time_avg_hours": 22,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C05",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.812,
+          22.242
+        ]
+      },
+      "properties": {
+        "code": "C05",
+        "name": "Yard Block C05 (Transshipment)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Transshipment",
+        "capacity_teu": 1000,
+        "occupancy_pct": 88.5,
+        "dwell_time_avg_hours": 30,
+        "risk_tier": "Watch",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C06",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8125,
+          22.2415
+        ]
+      },
+      "properties": {
+        "code": "C06",
+        "name": "Yard Block C06 (Empty)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Empty",
+        "capacity_teu": 1600,
+        "occupancy_pct": 52.0,
+        "dwell_time_avg_hours": 15,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C07",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8095,
+          22.243
+        ]
+      },
+      "properties": {
+        "code": "C07",
+        "name": "Yard Block C07 (Import)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Import",
+        "capacity_teu": 1200,
+        "occupancy_pct": 79.0,
+        "dwell_time_avg_hours": 25,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C08",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.81,
+          22.2425
+        ]
+      },
+      "properties": {
+        "code": "C08",
+        "name": "Yard Block C08 (Export)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Export",
+        "capacity_teu": 1400,
+        "occupancy_pct": 64.0,
+        "dwell_time_avg_hours": 18,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C09",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8105,
+          22.242
+        ]
+      },
+      "properties": {
+        "code": "C09",
+        "name": "Yard Block C09 (Export)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Export",
+        "capacity_teu": 1400,
+        "occupancy_pct": 66.5,
+        "dwell_time_avg_hours": 19,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C10",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.811,
+          22.2415
+        ]
+      },
+      "properties": {
+        "code": "C10",
+        "name": "Yard Block C10 (Empty)",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Empty",
+        "capacity_teu": 1600,
+        "occupancy_pct": 50.0,
+        "dwell_time_avg_hours": 14,
+        "risk_tier": "Normal",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C11",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8115,
+          22.241
+        ]
+      },
+      "properties": {
+        "code": "C11",
+        "name": "Yard Block C11 (Reefer (Powered))",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Reefer (Powered)",
+        "capacity_teu": 800,
+        "occupancy_pct": 85.0,
+        "dwell_time_avg_hours": 32,
+        "risk_tier": "Watch",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_yard_C12",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.812,
+          22.2405
+        ]
+      },
+      "properties": {
+        "code": "C12",
+        "name": "Yard Block C12 (Hazardous (IMO Segregated))",
+        "entity_type": "YardBlock",
+        "layer": "container_yards",
+        "category": "Hazardous (IMO Segregated)",
+        "capacity_teu": 600,
+        "occupancy_pct": 91.5,
+        "dwell_time_avg_hours": 36,
+        "risk_tier": "High Risk",
+        "rtg_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001 (Rev A)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_gate_in",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.809,
+          22.24
+        ]
+      },
+      "properties": {
+        "name": "In-Gate Complex (OCR, Weighbridge, Security)",
+        "entity_type": "Gate",
+        "layer": "port_facilities",
+        "description": "Import gate lanes with automated OCR",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_gate_out",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8095,
+          22.2395
+        ]
+      },
+      "properties": {
+        "name": "Out-Gate Complex (OCR & Security Booth)",
+        "entity_type": "Gate",
+        "layer": "port_facilities",
+        "description": "Export gate lanes with weighbridge",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_customs_scanner",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8092,
+          22.239
+        ]
+      },
+      "properties": {
+        "name": "Customs Inspection & Container Scanner Canopy",
+        "entity_type": "PortFacility",
+        "layer": "port_facilities",
+        "description": "X-ray container scanning portal",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_control_tower",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.808,
+          22.242
+        ]
+      },
+      "properties": {
+        "name": "Marine Operations & Control Tower",
+        "entity_type": "PortFacility",
+        "layer": "port_facilities",
+        "description": "Elevated marine traffic operations tower",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_admin_bldg",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8075,
+          22.2415
+        ]
+      },
+      "properties": {
+        "name": "Administration Building & Staff Center",
+        "entity_type": "PortFacility",
+        "layer": "port_facilities",
+        "description": "Terminal administrative offices",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_maint_workshop",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.807,
+          22.2435
+        ]
+      },
+      "properties": {
+        "name": "Equipment Maintenance Yard & Workshop",
+        "entity_type": "PortFacility",
+        "layer": "port_facilities",
+        "description": "Heavy STS & RTG mechanical workshop",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_fuel_storage",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8125,
+          22.2395
+        ]
+      },
+      "properties": {
+        "name": "Fuel Storage Tanks & Pump House",
+        "entity_type": "PortFacility",
+        "layer": "port_facilities",
+        "description": "MGO marine diesel and terminal tractor fuel storage",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_substation",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8085,
+          22.2405
+        ]
+      },
+      "properties": {
+        "name": "Electrical Substation & Generator Backup",
+        "entity_type": "PortFacility",
+        "layer": "port_facilities",
+        "description": "11kV shore-power and STS crane electrical feed",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_fire_station",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8082,
+          22.241
+        ]
+      },
+      "properties": {
+        "name": "Terminal Fire Station & First Aid Clinic",
+        "entity_type": "PortFacility",
+        "layer": "port_facilities",
+        "description": "24/7 port emergency response unit",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_truck_staging",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8098,
+          22.2385
+        ]
+      },
+      "properties": {
+        "name": "Truck Staging & Holding Area (~200 Trucks)",
+        "entity_type": "PortFacility",
+        "layer": "port_facilities",
+        "description": "Off-street holding facility for container trailers",
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Masterplan Drawing PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_pct_b1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8126,
+          22.2425
+        ]
+      },
+      "properties": {
+        "id": "pct_b1",
+        "code": "PCT_B1",
+        "name": "PCT Berth 1",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "OCCUPIED",
+        "length_m": 200.0,
+        "depth_draft_m": 11.0,
+        "max_vessel_loa_m": 190.0,
+        "sts_crane_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Conceptual Layout PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_pct_b2",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8133,
+          22.244
+        ]
+      },
+      "properties": {
+        "id": "pct_b2",
+        "code": "PCT_B2",
+        "name": "PCT Berth 2",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "AVAILABLE",
+        "length_m": 190.0,
+        "depth_draft_m": 11.0,
+        "max_vessel_loa_m": 190.0,
+        "sts_crane_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Conceptual Layout PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_pct_b3",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.814,
+          22.2455
+        ]
+      },
+      "properties": {
+        "id": "pct_b3",
+        "code": "PCT_B3",
+        "name": "PCT Berth 3",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "OCCUPIED",
+        "length_m": 190.0,
+        "depth_draft_m": 11.0,
+        "max_vessel_loa_m": 190.0,
+        "sts_crane_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Conceptual Layout PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_pct_b4",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8145,
+          22.2465
+        ]
+      },
+      "properties": {
+        "id": "pct_b4",
+        "code": "PCT_B4",
+        "name": "PCT Berth 4 (Oil/Tanker)",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "AVAILABLE",
+        "length_m": 150.0,
+        "depth_draft_m": 9.5,
+        "max_vessel_loa_m": 140.0,
+        "sts_crane_equipped": true,
+        "data_status": "CONCEPTUAL",
+        "data_source": "RSGT PCT Conceptual Layout PCT-MP-001"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_berth_01",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.802,
+          22.304
+        ]
+      },
+      "properties": {
+        "id": "berth_01",
+        "code": "BERTH-01",
+        "name": "CCT Berth 1",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "OCCUPIED",
+        "length_m": 200.0,
+        "depth_draft_m": 9.5,
+        "max_vessel_loa_m": 185.0,
+        "sts_crane_equipped": true,
+        "crane_rail_gauge_m": 30.48,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_berth_02",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.799,
+          22.3
+        ]
+      },
+      "properties": {
+        "id": "berth_02",
+        "code": "BERTH-02",
+        "name": "CCT Berth 2",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "OCCUPIED",
+        "length_m": 210.0,
+        "depth_draft_m": 9.5,
+        "max_vessel_loa_m": 190.0,
+        "sts_crane_equipped": true,
+        "crane_rail_gauge_m": 30.48,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_berth_03",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.797,
+          22.296
+        ]
+      },
+      "properties": {
+        "id": "berth_03",
+        "code": "BERTH-03",
+        "name": "CCT Berth 3",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "AVAILABLE",
+        "length_m": 195.0,
+        "depth_draft_m": 9.2,
+        "max_vessel_loa_m": 180.0,
+        "sts_crane_equipped": true,
+        "crane_rail_gauge_m": 30.48,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_berth_04",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7955,
+          22.292
+        ]
+      },
+      "properties": {
+        "id": "berth_04",
+        "code": "BERTH-04",
+        "name": "NCT Berth 4",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "OCCUPIED",
+        "length_m": 220.0,
+        "depth_draft_m": 10.0,
+        "max_vessel_loa_m": 200.0,
+        "sts_crane_equipped": true,
+        "crane_rail_gauge_m": 30.48,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_berth_05",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7945,
+          22.288
+        ]
+      },
+      "properties": {
+        "id": "berth_05",
+        "code": "BERTH-05",
+        "name": "NCT Berth 5",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "MAINTENANCE",
+        "length_m": 225.0,
+        "depth_draft_m": 10.2,
+        "max_vessel_loa_m": 205.0,
+        "sts_crane_equipped": true,
+        "crane_rail_gauge_m": 30.48,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_berth_berth_06",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7965,
+          22.284
+        ]
+      },
+      "properties": {
+        "id": "berth_06",
+        "code": "BERTH-06",
+        "name": "NCT Berth 6",
+        "entity_type": "Berth",
+        "layer": "berths",
+        "status": "AVAILABLE",
+        "length_m": 200.0,
+        "depth_draft_m": 9.5,
+        "max_vessel_loa_m": 185.0,
+        "sts_crane_equipped": true,
+        "crane_rail_gauge_m": 30.48,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_01",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.802,
+          22.304
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_01",
+        "vessel_id": "vsl_01",
+        "vessel_name": "DEMO MV Karnaphuli Pioneer",
+        "imo_number": "9412001",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "BERTHED",
+        "delay_risk": "NORMAL",
+        "speed_knots": 0.0,
+        "heading_degrees": 0.0,
+        "draft_m": 9.2,
+        "length_overall_m": 172.0,
+        "reported_eta": "2026-11-02T00:00:00",
+        "predicted_eta": "2026-11-02T00:00:00",
+        "berth_assigned": "BERTH-01",
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_01",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.823,
+            22.27
+          ],
+          [
+            91.812,
+            22.275
+          ],
+          [
+            91.7998,
+            22.28
+          ],
+          [
+            91.798,
+            22.285
+          ],
+          [
+            91.796,
+            22.29
+          ],
+          [
+            91.796,
+            22.298
+          ],
+          [
+            91.804,
+            22.305
+          ],
+          [
+            91.802,
+            22.304
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_01",
+        "vessel_name": "DEMO MV Karnaphuli Pioneer",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 8,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_02",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.799,
+          22.3
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_02",
+        "vessel_id": "vsl_02",
+        "vessel_name": "DEMO MV Bay Feeder Express",
+        "imo_number": "9412002",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "BERTHED",
+        "delay_risk": "WATCH",
+        "speed_knots": 0.0,
+        "heading_degrees": 0.0,
+        "draft_m": 8.9,
+        "length_overall_m": 168.0,
+        "reported_eta": "2026-11-02T04:00:00",
+        "predicted_eta": "2026-11-02T06:30:00",
+        "berth_assigned": "BERTH-02",
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_02",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.8355,
+            22.265
+          ],
+          [
+            91.823,
+            22.27
+          ],
+          [
+            91.812,
+            22.275
+          ],
+          [
+            91.7998,
+            22.28
+          ],
+          [
+            91.798,
+            22.285
+          ],
+          [
+            91.796,
+            22.29
+          ],
+          [
+            91.796,
+            22.298
+          ],
+          [
+            91.799,
+            22.3
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_02",
+        "vessel_name": "DEMO MV Bay Feeder Express",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 8,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_03",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7955,
+          22.292
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_03",
+        "vessel_id": "vsl_03",
+        "vessel_name": "DEMO MV Padma Bridge Star",
+        "imo_number": "9412003",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "BERTHED",
+        "delay_risk": "NORMAL",
+        "speed_knots": 0.0,
+        "heading_degrees": 0.0,
+        "draft_m": 9.4,
+        "length_overall_m": 182.0,
+        "reported_eta": "2026-11-02T06:00:00",
+        "predicted_eta": "2026-11-02T06:00:00",
+        "berth_assigned": "BERTH-04",
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_03",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.8355,
+            22.255
+          ],
+          [
+            91.8355,
+            22.265
+          ],
+          [
+            91.823,
+            22.27
+          ],
+          [
+            91.812,
+            22.275
+          ],
+          [
+            91.7998,
+            22.28
+          ],
+          [
+            91.798,
+            22.285
+          ],
+          [
+            91.796,
+            22.29
+          ],
+          [
+            91.7955,
+            22.292
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_03",
+        "vessel_name": "DEMO MV Padma Bridge Star",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 8,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_04",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.75,
+          22.175
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_04",
+        "vessel_id": "vsl_04",
+        "vessel_name": "DEMO MV Karnaphuli Express",
+        "imo_number": "9412004",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "OUTER_ANCHORAGE",
+        "delay_risk": "HIGH_RISK",
+        "speed_knots": 0.0,
+        "heading_degrees": 210.0,
+        "draft_m": 9.1,
+        "length_overall_m": 175.0,
+        "reported_eta": "2026-11-02T14:00:00",
+        "predicted_eta": "2026-11-02T18:12:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_04",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.725,
+            22.14
+          ],
+          [
+            91.738,
+            22.157
+          ],
+          [
+            91.75,
+            22.175
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_04",
+        "vessel_name": "DEMO MV Karnaphuli Express",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 3,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_05",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.725,
+          22.155
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_05",
+        "vessel_id": "vsl_05",
+        "vessel_name": "DEMO MV Bengal Pearl",
+        "imo_number": "9412005",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "OUTER_ANCHORAGE",
+        "delay_risk": "NORMAL",
+        "speed_knots": 0.0,
+        "heading_degrees": 195.0,
+        "draft_m": 8.5,
+        "length_overall_m": 160.0,
+        "reported_eta": "2026-11-02T16:00:00",
+        "predicted_eta": "2026-11-02T16:00:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_05",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.7,
+            22.12
+          ],
+          [
+            91.713,
+            22.137
+          ],
+          [
+            91.725,
+            22.155
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_05",
+        "vessel_name": "DEMO MV Bengal Pearl",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 3,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_06",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.775,
+          22.195
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_06",
+        "vessel_id": "vsl_06",
+        "vessel_name": "DEMO MV Meghna Carrier",
+        "imo_number": "9412006",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "OUTER_ANCHORAGE",
+        "delay_risk": "WATCH",
+        "speed_knots": 11.2,
+        "heading_degrees": 40.0,
+        "draft_m": 9.5,
+        "length_overall_m": 185.0,
+        "reported_eta": "2026-11-02T20:00:00",
+        "predicted_eta": "2026-11-02T21:48:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_06",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.75,
+            22.175
+          ],
+          [
+            91.775,
+            22.195
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_06",
+        "vessel_name": "DEMO MV Meghna Carrier",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 2,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_07",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7,
+          22.13
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_07",
+        "vessel_id": "vsl_07",
+        "vessel_name": "DEMO MV Sundarban Pride",
+        "imo_number": "9412007",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "EN_ROUTE",
+        "delay_risk": "NORMAL",
+        "speed_knots": 13.8,
+        "heading_degrees": 35.0,
+        "draft_m": 8.2,
+        "length_overall_m": 155.0,
+        "reported_eta": "2026-11-03T02:00:00",
+        "predicted_eta": "2026-11-03T02:00:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_07",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.675,
+            22.095
+          ],
+          [
+            91.688,
+            22.112
+          ],
+          [
+            91.7,
+            22.13
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_07",
+        "vessel_name": "DEMO MV Sundarban Pride",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 3,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_08",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.745,
+          22.17
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_08",
+        "vessel_id": "vsl_08",
+        "vessel_name": "DEMO MV Karnaphuli Voyager",
+        "imo_number": "9412008",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "EN_ROUTE",
+        "delay_risk": "NORMAL",
+        "speed_knots": 0.0,
+        "heading_degrees": 205.0,
+        "draft_m": 9.0,
+        "length_overall_m": 170.0,
+        "reported_eta": "2026-11-03T08:00:00",
+        "predicted_eta": "2026-11-03T08:00:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_08",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.72,
+            22.135
+          ],
+          [
+            91.733,
+            22.152
+          ],
+          [
+            91.745,
+            22.17
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_08",
+        "vessel_name": "DEMO MV Karnaphuli Voyager",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 3,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_09",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.792,
+          22.208
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_09",
+        "vessel_id": "vsl_09",
+        "vessel_name": "DEMO MV Chittagong Trader",
+        "imo_number": "9412009",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "EN_ROUTE",
+        "delay_risk": "WATCH",
+        "speed_knots": 9.5,
+        "heading_degrees": 42.0,
+        "draft_m": 8.8,
+        "length_overall_m": 165.0,
+        "reported_eta": "2026-11-03T14:00:00",
+        "predicted_eta": "2026-11-03T15:30:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_09",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.75,
+            22.175
+          ],
+          [
+            91.775,
+            22.195
+          ],
+          [
+            91.792,
+            22.208
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_09",
+        "vessel_name": "DEMO MV Chittagong Trader",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 3,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_10",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8095,
+          22.226
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_10",
+        "vessel_id": "vsl_10",
+        "vessel_name": "DEMO MV Shitalakshya Wave",
+        "imo_number": "9412010",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "EN_ROUTE",
+        "delay_risk": "NORMAL",
+        "speed_knots": 8.5,
+        "heading_degrees": 45.0,
+        "draft_m": 9.3,
+        "length_overall_m": 178.0,
+        "reported_eta": "2026-11-03T20:00:00",
+        "predicted_eta": "2026-11-03T20:00:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_10",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.75,
+            22.175
+          ],
+          [
+            91.775,
+            22.195
+          ],
+          [
+            91.792,
+            22.208
+          ],
+          [
+            91.805,
+            22.22
+          ],
+          [
+            91.8095,
+            22.226
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_10",
+        "vessel_name": "DEMO MV Shitalakshya Wave",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 5,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_11",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8295,
+          22.245
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_11",
+        "vessel_id": "vsl_11",
+        "vessel_name": "DEMO MV Rupsha Hope",
+        "imo_number": "9412011",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "EN_ROUTE",
+        "delay_risk": "NORMAL",
+        "speed_knots": 7.2,
+        "heading_degrees": 30.0,
+        "draft_m": 8.6,
+        "length_overall_m": 162.0,
+        "reported_eta": "2026-11-04T04:00:00",
+        "predicted_eta": "2026-11-04T04:00:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_11",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.75,
+            22.175
+          ],
+          [
+            91.775,
+            22.195
+          ],
+          [
+            91.792,
+            22.208
+          ],
+          [
+            91.805,
+            22.22
+          ],
+          [
+            91.8095,
+            22.226
+          ],
+          [
+            91.818,
+            22.235
+          ],
+          [
+            91.8295,
+            22.245
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_11",
+        "vessel_name": "DEMO MV Rupsha Hope",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 7,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_vessel_call_vsl_12",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7998,
+          22.28
+        ]
+      },
+      "properties": {
+        "id": "call_vsl_12",
+        "vessel_id": "vsl_12",
+        "vessel_name": "DEMO MV Jamuna Horizon",
+        "imo_number": "9412012",
+        "vessel_type": "CONTAINER_FEEDER",
+        "entity_type": "Vessel",
+        "layer": "vessels",
+        "status": "EN_ROUTE",
+        "delay_risk": "HIGH_RISK",
+        "speed_knots": 5.4,
+        "heading_degrees": 345.0,
+        "draft_m": 9.4,
+        "length_overall_m": 180.0,
+        "reported_eta": "2026-11-04T12:00:00",
+        "predicted_eta": "2026-11-04T15:48:00",
+        "berth_assigned": null,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Seed Engine"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "feat_track_call_vsl_12",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            91.818,
+            22.235
+          ],
+          [
+            91.8295,
+            22.245
+          ],
+          [
+            91.8355,
+            22.255
+          ],
+          [
+            91.8355,
+            22.265
+          ],
+          [
+            91.823,
+            22.27
+          ],
+          [
+            91.812,
+            22.275
+          ],
+          [
+            91.7998,
+            22.28
+          ]
+        ]
+      },
+      "properties": {
+        "vessel_call_id": "call_vsl_12",
+        "vessel_name": "DEMO MV Jamuna Horizon",
+        "entity_type": "VesselTrack",
+        "layer": "vessel_tracks",
+        "points_count": 7,
+        "data_status": "SIMULATED",
+        "data_source": "PORTOS Hydrographic Fairway Interpolator"
+      }
+    }
+  ],
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "metadata": {
+    "generated_at": "2026-11-12T14:41:20.968634+00:00",
+    "total_features": 69,
+    "port_name": "Port of Chattogram (Chittagong)",
+    "terminal_anchor_lat": 22.285,
+    "terminal_anchor_lon": 91.802,
+    "disclaimer": "All vessel positions, berth assignments, and fairway corridors represent conceptual/simulated research records.",
+    "data_status": "SIMULATED / OBSERVED HYBRID"
+  }
+}

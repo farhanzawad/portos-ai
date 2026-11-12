@@ -19,7 +19,15 @@ import {
   SlidersHorizontal,
   Compass,
   Terminal,
+  Database,
+  Search,
 } from "lucide-react";
+import {
+  sendCopilotMessage,
+  getCopilotStatus,
+  getCopilotPrompts,
+} from "@/lib/api-client";
+import { ToolCallRecord } from "@/types/api";
 
 interface CopilotMessage {
   id: string;
@@ -31,6 +39,8 @@ interface CopilotMessage {
     latencyMs: number;
     status: "OBSERVED" | "DERIVED" | "SIMULATED";
   };
+  toolRecords?: ToolCallRecord[];
+  modelName?: string;
   recommendation?: {
     title: string;
     summary: string;
@@ -85,6 +95,7 @@ export function CopilotTacticalCockpitView() {
   const [inputQuery, setInputQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const conversationIdRef = useRef<string>(`conv_${Date.now()}`);
 
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
@@ -96,9 +107,9 @@ export function CopilotTacticalCockpitView() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (customText?: string) => {
+  const handleSendMessage = async (customText?: string) => {
     const textToSend = customText || inputQuery;
-    if (!textToSend.trim()) return;
+    if (!textToSend.trim() || isSubmitting) return;
 
     const userMsg: CopilotMessage = {
       id: `msg-${Date.now()}`,
@@ -111,7 +122,62 @@ export function CopilotTacticalCockpitView() {
     setInputQuery("");
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    const startTime = performance.now();
+
+    try {
+      const res = await sendCopilotMessage({
+        message: textToSend,
+        conversation_id: conversationIdRef.current,
+      });
+
+      if (res.conversation_id) {
+        conversationIdRef.current = res.conversation_id;
+      }
+
+      const elapsedMs = Math.round(performance.now() - startTime);
+
+      // Synthesize formatted markdown response with real facts, predictions, and limitations
+      let replyText = res.summary || "";
+
+      if (res.retrieved_facts && res.retrieved_facts.length > 0) {
+        replyText += `\n\n**Retrieved Operational Facts:**\n` + res.retrieved_facts.map((f) => `- ${f}`).join("\n");
+      }
+
+      if (res.model_predictions && res.model_predictions.length > 0) {
+        replyText += `\n\n**Model Predictions & Boundaries:**\n` + res.model_predictions.map((p) => `- ${p}`).join("\n");
+      }
+
+      if (res.simulated_results && res.simulated_results.length > 0) {
+        replyText += `\n\n**Simulated Scenarios:**\n` + res.simulated_results.map((s) => `- ${s}`).join("\n");
+      }
+
+      if (res.limitations && res.limitations.length > 0) {
+        replyText += `\n\n*Limitations & Operational Gates:*\n` + res.limitations.map((l) => `> ${l}`).join("\n");
+      }
+
+      const toolNames = res.tool_calls && res.tool_calls.length > 0
+        ? res.tool_calls.map((tc) => tc.tool_name).join(" & ")
+        : "get_terminal_status";
+
+      const copilotMsg: CopilotMessage = {
+        id: `msg-${Date.now() + 1}`,
+        sender: "copilot",
+        timestamp: new Date().toLocaleTimeString("en-GB", { hour12: false }) + " BST",
+        toolCall: {
+          name: toolNames,
+          latencyMs: elapsedMs,
+          status: res.is_demo_mode ? "SIMULATED" : "DERIVED",
+        },
+        toolRecords: res.tool_calls || [],
+        modelName: res.model_name || "Gemini-2.5-Flash",
+        text: replyText,
+      };
+
+      setMessages((prev) => [...prev, copilotMsg]);
+    } catch (err: any) {
+      console.warn("Backend copilot API warning, using local intelligence synthesis:", err);
+      // Fallback deterministic synthesis if backend connection is interrupted
+      const elapsedMs = Math.round(performance.now() - startTime);
       const isReeferQuery = textToSend.toLowerCase().includes("yard") || textToSend.toLowerCase().includes("reefer");
       const isBerthQuery = textToSend.toLowerCase().includes("berth") || textToSend.toLowerCase().includes("schedule");
 
@@ -144,15 +210,16 @@ export function CopilotTacticalCockpitView() {
         timestamp: new Date().toLocaleTimeString("en-GB", { hour12: false }) + " BST",
         toolCall: {
           name: toolName,
-          latencyMs: Math.floor(Math.random() * 20) + 15,
-          status: "DERIVED",
+          latencyMs: elapsedMs || 22,
+          status: "SIMULATED",
         },
         text: replyText,
       };
 
       setMessages((prev) => [...prev, copilotMsg]);
+    } finally {
       setIsSubmitting(false);
-    }, 850);
+    }
   };
 
   const handleClearChat = () => {
@@ -263,13 +330,18 @@ export function CopilotTacticalCockpitView() {
                   >
                     {/* Tool Call Badge if assistant */}
                     {msg.toolCall && (
-                      <div className="flex items-center gap-2 pb-2 border-b border-white/[0.06] font-mono text-[10px]">
+                      <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-white/[0.06] font-mono text-[10px]">
                         <span className="px-2 py-0.5 rounded bg-secondary-container/20 text-secondary font-bold flex items-center gap-1">
                           <CheckCircle2 className="size-3" />
                           TOOL EXECUTED: {msg.toolCall.name}
                         </span>
                         <span className="text-[#8e9bae]">• {msg.toolCall.latencyMs}ms</span>
                         <span className="text-[#8e9bae]">• {msg.toolCall.status}</span>
+                        {msg.modelName && (
+                          <span className="text-secondary/90 px-1.5 py-0.5 rounded bg-white/[0.04]">
+                            {msg.modelName}
+                          </span>
+                        )}
                       </div>
                     )}
 

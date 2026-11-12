@@ -128,12 +128,54 @@ const OFFLINE_VECTOR_STYLE: maplibregl.StyleSpecification = {
 const BASEMAP_STYLES: Record<BaseMapStyle, { name: string; url: string | maplibregl.StyleSpecification; description: string }> = {
   "nautical-dark": {
     name: "Tactical Nautical Dark",
-    url: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    url: {
+      version: 8,
+      sources: {
+        "esri-dark-gray": {
+          type: "raster",
+          tiles: [
+            "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+          ],
+          tileSize: 256,
+          attribution: "&copy; Esri, HERE, Garmin, © OpenStreetMap contributors",
+        },
+      },
+      layers: [
+        {
+          id: "esri-dark-gray-layer",
+          type: "raster",
+          source: "esri-dark-gray",
+          minzoom: 0,
+          maxzoom: 16,
+        },
+      ],
+    },
     description: "High-contrast dark hydrographic theme for bridge night-watch and monitoring",
   },
   "maritime-standard": {
     name: "ECDIS Maritime Standard",
-    url: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+    url: {
+      version: 8,
+      sources: {
+        "osm-standard": {
+          type: "raster",
+          tiles: [
+            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          ],
+          tileSize: 256,
+          attribution: "&copy; OpenStreetMap contributors",
+        },
+      },
+      layers: [
+        {
+          id: "osm-standard-layer",
+          type: "raster",
+          source: "osm-standard",
+          minzoom: 0,
+          maxzoom: 19,
+        },
+      ],
+    },
     description: "Crisp neutral GIS cartography matching Port Authority hydrographic charts",
   },
   "satellite-hybrid": {
@@ -164,12 +206,54 @@ const BASEMAP_STYLES: Record<BaseMapStyle, { name: string; url: string | maplibr
   },
   "bathymetric-thermal": {
     name: "Bathymetric Soundings",
-    url: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    url: {
+      version: 8,
+      sources: {
+        "esri-ocean": {
+          type: "raster",
+          tiles: [
+            "https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean/MapServer/tile/{z}/{y}/{x}",
+          ],
+          tileSize: 256,
+          attribution: "&copy; Esri, GEBCO, NOAA, National Geographic",
+        },
+      },
+      layers: [
+        {
+          id: "ocean-layer",
+          type: "raster",
+          source: "esri-ocean",
+          minzoom: 0,
+          maxzoom: 16,
+        },
+      ],
+    },
     description: "Thermal depth gradient highlighting dredged fairway channels and shoal banks",
   },
   "tactical-radar": {
     name: "Tactical Radar (Phosphor Green)",
-    url: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    url: {
+      version: 8,
+      sources: {
+        "esri-dark-radar": {
+          type: "raster",
+          tiles: [
+            "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+          ],
+          tileSize: 256,
+          attribution: "&copy; Esri, HERE, Garmin, © OpenStreetMap contributors",
+        },
+      },
+      layers: [
+        {
+          id: "esri-dark-radar-layer",
+          type: "raster",
+          source: "esri-dark-radar",
+          minzoom: 0,
+          maxzoom: 16,
+        },
+      ],
+    },
     description: "Authentic phosphor green night sweep radar with nautical range rings and VTS tracking",
   },
   "topographic": {
